@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
     }
 
     CommandManager commandManager;
+    registerCommands(commandManager);
 
     while (!std::cin.eof()) {
       commandManager.waitForCommand();
@@ -50,6 +51,22 @@ int main(int argc, char *argv[]) {
   }
 
   return EXIT_SUCCESS;
+}
+
+void registerCommands(CommandManager &commandManager) {
+  commandManager.addCommand(std::make_shared<LoginCommand>());
+  commandManager.addCommand(std::make_shared<LogoutCommand>());
+  commandManager.addCommand(std::make_shared<UnregisterCommand>());
+  commandManager.addCommand(std::make_shared<ExitCommand>());
+  commandManager.addCommand(std::make_shared<OpenAuctionCommand>());
+  commandManager.addCommand(std::make_shared<CloseAuctionCommand>());
+  commandManager.addCommand(std::make_shared<ListUserAuctionsCommand>());
+  commandManager.addCommand(std::make_shared<ListUserBidsCommand>());
+  commandManager.addCommand(std::make_shared<ListAuctionsCommand>());
+  commandManager.addCommand(std::make_shared<ShowAssetCommand>());
+  commandManager.addCommand(std::make_shared<BidCommand>());
+  commandManager.addCommand(std::make_shared<ShowRecordCommand>());
+  
 }
 
 ClientConfig::ClientConfig(int argc, char *argv[]) {

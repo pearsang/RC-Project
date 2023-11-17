@@ -4,6 +4,8 @@
 #include <csignal>
 #include <iostream>
 #include "../utils/constants.hpp"
+#include "../utils/utils.hpp"
+#include "commands.hpp"
 
 /**
  * @class ClientConfig
@@ -35,6 +37,30 @@ class ClientConfig {
    */
   void printHelp(std::ostream& stream);
 };
+
+
+/**
+ * @brief Sets up custom signal handlers for the application.
+ *
+ * @note This function should be called before any threads are created.
+ */
+void setup_custom_signal_handlers();
+
+/**
+ * @brief Handles a terminate signal.
+ *
+ * @param signal The signal number.
+ */
+void terminate_signal_handler(int signal);
+
+
+/**
+ * @brief Registers all commands with the given CommandManager.
+ * 
+ * @param commandManager The CommandManager to register commands with.
+ */
+void registerCommands(CommandManager& commandManager);
+
 
 
 #endif
