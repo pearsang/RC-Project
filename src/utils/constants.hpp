@@ -10,4 +10,3 @@
 #define USER_ID_MAX ((uint32_t)pow(10, USER_ID_LENGTH) - 1)
 
 #endif
-

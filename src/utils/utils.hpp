@@ -32,9 +32,6 @@ public:
       : std::runtime_error(cause + ": " + strerror(_errno)) {}
 };
 
-
-
-
 /**
  * @brief Sets up the signal handlers.
  *
@@ -72,7 +69,6 @@ void terminate_signal_handler(const int sig);
  * out of range.
  */
 void validate_port_number(const std::string &port_number);
-
 
 /**
  * @brief Checks if a string contains only digits.

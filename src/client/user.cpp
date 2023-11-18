@@ -66,7 +66,6 @@ void registerCommands(CommandManager &commandManager) {
   commandManager.addCommand(std::make_shared<ShowAssetCommand>());
   commandManager.addCommand(std::make_shared<BidCommand>());
   commandManager.addCommand(std::make_shared<ShowRecordCommand>());
-  
 }
 
 ClientConfig::ClientConfig(int argc, char *argv[]) {

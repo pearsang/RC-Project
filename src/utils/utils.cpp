@@ -27,8 +27,8 @@ void validate_port_number(const std::string &port_number) {
 
 // check if string has only digits
 bool is_digits(const std::string &str) {
-  for(int i=0; i<str.length(); i++) {
-    if(!std::isdigit(str[i])) {
+  for (int i = 0; i < str.length(); i++) {
+    if (!std::isdigit(str[i])) {
       return false;
     }
   }
@@ -37,8 +37,8 @@ bool is_digits(const std::string &str) {
 
 // check if string is alphanumeric
 bool is_alphanumeric(const std::string &str) {
-  for(int i=0; i<str.length(); i++) {
-    if(!std::isalnum(str[i])) {
+  for (int i = 0; i < str.length(); i++) {
+    if (!std::isalnum(str[i])) {
       return false;
     }
   }
