@@ -1,7 +1,5 @@
 #include "utils.hpp"
 
-#include <csignal>
-
 // Flag to indicate whether the application is shutting down
 bool is_shutting_down = false;
 
@@ -72,4 +70,18 @@ void terminate_signal_handler(int sig) {
     exit(EXIT_SUCCESS);
   }
   is_shutting_down = true;
+}
+
+std::vector<std::string> parse_args(std::string args) {
+  // Create an input string stream
+  std::istringstream iss(args);
+
+  std::vector<std::string> parameters;
+
+  std::string parameter;
+  while (std::getline(iss, parameter, ' ')) {
+    parameters.push_back(parameter);
+  }
+
+  return parameters;
 }

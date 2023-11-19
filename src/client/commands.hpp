@@ -67,6 +67,7 @@ public:
   const std::optional<const char *> alias;
   const std::optional<const char *> usage;
   const char *description;
+  virtual void handleCommand(std::string args) = 0;
 };
 
 /**
@@ -229,13 +230,13 @@ public:
  * @brief Parses the user ID from the given string.
  *
  */
-uint32_t parseUserId(std::string args);
+uint32_t validateUserID(std::string args);
 
 /**
  *
  * @brief Parses the user password from the given string.
  *
  */
-std::string parsePassword(std::string args);
+uint32_t validatePassword(std::string args);
 
 #endif

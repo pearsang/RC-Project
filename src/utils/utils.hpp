@@ -1,8 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <csignal>
 #include <cstring>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <vector>
 
 /**
  * @class FatalError
@@ -87,5 +91,12 @@ bool is_digits(const std::string &str);
  * @return True if the string is alphanumeric, false otherwise.
  */
 bool is_alphanumeric(const std::string &str);
+
+/**
+ * @brief Parses the given string into a vector of arguments.
+ *
+ * @param args A reference to a string containing the arguments.
+ */
+std::vector<std::string> parse_args(std::string args);
 
 #endif

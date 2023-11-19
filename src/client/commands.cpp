@@ -59,32 +59,46 @@ void CommandManager::waitForCommand() {
   std::string userID = line.substr(line.find(' ') + 1);
 
   std::cout << "First argument: " << userID << std::endl;
+
+  try {
+    // Perform the command
+    handler->second->handleCommand(line);
+  } catch (std::exception &e) {
+    std::cout << "Error: " << e.what() << std::endl;
+  }
 }
 
 void LoginCommand::handleCommand(std::string args) {
-
   // parse args
-  uint32_t user_id;
+  std::string user_id, password;
+  std::vector<std::string> params = parse_args(args);
 
-  try {
-    user_id = parseUserId(args);
-  } catch (...) {
+  if (params.size() != 2) {
+    std::cout << "Invalid number of arguments: Expected 2, got "
+              << params.size() << std::endl;
+    return;
+  }
+
+  user_id = params[0];
+  if (validateUserID(user_id) == INVALID) {
     std::cout << "Invalid user ID: Must be a positive 6 digit number"
               << std::endl;
     return;
   }
 
-  // send login request to server
-  // wait for response
-  // if response is success, then set user_id
-  // else print error message
-  // return
+  password = params[1];
+  if (validatePassword(password) == INVALID) {
+    std::cout << "Invalid password: Must be alphanumeric and 8 characters long"
+              << std::endl;
+    return;
+  }
 
-  std::cout << "Login command" << std::endl;
+  std::string message = "LIN " + user_id + " " + password;
+
+  std::cout << message << std::endl;
 }
 
 void LogoutCommand::handleCommand(std::string args) {
-
   std::cout << "Logout command" << std::endl;
 }
 
@@ -138,29 +152,24 @@ void ShowRecordCommand::handleCommand(std::string args) {
   std::cout << "Show record command" << std::endl;
 }
 
-uint32_t parseUserId(std::string args) {
-
-  std::string temp = args.substr(0, args.find(' '));
-
-  if (!is_digits(temp)) {
-    throw std::runtime_error("Invalid user ID");
+uint32_t validateUserID(std::string userID) {
+  if (!is_digits(userID) || userID.length() != USER_ID_LENGTH) {
+    return INVALID;
   }
 
-  long userID = std::stol(args.substr(0, args.find(' ')), nullptr, 10);
-  if (userID < 0 || userID > USER_ID_MAX) {
-    throw std::runtime_error("Invalid user ID");
+  uint32_t id = (uint32_t)std::stoi(userID);
+  if (id > USER_ID_MAX || id < 0) {
+    return INVALID;
   }
 
-  return (int32_t)userID;
+  return 0;
 }
 
-std::string parsePassword(std::string args) {
-  std::string userPassword = args.substr(args.find(' ') + 1);
+uint32_t validatePassword(std::string password) {
 
-  if (userPassword.length() != 8 || !is_alphanumeric(userPassword)) {
-    throw std::runtime_error(
-        "Invalid password: Must be alphanumeric and 8 characters long");
+  if (password.length() != 8 || !is_alphanumeric(password)) {
+    return INVALID;
   }
 
-  return userPassword;
+  return 0;
 }
