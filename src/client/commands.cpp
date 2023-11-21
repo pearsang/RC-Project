@@ -55,11 +55,6 @@ void CommandManager::waitForCommand() {
   std::cout << "Command: " << commandName << std::endl;
   std ::cout << "Arguments: " << line << std::endl;
 
-  // extract fiorst argumnet from line
-  std::string userID = line.substr(line.find(' ') + 1);
-
-  std::cout << "First argument: " << userID << std::endl;
-
   try {
     // Perform the command
     handler->second->handleCommand(line);
