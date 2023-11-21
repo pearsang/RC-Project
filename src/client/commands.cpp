@@ -94,73 +94,73 @@ void LoginCommand::handleCommand(std::string args) {
 }
 
 void LogoutCommand::handleCommand(std::string args) {
-  std::cout << "Logout command" << std::endl;
+  std::cout << "Logout command" << args << std::endl;
 }
 
 void UnregisterCommand::handleCommand(std::string args) {
 
-  std::cout << "Unregister command" << std::endl;
+  std::cout << "Unregister command" << args << std::endl;
 }
 
 void ExitCommand::handleCommand(std::string args) {
 
-  std::cout << "Exit command" << std::endl;
+  std::cout << "Exit command" << args << std::endl;
 }
 
 void OpenAuctionCommand::handleCommand(std::string args) {
 
-  std::cout << "Open command" << std::endl;
+  std::cout << "Open command" << args << std::endl;
 }
 
 void CloseAuctionCommand::handleCommand(std::string args) {
 
-  std::cout << "Close command" << std::endl;
+  std::cout << "Close command" << args << std::endl;
 }
 
 void ListUserAuctionsCommand::handleCommand(std::string args) {
 
-  std::cout << "List user auctions command" << std::endl;
+  std::cout << "List user auctions command" << args << std::endl;
 }
 
 void ListUserBidsCommand::handleCommand(std::string args) {
 
-  std::cout << "List user bids command" << std::endl;
+  std::cout << "List user bids command" << args << std::endl;
 }
 
 void ListAuctionsCommand::handleCommand(std::string args) {
 
-  std::cout << "List auctions command" << std::endl;
+  std::cout << "List auctions command" << args << std::endl;
 }
 
 void ShowAssetCommand::handleCommand(std::string args) {
 
-  std::cout << "Show asset command" << std::endl;
+  std::cout << "Show asset command" << args << std::endl;
 }
 
 void BidCommand::handleCommand(std::string args) {
 
-  std::cout << "Bid command" << std::endl;
+  std::cout << "Bid command" << args << std::endl;
 }
 
 void ShowRecordCommand::handleCommand(std::string args) {
 
-  std::cout << "Show record command" << std::endl;
+  std::cout << "Show record command" << args << std::endl;
 }
 
-uint32_t validateUserID(std::string userID) {
+int8_t validateUserID(std::string userID) {
   if (!is_digits(userID) || userID.length() != USER_ID_LENGTH) {
     return INVALID;
   }
 
   uint32_t id = (uint32_t)std::stoi(userID);
-  if (id > USER_ID_MAX || id < 0) {
+  if (id > USER_ID_MAX ) {
     return INVALID;
   }
 
   return 0;
 }
 
-uint32_t validatePassword(std::string password) {
+int8_t validatePassword(std::string password) {
 
   if (password.length() != 8 || !is_alphanumeric(password)) {
     return INVALID;

@@ -57,10 +57,10 @@ protected:
    * @param usage An optional string describing the usage of the command.
    * @param description The description of the command's purpose.
    */
-  CommandHandler(const char *name, const std::optional<const char *> alias,
-                 const std::optional<const char *> usage,
-                 const char *description)
-      : name{name}, alias{alias}, usage{usage}, description{description} {}
+  CommandHandler(const char *__name, const std::optional<const char *> __alias,
+                 const std::optional<const char *> __usage,
+                 const char *__description)
+      : name{__name}, alias{__alias}, usage{__usage}, description{__description} {}
 
 public:
   const char *name;
@@ -230,13 +230,13 @@ public:
  * @brief Parses the user ID from the given string.
  *
  */
-uint32_t validateUserID(std::string args);
+int8_t validateUserID(std::string args);
 
 /**
  *
  * @brief Parses the user password from the given string.
  *
  */
-uint32_t validatePassword(std::string args);
+int8_t validatePassword(std::string args);
 
 #endif
