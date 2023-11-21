@@ -6,7 +6,7 @@
 #define DEFAULT_HOSTNAME "tejo.tecnico.ulisboa.pt"
 #define DEFAULT_PORT "58011"
 
-#define INVALID (int8_t)-1
+#define INVALID (int8_t) - 1
 
 #define USER_ID_LENGTH 6
 #define USER_ID_MAX ((uint32_t)pow(10, USER_ID_LENGTH) - 1)

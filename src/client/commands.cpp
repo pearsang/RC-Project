@@ -153,7 +153,7 @@ int8_t validateUserID(std::string userID) {
   }
 
   uint32_t id = (uint32_t)std::stoi(userID);
-  if (id > USER_ID_MAX ) {
+  if (id > USER_ID_MAX) {
     return INVALID;
   }
 
