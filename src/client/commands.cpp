@@ -125,8 +125,7 @@ void CloseAuctionCommand::handleCommand(std::string args) {
   auction_id = params[0];
 
   if (validateAuctionID(auction_id) == INVALID) {
-    std::cout << "Invalid auction ID"
-              << std::endl;
+    std::cout << "Invalid auction ID" << std::endl;
     return;
   }
 
