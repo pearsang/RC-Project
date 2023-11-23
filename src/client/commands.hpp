@@ -60,8 +60,8 @@ protected:
   CommandHandler(const char *__name, const std::optional<const char *> __alias,
                  const std::optional<const char *> __usage,
                  const char *__description)
-      : name{__name}, alias{__alias}, usage{__usage},
-        description{__description} {}
+      : name{__name}, alias{__alias}, usage{__usage}, description{
+                                                          __description} {}
 
 public:
   const char *name;
