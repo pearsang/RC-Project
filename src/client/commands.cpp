@@ -113,6 +113,26 @@ void OpenAuctionCommand::handleCommand(std::string args) {
 }
 
 void CloseAuctionCommand::handleCommand(std::string args) {
+  std::string auction_id;
+  std::vector<std::string> params = parse_args(args);
+
+  if (params.size() != 1) {
+    std::cout << "Invalid number of arguments: Expected 1, got "
+              << params.size() << std::endl;
+    return;
+  }
+
+  auction_id = params[0];
+
+  if (validateAuctionID(auction_id) == INVALID) {
+    std::cout << "Invalid auction ID"
+              << std::endl;
+    return;
+  }
+
+  std::string message = "CLS " + auction_id;
+
+  std::cout << message << std::endl;
 
   std::cout << "Close command" << args << std::endl;
 }
@@ -133,16 +153,80 @@ void ListAuctionsCommand::handleCommand(std::string args) {
 }
 
 void ShowAssetCommand::handleCommand(std::string args) {
+  std::string auction_id;
+  std::vector<std::string> params = parse_args(args);
+
+  if (params.size() != 1) {
+    std::cout << "Invalid number of arguments: Expected 1, got "
+              << params.size() << std::endl;
+    return;
+  }
+
+  auction_id = params[0];
+
+  if (validateAuctionID(auction_id) == INVALID) {
+    std::cout << "Invalid auction ID" << std::endl;
+    return;
+  }
+
+  std::string message = "SAS " + auction_id;
+
+  std::cout << message << std::endl;
 
   std::cout << "Show asset command" << args << std::endl;
 }
 
 void BidCommand::handleCommand(std::string args) {
+  std::string auction_id;
+  std::string bid_value;
+  std::vector<std::string> params = parse_args(args);
+
+  if (params.size() != 2) {
+    std::cout << "Invalid number of arguments: Expected 2, got "
+              << params.size() << std::endl;
+    return;
+  }
+
+  auction_id = params[0];
+  bid_value = params[1];
+
+  if (validateAuctionID(auction_id) == INVALID) {
+    std::cout << "Invalid auction ID" << std::endl;
+    return;
+  }
+
+  if (validateBidValue(bid_value) == INVALID) {
+    std::cout << "Invalid bid value: Must be a positive number" << std::endl;
+    return;
+  }
+
+  std::string message = "BID " + auction_id + " " + bid_value;
+
+  std::cout << message << std::endl;
 
   std::cout << "Bid command" << args << std::endl;
 }
 
 void ShowRecordCommand::handleCommand(std::string args) {
+  std::string auction_id;
+  std::vector<std::string> params = parse_args(args);
+
+  if (params.size() != 1) {
+    std::cout << "Invalid number of arguments: Expected 1, got "
+              << params.size() << std::endl;
+    return;
+  }
+
+  auction_id = params[0];
+
+  if (validateAuctionID(auction_id) == INVALID) {
+    std::cout << "Invalid auction ID" << std::endl;
+    return;
+  }
+
+  std::string message = "SRC " + auction_id;
+
+  std::cout << message << std::endl;
 
   std::cout << "Show record command" << args << std::endl;
 }
@@ -163,6 +247,22 @@ int8_t validateUserID(std::string userID) {
 int8_t validatePassword(std::string password) {
 
   if (password.length() != 8 || !is_alphanumeric(password)) {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validateAuctionID(std::string auctionID) {
+  if (!is_digits(auctionID) || auctionID.length() != AUCTION_ID_LENGTH) {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validateBidValue(std::string bidValue) {
+  if (!is_digits(bidValue)) {
     return INVALID;
   }
 

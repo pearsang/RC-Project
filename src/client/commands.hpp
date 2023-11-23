@@ -228,16 +228,30 @@ public:
 
 /**
  *
- * @brief Parses the user ID from the given string.
+ * @brief Validates the user ID from the given string.
  *
  */
-int8_t validateUserID(std::string args);
+int8_t validateUserID(std::string userID);
 
 /**
  *
- * @brief Parses the user password from the given string.
+ * @brief Validate the user password from the given string.
  *
  */
-int8_t validatePassword(std::string args);
+int8_t validatePassword(std::string password);
+
+/**
+ *
+ * @brief Validate the auction ID from the given string.
+ *
+ */
+int8_t validateAuctionID(std::string auctionId);
+
+/**
+ *
+ * @brief Validate the bid value from the given string.
+ *
+ */
+int8_t validateBidValue(std::string bidValue);
 
 #endif
