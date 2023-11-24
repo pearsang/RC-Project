@@ -1,14 +1,15 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#include "../utils/constants.hpp"
-#include "../utils/utils.hpp"
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "../utils/constants.hpp"
+#include "user_state.hpp"
 
 class CommandHandler;
 
@@ -33,7 +34,7 @@ public:
   /**
    * @brief Waits for and handles incoming commands.
    */
-  void waitForCommand();
+  void waitForCommand(UserState &state);
   void addCommand(std::shared_ptr<CommandHandler> handler);
 };
 
@@ -68,7 +69,7 @@ public:
   const std::optional<const char *> alias;
   const std::optional<const char *> usage;
   const char *description;
-  virtual void handleCommand(std::string args) = 0;
+  virtual void handleCommand(std::string args, UserState &state) = 0;
 };
 
 /**
@@ -78,7 +79,7 @@ public:
  *
  */
 class LoginCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   LoginCommand() : CommandHandler("login", std::nullopt, "LIN", "Login") {}
@@ -91,7 +92,7 @@ public:
  *
  */
 class LogoutCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   LogoutCommand() : CommandHandler("logout", std::nullopt, "LOU", "Logout") {}
@@ -103,7 +104,7 @@ public:
  * @brief Represents a command for unregistering from the server.
  */
 class UnregisterCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   UnregisterCommand()
@@ -116,7 +117,7 @@ public:
  * @brief Represents a command for exiting the application.
  */
 class ExitCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
   // The Exit command has no usage
 public:
@@ -129,7 +130,7 @@ public:
  * @brief Represents a command for opening a new auction.
  */
 class OpenAuctionCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   OpenAuctionCommand()
@@ -142,7 +143,7 @@ public:
  * @brief Represents a command for closing an auction.
  */
 class CloseAuctionCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   CloseAuctionCommand()
@@ -155,7 +156,7 @@ public:
  * @brief Represents a command for listing all auctions for a user.
  */
 class ListUserAuctionsCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   ListUserAuctionsCommand()
@@ -168,7 +169,7 @@ public:
  * @brief Represents a command for listing all auctions that the user bidded.
  */
 class ListUserBidsCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   ListUserBidsCommand()
@@ -181,7 +182,7 @@ public:
  * @brief Represents a command for listing all active auctions.
  */
 class ListAuctionsCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   ListAuctionsCommand()
@@ -194,7 +195,7 @@ public:
  * @brief Represents a command for showing the image of the asset of an auction.
  */
 class ShowAssetCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   ShowAssetCommand()
@@ -207,7 +208,7 @@ public:
  * @brief Represents a command for bidding on an auction.
  */
 class BidCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   BidCommand() : CommandHandler("bid", "b", "BID", "Place a Bid") {}
@@ -219,7 +220,7 @@ public:
  * @brief Represents a command for showing the record of an auction.
  */
 class ShowRecordCommand : public CommandHandler {
-  void handleCommand(std::string args);
+  void handleCommand(std::string args, UserState &state);
 
 public:
   ShowRecordCommand()

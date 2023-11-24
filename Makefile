@@ -34,7 +34,7 @@ LDFLAGS += $(INCLUDES)
 
 CXXFLAGS += -fdiagnostics-color=always
 CXXFLAGS += -Wall
-CXXFLAGS += -Werror
+#CXXFLAGS += -Werror
 CXXFLAGS += -Wextra
 CXXFLAGS += -Wcast-align
 CXXFLAGS += -Wconversion

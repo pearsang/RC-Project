@@ -1,5 +1,7 @@
 #include "commands.hpp"
+#include "./utils/protocol.hpp"
 
+#include "../utils/utils.hpp"
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -18,7 +20,7 @@ void CommandManager::addCommand(std::shared_ptr<CommandHandler> handler) {
   }
 }
 
-void CommandManager::waitForCommand() {
+void CommandManager::waitForCommand(UserState &state) {
   std::cout << "> ";
 
   std::string line;
@@ -52,19 +54,15 @@ void CommandManager::waitForCommand() {
     return;
   }
 
-  std::cout << "Command: " << commandName << std::endl;
-  std ::cout << "Arguments: " << line << std::endl;
-
   try {
     // Perform the command
-    handler->second->handleCommand(line);
+    handler->second->handleCommand(line, state);
   } catch (std::exception &e) {
     std::cout << "Error: " << e.what() << std::endl;
   }
 }
 
-void LoginCommand::handleCommand(std::string args) {
-  // parse args
+void LoginCommand::handleCommand(std::string args, UserState &state) {
   std::string user_id, password;
   std::vector<std::string> params = parse_args(args);
 
@@ -87,32 +85,73 @@ void LoginCommand::handleCommand(std::string args) {
               << std::endl;
     return;
   }
+  LoginRequest loginRequest;
+  loginRequest.userID = user_id;
+  loginRequest.password = password;
 
-  std::string message = "LIN " + user_id + " " + password;
+  std::cout << loginRequest.serialize().str() << std::endl;
 
-  std::cout << message << std::endl;
+  // send request
+
+  int udp_socket = state.getUdpSocketFD();
+  struct addrinfo *server_addr = state.getServerUdpAddr();
+
+  std::stringstream buffer = loginRequest.serialize();
+
+  int bytes_sent =
+      sendto(udp_socket, buffer.str().c_str(), buffer.str().length(), 0,
+             server_addr->ai_addr, server_addr->ai_addrlen);
+
+  if (bytes_sent == -1) {
+    std::cout << "Error sending login request" << std::endl;
+    return;
+  }
+
+  // receive response
+  char response_buffer[1024];
+  int bytes_received =
+      recvfrom(udp_socket, response_buffer, 1024, 0, NULL, NULL);
+
+  if (bytes_received == -1) {
+    std::cout << "Error receiving login response" << std::endl;
+    return;
+  }
+
+  state.setUserID(user_id);
+  state.setPassword(password);
+
+  std::string response(response_buffer, bytes_received);
+
+  std::cout << response << std::endl;
 }
 
-void LogoutCommand::handleCommand(std::string args) {
-  std::cout << "Logout command" << args << std::endl;
+void LogoutCommand::handleCommand(std::string args, UserState &state) {
+  LogoutRequest logoutRequest;
+  logoutRequest.userID = state.getUserID();
+  logoutRequest.password = state.getPassword();
+
+  std::cout << logoutRequest.serialize().str() << std::endl;
 }
 
-void UnregisterCommand::handleCommand(std::string args) {
+void UnregisterCommand::handleCommand(std::string args, UserState &state) {
+  UnregisterRequest unregisterRequest;
+  unregisterRequest.userID = state.getUserID();
+  unregisterRequest.password = state.getPassword();
 
-  std::cout << "Unregister command" << args << std::endl;
+  std::cout << unregisterRequest.serialize().str() << std::endl;
 }
 
-void ExitCommand::handleCommand(std::string args) {
+void ExitCommand::handleCommand(std::string args, UserState &state) {
 
   std::cout << "Exit command" << args << std::endl;
 }
 
-void OpenAuctionCommand::handleCommand(std::string args) {
+void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
 
   std::cout << "Open command" << args << std::endl;
 }
 
-void CloseAuctionCommand::handleCommand(std::string args) {
+void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);
 
@@ -136,22 +175,31 @@ void CloseAuctionCommand::handleCommand(std::string args) {
   std::cout << "Close command" << args << std::endl;
 }
 
-void ListUserAuctionsCommand::handleCommand(std::string args) {
+void ListUserAuctionsCommand::handleCommand(std::string args,
+                                            UserState &state) {
 
-  std::cout << "List user auctions command" << args << std::endl;
+  ListUserAuctionsRequest listUserAuctionsRequest;
+  listUserAuctionsRequest.userID = state.getUserID();
+
+  std::cout << listUserAuctionsRequest.serialize().str() << std::endl;
 }
 
-void ListUserBidsCommand::handleCommand(std::string args) {
+void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
 
-  std::cout << "List user bids command" << args << std::endl;
+  ListUserBidsRequest listUserBidsRequest;
+  listUserBidsRequest.userID = state.getUserID();
+
+  std::cout << listUserBidsRequest.serialize().str() << std::endl;
 }
 
-void ListAuctionsCommand::handleCommand(std::string args) {
+void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
 
-  std::cout << "List auctions command" << args << std::endl;
+  ListAuctionsRequest listAuctionsRequest;
+
+  std::cout << listAuctionsRequest.serialize().str() << std::endl;
 }
 
-void ShowAssetCommand::handleCommand(std::string args) {
+void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);
 
@@ -176,7 +224,7 @@ void ShowAssetCommand::handleCommand(std::string args) {
   std::cout << "Show asset command" << args << std::endl;
 }
 
-void BidCommand::handleCommand(std::string args) {
+void BidCommand::handleCommand(std::string args, UserState &state) {
   std::string auction_id;
   std::string bid_value;
   std::vector<std::string> params = parse_args(args);
@@ -206,7 +254,7 @@ void BidCommand::handleCommand(std::string args) {
   std::cout << message << std::endl;
 }
 
-void ShowRecordCommand::handleCommand(std::string args) {
+void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);
 
@@ -224,11 +272,10 @@ void ShowRecordCommand::handleCommand(std::string args) {
     return;
   }
 
-  std::string message = "SRC " + auction_id;
+  ShowRecordRequest showRecordRequest;
+  showRecordRequest.auctionID = auction_id;
 
-  std::cout << message << std::endl;
-
-  std::cout << "Show record command" << args << std::endl;
+  std::cout << showRecordRequest.serialize().str() << std::endl;
 }
 
 int8_t validateUserID(std::string userID) {

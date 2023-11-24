@@ -2,6 +2,7 @@
 
 #include "../utils/utils.hpp"
 #include "commands.hpp"
+#include "user_state.hpp"
 #include <arpa/inet.h>
 #include <iostream>
 #include <netdb.h>
@@ -22,11 +23,13 @@ int main(int argc, char *argv[]) {
       return EXIT_SUCCESS;
     }
 
+    UserState userState(config.host, config.port);
+
     CommandManager commandManager;
     registerCommands(commandManager);
 
     while (!std::cin.eof()) {
-      commandManager.waitForCommand();
+      commandManager.waitForCommand(userState);
     }
 
     std::cout << std::endl
