@@ -164,7 +164,8 @@ void ShowAssetCommand::handleCommand(std::string args) {
   auction_id = params[0];
 
   if (validateAuctionID(auction_id) == INVALID) {
-    std::cout << "Invalid auction ID" << std::endl;
+    std::cout << "Invalid auction ID: Must be a 3 digit postive number"
+              << std::endl;
     return;
   }
 
@@ -190,7 +191,8 @@ void BidCommand::handleCommand(std::string args) {
   bid_value = params[1];
 
   if (validateAuctionID(auction_id) == INVALID) {
-    std::cout << "Invalid auction ID" << std::endl;
+    std::cout << "Invalid auction ID: Must be a 3 digit positive number"
+              << std::endl;
     return;
   }
 
@@ -202,8 +204,6 @@ void BidCommand::handleCommand(std::string args) {
   std::string message = "BID " + auction_id + " " + bid_value;
 
   std::cout << message << std::endl;
-
-  std::cout << "Bid command" << args << std::endl;
 }
 
 void ShowRecordCommand::handleCommand(std::string args) {
@@ -219,7 +219,8 @@ void ShowRecordCommand::handleCommand(std::string args) {
   auction_id = params[0];
 
   if (validateAuctionID(auction_id) == INVALID) {
-    std::cout << "Invalid auction ID" << std::endl;
+    std::cout << "Invalid auction ID: Must be a 3 digit positive number"
+              << std::endl;
     return;
   }
 
