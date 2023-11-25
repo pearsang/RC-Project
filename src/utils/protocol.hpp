@@ -247,6 +247,16 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
+class LogoutResponse : public UdpPacket {
+public:
+  enum status { OK, NOK, UNR, ERR };
+  static constexpr const char *ID = "RLO";
+  status status;
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
 /**
  * @class UnregisterRequest
  *
@@ -260,6 +270,24 @@ public:
   static constexpr const char *ID = "UNR";
   std::string userID;
   std::string password;
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
+/**
+ * @class UnregisterResponse
+ *
+ * @brief Represents a UDP packet for responding to an unregister request.
+ * The packet has the following format:
+ * RUN <status>
+ *
+ */
+class UnregisterResponse : public UdpPacket {
+public:
+  enum status { OK, NOK, UNR, ERR };
+  static constexpr const char *ID = "RUR";
+  status status;
 
   std::stringstream serialize();
   void deserialize(std::stringstream &buffer);

@@ -147,8 +147,35 @@ std::stringstream LogoutRequest::serialize() {
 }
 
 void LogoutRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
   buffer >> this->userID >> this->password;
 }
+
+std::stringstream LogoutResponse::serialize() {
+  // server stuff
+  std::stringstream buffer;
+  buffer << LogoutResponse::ID << " " << this->status << std::endl;
+  return buffer;
+};
+
+void LogoutResponse::deserialize(std::stringstream &buffer) {
+  buffer >> std::noskipws;
+  readPacketId(buffer, LogoutResponse::ID);
+  readSpace(buffer);
+  auto status_str = readString(buffer, 3);
+  if (status_str == "OK") {
+    status = OK;
+  } else if (status_str == "NOK") {
+    status = NOK;
+  } else if (status_str == "UNR") {
+    status = UNR;
+  } else if (status_str == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(buffer);
+};
 
 std::stringstream UnregisterRequest::serialize() {
   std::stringstream buffer;
@@ -158,8 +185,35 @@ std::stringstream UnregisterRequest::serialize() {
 }
 
 void UnregisterRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
   buffer >> this->userID >> this->password;
 }
+
+std::stringstream UnregisterResponse::serialize() {
+  // server stuff
+  std::stringstream buffer;
+  buffer << UnregisterResponse::ID << " " << this->status << std::endl;
+  return buffer;
+};
+
+void UnregisterResponse::deserialize(std::stringstream &buffer) {
+  buffer >> std::noskipws;
+  readPacketId(buffer, UnregisterResponse::ID);
+  readSpace(buffer);
+  auto status_str = readString(buffer, 3);
+  if (status_str == "OK") {
+    status = OK;
+  } else if (status_str == "NOK") {
+    status = NOK;
+  } else if (status_str == "UNR") {
+    status = UNR;
+  } else if (status_str == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(buffer);
+};
 
 std::stringstream ListUserAuctionsRequest::serialize() {
   std::stringstream buffer;

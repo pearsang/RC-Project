@@ -94,22 +94,17 @@ void LoginCommand::handleCommand(std::string args, UserState &state) {
   LoginResponse loginResponse;
   state.sendUdpPacketAndWaitForReply(loginRequest, loginResponse);
 
-  // check status
-  switch (loginResponse.status) {
-  case LoginResponse::status::OK:
+  if (loginResponse.status == LoginResponse::status::OK) {
     std::cout << "Login successful!" << std::endl;
-    state.setUserID(user_id);
-    state.setPassword(password);
-    break;
-  case LoginResponse::status::NOK:
+    std::string empty = " ";
+    state.setUserID(empty);
+    state.setPassword(empty);
+  } else if (loginResponse.status == LoginResponse::status::NOK) {
     std::cout << "Login failed: Incorrect password" << std::endl;
-    break;
-  case LoginResponse::status::REG:
+  } else if (loginResponse.status == LoginResponse::status::REG) {
     std::cout << "Login successful: You were registred" << std::endl;
-    break;
-  case LoginResponse::status::ERR:
+  } else if (loginResponse.status == LoginResponse::status::ERR) {
     std::cout << "Login failed: Server error" << std::endl;
-    break;
   }
 }
 
@@ -118,7 +113,21 @@ void LogoutCommand::handleCommand(std::string args, UserState &state) {
   logoutRequest.userID = state.getUserID();
   logoutRequest.password = state.getPassword();
 
-  std::cout << logoutRequest.serialize().str() << std::endl;
+  LogoutResponse logoutResponse;
+  state.sendUdpPacketAndWaitForReply(logoutRequest, logoutResponse);
+
+  if (logoutResponse.status == LogoutResponse::status::OK) {
+    std::cout << "Logout successful!" << std::endl;
+    std::string empty = " ";
+    state.setUserID(empty);
+    state.setPassword(empty);
+  } else if (logoutResponse.status == LogoutResponse::status::NOK) {
+    std::cout << "Logout failed: You are not logged in" << std::endl;
+  } else if (logoutResponse.status == LogoutResponse::status::UNR) {
+    std::cout << "Logout failed: You are not registered" << std::endl;
+  } else if (logoutResponse.status == LogoutResponse::status::ERR) {
+    std::cout << "Logout failed: Server error" << std::endl;
+  }
 }
 
 void UnregisterCommand::handleCommand(std::string args, UserState &state) {
@@ -126,7 +135,21 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
   unregisterRequest.userID = state.getUserID();
   unregisterRequest.password = state.getPassword();
 
-  std::cout << unregisterRequest.serialize().str() << std::endl;
+  UnregisterResponse unregisterResponse;
+  state.sendUdpPacketAndWaitForReply(unregisterRequest, unregisterResponse);
+
+  if (unregisterResponse.status == UnregisterResponse::status::OK) {
+    std::cout << "Unregister successful!" << std::endl;
+    std::string empty = " ";
+    state.setUserID(empty);
+    state.setPassword(empty);
+  } else if (unregisterResponse.status == UnregisterResponse::status::NOK) {
+    std::cout << "Unregister failed: You are not logged in" << std::endl;
+  } else if (unregisterResponse.status == UnregisterResponse::status::UNR) {
+    std::cout << "Unregister failed: You are not registered" << std::endl;
+  } else if (unregisterResponse.status == UnregisterResponse::status::ERR) {
+    std::cout << "Unregister failed: Server error" << std::endl;
+  }
 }
 
 void ExitCommand::handleCommand(std::string args, UserState &state) {
