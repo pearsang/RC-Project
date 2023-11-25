@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <iostream>
 
+extern bool is_shutting_down;
+
 void CommandManager::addCommand(std::shared_ptr<CommandHandler> handler) {
   // Add the handler to the list of handlers
   handlerList.push_back(handler);
@@ -89,40 +91,26 @@ void LoginCommand::handleCommand(std::string args, UserState &state) {
   loginRequest.userID = user_id;
   loginRequest.password = password;
 
-  std::cout << loginRequest.serialize().str() << std::endl;
+  LoginResponse loginResponse;
+  state.sendUdpPacketAndWaitForReply(loginRequest, loginResponse);
 
-  // send request
-
-  int udp_socket = state.getUdpSocketFD();
-  struct addrinfo *server_addr = state.getServerUdpAddr();
-
-  std::stringstream buffer = loginRequest.serialize();
-
-  int bytes_sent =
-      sendto(udp_socket, buffer.str().c_str(), buffer.str().length(), 0,
-             server_addr->ai_addr, server_addr->ai_addrlen);
-
-  if (bytes_sent == -1) {
-    std::cout << "Error sending login request" << std::endl;
-    return;
+  // check status
+  switch (loginResponse.status) {
+  case LoginResponse::status::OK:
+    std::cout << "Login successful!" << std::endl;
+    state.setUserID(user_id);
+    state.setPassword(password);
+    break;
+  case LoginResponse::status::NOK:
+    std::cout << "Login failed: Incorrect password" << std::endl;
+    break;
+  case LoginResponse::status::REG:
+    std::cout << "Login successful: You were registred" << std::endl;
+    break;
+  case LoginResponse::status::ERR:
+    std::cout << "Login failed: Server error" << std::endl;
+    break;
   }
-
-  // receive response
-  char response_buffer[1024];
-  int bytes_received =
-      recvfrom(udp_socket, response_buffer, 1024, 0, NULL, NULL);
-
-  if (bytes_received == -1) {
-    std::cout << "Error receiving login response" << std::endl;
-    return;
-  }
-
-  state.setUserID(user_id);
-  state.setPassword(password);
-
-  std::string response(response_buffer, bytes_received);
-
-  std::cout << response << std::endl;
 }
 
 void LogoutCommand::handleCommand(std::string args, UserState &state) {

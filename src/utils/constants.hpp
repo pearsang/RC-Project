@@ -12,4 +12,7 @@
 #define USER_ID_MAX ((uint32_t)pow(10, USER_ID_LENGTH) - 1)
 #define AUCTION_ID_LENGTH 3
 
+#define UDP_RESEND_TRIES 3
+#define UDP_TIMEOUT_SECONDS 5
+#define SOCKET_BUFFER_LEN 1024
 #endif

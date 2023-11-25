@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "utils/constants.hpp"
 #include "utils/utils.hpp"
 
 UserState::UserState(std::string &hostname, std::string &port) {
@@ -60,5 +61,31 @@ void UserState::resolveServerAddress(std::string &hostname, std::string &port) {
       0) {
     throw FatalError(std::string("Failed to get address for TCP connection: ") +
                      gai_strerror(addr_res));
+  }
+}
+
+void UserState::sendUdpPacket(UdpPacket &packet) {
+  send_packet(packet, udpSocketFD, serverUdpAddr->ai_addr,
+              serverUdpAddr->ai_addrlen);
+}
+
+void UserState::waitForUdpPacket(UdpPacket &packet) {
+  wait_for_packet(packet, udpSocketFD);
+}
+
+void UserState::sendUdpPacketAndWaitForReply(UdpPacket &request,
+                                             UdpPacket &response) {
+  int triesLeft = UDP_RESEND_TRIES;
+  while (triesLeft > 0) {
+    --triesLeft;
+    try {
+      this->sendUdpPacket(request);
+      this->waitForUdpPacket(response);
+      return;
+    } catch (ConnectionTimeoutException &e) {
+      if (triesLeft == 0) {
+        throw;
+      }
+    }
   }
 }

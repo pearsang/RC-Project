@@ -13,6 +13,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+extern bool is_shutting_down;
+
 int main(int argc, char *argv[]) {
   try {
     setup_custom_signal_handlers();
@@ -28,7 +30,7 @@ int main(int argc, char *argv[]) {
     CommandManager commandManager;
     registerCommands(commandManager);
 
-    while (!std::cin.eof()) {
+    while (!std::cin.eof() && !is_shutting_down) {
       commandManager.waitForCommand(userState);
     }
 

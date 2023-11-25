@@ -52,6 +52,28 @@ public:
   ~UserState();
 
   /**
+   * @brief Sends a UDP packet.
+   *
+   * @param packet The packet to send.
+   */
+  void sendUdpPacket(UdpPacket &packet);
+
+  /**
+   * @brief Waits for a UDP packet.
+   *
+   * @param packet The packet to receive.
+   */
+  void waitForUdpPacket(UdpPacket &packet);
+
+  /**
+   * @brief Sends a UDP packet and waits for a reply.
+   *
+   * @param out_packet The packet to send.
+   * @param in_packet The packet to receive.
+   */
+  void sendUdpPacketAndWaitForReply(UdpPacket &request, UdpPacket &response);
+
+  /**
    * @brief Gets the UDP socket file descriptor.
    *
    * @return The UDP socket file descriptor.
