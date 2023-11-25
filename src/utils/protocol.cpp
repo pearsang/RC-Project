@@ -222,8 +222,42 @@ std::stringstream ListUserAuctionsRequest::serialize() {
 }
 
 void ListUserAuctionsRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
   buffer >> this->userID;
 }
+
+std::stringstream ListUserAuctionsResponse::serialize() {
+  // server stuff
+  std::stringstream buffer;
+  return buffer;
+};
+
+void ListUserAuctionsResponse::deserialize(std::stringstream &buffer) {
+  buffer >> std::noskipws;
+  readPacketId(buffer, ListUserAuctionsResponse::ID);
+  readSpace(buffer);
+  auto status_str = readString(buffer, 3);
+  if (status_str == "OK") {
+    status = OK;
+
+    while (buffer.peek() != '\n') {
+      readSpace(buffer);
+      auto auction_id = readString(buffer, 3);
+      readSpace(buffer);
+      auto state = readInt(buffer);
+      auctions.push_back(std::make_pair(auction_id, (uint8_t)1));
+    }
+  } else if (status_str == "NOK") {
+    status = NOK;
+  } else if (status_str == "NLG") {
+    status = NLG;
+  } else if (status_str == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(buffer);
+};
 
 std::stringstream ListUserBidsRequest::serialize() {
   std::stringstream buffer;

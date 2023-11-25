@@ -311,6 +311,26 @@ public:
 };
 
 /**
+ * @class ListUserAuctionsResponse
+ *
+ * @brief Represents a UDP packet for responding to a list user auctions
+ * request. The packet has the following format:
+ * RLA <status> [ AID state]*
+ * state takes value 1 if the auction is active, or 0 otherwise.
+ *
+ */
+class ListUserAuctionsResponse : public UdpPacket {
+public:
+  enum status { OK, NOK, NLG, ERR };
+  static constexpr const char *ID = "RMA";
+  status status;
+  std::vector<std::pair<std::string, uint8_t>> auctions;
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
+/**
  * @class ListUserBidsRequest
  *
  * @brief Represents a UDP packet for listing the bids of a user.

@@ -96,9 +96,8 @@ void LoginCommand::handleCommand(std::string args, UserState &state) {
 
   if (loginResponse.status == LoginResponse::status::OK) {
     std::cout << "Login successful!" << std::endl;
-    std::string empty = " ";
-    state.setUserID(empty);
-    state.setPassword(empty);
+    state.setUserID(user_id);
+    state.setPassword(password);
   } else if (loginResponse.status == LoginResponse::status::NOK) {
     std::cout << "Login failed: Incorrect password" << std::endl;
   } else if (loginResponse.status == LoginResponse::status::REG) {
@@ -191,8 +190,57 @@ void ListUserAuctionsCommand::handleCommand(std::string args,
 
   ListUserAuctionsRequest listUserAuctionsRequest;
   listUserAuctionsRequest.userID = state.getUserID();
+  // THIS USER ID IS FOR TESTING PURPOSES ONLY
+  listUserAuctionsRequest.userID = "123456";
 
-  std::cout << listUserAuctionsRequest.serialize().str() << std::endl;
+  ListUserAuctionsResponse listUserAuctionsResponse;
+  state.sendUdpPacketAndWaitForReply(listUserAuctionsRequest,
+                                     listUserAuctionsResponse);
+
+  if (listUserAuctionsResponse.status == ListUserAuctionsResponse::status::OK) {
+    // probably refactor this into a function
+    std::cout << "List user auctions successful!" << std::endl;
+    const int columnWidth = 15;
+
+    // Print the top border
+    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ')
+              << std::endl;
+
+    // Print the header
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
+              << "|" << std::setw(columnWidth - 1) << std::left << "Status"
+              << "|" << std::endl;
+
+    // Print the border between header and data
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+
+    for (const auto &auction : listUserAuctionsResponse.auctions) {
+      std::cout << "|" << std::setw(columnWidth - 1) << std::left
+                << auction.first << "|" << std::setw(columnWidth - 1)
+                << std::left << (auction.second ? "Active" : "Not Active")
+                << "|" << std::endl;
+
+      // Print the border between rows
+      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+                << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+                << std::endl;
+    }
+
+  } else if (listUserAuctionsResponse.status ==
+             ListUserAuctionsResponse::status::NOK) {
+    std::cout << "List user auctions failed: You have no ongoing auctions"
+              << std::endl;
+  } else if (listUserAuctionsResponse.status ==
+             ListUserAuctionsResponse::status::NLG) {
+    std::cout << "List user auctions failed: You are not logged in"
+              << std::endl;
+  } else if (listUserAuctionsResponse.status ==
+             ListUserAuctionsResponse::status::ERR) {
+    std::cout << "List user auctions failed: Server error" << std::endl;
+  }
 }
 
 void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
