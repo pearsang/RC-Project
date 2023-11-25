@@ -248,14 +248,92 @@ void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
   ListUserBidsRequest listUserBidsRequest;
   listUserBidsRequest.userID = state.getUserID();
 
-  std::cout << listUserBidsRequest.serialize().str() << std::endl;
+  ListUserBidsResponse listUserBidsResponse;
+  state.sendUdpPacketAndWaitForReply(listUserBidsRequest, listUserBidsResponse);
+
+  if (listUserBidsResponse.status == ListUserBidsResponse::status::OK) {
+    std::cout << "List user auctions with bids successful!" << std::endl;
+    const int columnWidth = 15;
+
+    // Print the top border
+    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ')
+              << std::endl;
+
+    // Print the header
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
+              << "|" << std::setw(columnWidth - 1) << std::left << "Status"
+              << "|" << std::endl;
+
+    // Print the border between header and data
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+
+    for (const auto &auction : listUserBidsResponse.auctions) {
+      std::cout << "|" << std::setw(columnWidth - 1) << std::left
+                << auction.first << "|" << std::setw(columnWidth - 1)
+                << std::left << (auction.second ? "Active" : "Not Active")
+                << "|" << std::endl;
+
+      // Print the border between rows
+      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+                << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+                << std::endl;
+    }
+  } else if (listUserBidsResponse.status == ListUserBidsResponse::status::NOK) {
+    std::cout << "List user auctions with bids failed: You have no ongoing bids"
+              << std::endl;
+  } else if (listUserBidsResponse.status == ListUserBidsResponse::status::NLG) {
+    std::cout << "List user bids failed: You are not logged in" << std::endl;
+  } else if (listUserBidsResponse.status == ListUserBidsResponse::status::ERR) {
+    std::cout << "List user bids failed: Server error" << std::endl;
+  }
 }
 
 void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
 
   ListAuctionsRequest listAuctionsRequest;
 
-  std::cout << listAuctionsRequest.serialize().str() << std::endl;
+  ListAuctionsResponse listAuctionsResponse;
+  state.sendUdpPacketAndWaitForReply(listAuctionsRequest, listAuctionsResponse);
+
+  if (listAuctionsResponse.status == ListAuctionsResponse::status::OK) {
+    std::cout << "List auctions successful!" << std::endl;
+    const int columnWidth = 15;
+
+    // Print the top border
+    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ')
+              << std::endl;
+
+    // Print the header
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
+              << "|" << std::setw(columnWidth - 1) << std::left << "Status"
+              << "|" << std::endl;
+
+    // Print the border between header and data
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+
+    for (const auto &auction : listAuctionsResponse.auctions) {
+      std::cout << "|" << std::setw(columnWidth - 1) << std::left
+                << auction.first << "|" << std::setw(columnWidth - 1)
+                << std::left << (auction.second ? "Active" : "Not Active")
+                << "|" << std::endl;
+
+      // Print the border between rows
+      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+                << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+                << std::endl;
+    }
+  } else if (listAuctionsResponse.status == ListAuctionsResponse::status::NOK) {
+    std::cout << "List auctions failed: There are no ongoing auctions"
+              << std::endl;
+  } else if (listAuctionsResponse.status == ListAuctionsResponse::status::ERR) {
+    std::cout << "List auctions failed: Server error" << std::endl;
+  }
 }
 
 void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
@@ -334,7 +412,84 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
   ShowRecordRequest showRecordRequest;
   showRecordRequest.auctionID = auction_id;
 
-  std::cout << showRecordRequest.serialize().str() << std::endl;
+  ShowRecordResponse showRecordResponse;
+  state.sendUdpPacketAndWaitForReply(showRecordRequest, showRecordResponse);
+
+  if (showRecordResponse.status == ShowRecordResponse::status::OK) {
+
+    const int columnWidth = 35;
+
+    std::tm *tm_info = std::localtime(&showRecordResponse.startDate);
+
+    // Format the date and time
+    char date[20];
+    std::strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    std::cout << "Show record successful!" << std::endl;
+    std::cout << "Host ID: " << showRecordResponse.hostUID << "\t\t"
+              << "Auction Name: " << showRecordResponse.auctionName << "\t"
+              << "Asset Filename: " << showRecordResponse.assetFilename << "\t"
+              << "Start Value: " << showRecordResponse.startValue << "\t"
+              << "Start Date: " << date << "\t\t"
+              << "Active Time: " << showRecordResponse.timeActive << std::endl;
+
+    // Print the top border
+    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ')
+              << std::endl;
+
+    // Print the header
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Bidder"
+              << "|" << std::setw(columnWidth - 1) << std::left << "Bid Value"
+              << "|" << std::setw(columnWidth - 1) << std::left << "Bid Date"
+              << "|" << std::setw(columnWidth - 1) << std::left
+              << "Bid Sec Time"
+              << "|" << std::endl;
+
+    // Print the middle border
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+
+    for (const auto &bid : showRecordResponse.bids) {
+      // Accessing elements of the tuple
+      std::string bidder_UID = std::get<0>(bid);
+      uint32_t bid_value = std::get<1>(bid);
+      time_t bid_date_time = std::get<2>(bid);
+      uint32_t bid_sec_time = std::get<3>(bid);
+
+      // Convert time_t to a struct tm for extracting date and time components
+      std::tm *tm_info = std::localtime(&bid_date_time);
+
+      // Format the date and time
+      char date[20];
+      std::strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", tm_info);
+
+      std::cout << "|" << std::setw(columnWidth - 1) << std::left << bidder_UID
+                << "|" << std::setw(columnWidth - 1) << std::left << bid_value
+                << "|" << std::setw(columnWidth - 1) << std::left << date << "|"
+                << std::setw(columnWidth - 1) << std::left << bid_sec_time
+                << "|" << std::endl;
+
+      // Print the border between rows
+      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+                << std::setw(columnWidth) << "+" << std::setw(columnWidth)
+                << "+" << std::setw(columnWidth) << "+" << std::setfill(' ')
+                << "+" << std::endl;
+    }
+    if (showRecordResponse.end.first != 0) {
+      std::cout << "End Date: " << showRecordResponse.end.first << "\t\t"
+                << "Time passed: " << showRecordResponse.end.second << "\t"
+                << std::endl;
+    }
+
+  } else if (showRecordResponse.status == ShowRecordResponse::status::NOK) {
+    std::cout << "Show record failed: Auction does not exist" << std::endl;
+  } else if (showRecordResponse.status == ShowRecordResponse::status::ERR) {
+    std::cout << "Show record failed: Server error" << std::endl;
+  }
 }
 
 int8_t validateUserID(std::string userID) {

@@ -6,11 +6,13 @@
 #include <sys/socket.h>
 
 #include <cstdint>
+#include <ctime>
 #include <filesystem>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 
 /**
@@ -24,7 +26,7 @@ public:
   UnexpectedPacketException()
       : std::runtime_error(
             "The server did not reply with the expected response, so it was "
-            "ignored. Please try again or connect to a different game "
+            "ignored. Please try again or connect to a different auction "
             "server.") {}
 };
 
@@ -39,7 +41,8 @@ public:
   InvalidPacketException()
       : std::runtime_error(
             "The response given by the server is not correctly structured, so "
-            "it was ignored. Please try again or connect to a different game "
+            "it was ignored. Please try again or connect to a different "
+            "auction "
             "server.") {}
 };
 
@@ -170,6 +173,14 @@ protected:
    * @return The integer that was read.
    */
   uint32_t readInt(std::stringstream &buffer);
+
+  /**
+   * @brief Reads a time from the buffer.
+   *
+   * @param buffer The buffer to read from.
+   * @return The time that was read.
+   */
+  time_t readTime(std::stringstream &buffer);
 
 public:
   /**
@@ -348,6 +359,26 @@ public:
 };
 
 /**
+ * @class ListUserBidsResponse
+ *
+ * @brief Represents a UDP packet for responding to a list user bids request.
+ * The packet has the following format:
+ * RLB <status> [ AID state]*
+ * state takes value 1 if the auction is active, or 0 otherwise.
+ *
+ */
+class ListUserBidsResponse : public UdpPacket {
+public:
+  enum status { OK, NOK, NLG, ERR };
+  static constexpr const char *ID = "RMB";
+  status status;
+  std::vector<std::pair<std::string, uint8_t>> auctions;
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
+/**
  * @class ListAuctionsRequest
  *
  * @brief Represents a UDP packet for listing all auctions.
@@ -358,6 +389,27 @@ public:
 class ListAuctionsRequest : public UdpPacket {
 public:
   static constexpr const char *ID = "LST";
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
+/**
+ * @class ListAuctionsResponse
+ *
+ * @brief Represents a UDP packet for responding to a list auctions request.
+ * The packet has the following format:
+ * RLS <status> [ AID state]*
+ * state takes value 1 if the auction is active, or 0 otherwise.
+ *
+ */
+
+class ListAuctionsResponse : public UdpPacket {
+public:
+  enum status { OK, NOK, ERR };
+  static constexpr const char *ID = "RLS";
+  status status;
+  std::vector<std::pair<std::string, uint8_t>> auctions;
 
   std::stringstream serialize();
   void deserialize(std::stringstream &buffer);
@@ -375,6 +427,34 @@ class ShowRecordRequest : public UdpPacket {
 public:
   static constexpr const char *ID = "SRC";
   std::string auctionID;
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
+/**
+ * @class ShowRecordResponse
+ *
+ * @brief Represents a UDP packet for responding to a show record request.
+ * The packet has the following format:
+ * RRC <status> [host_UID  auction_name  asset_fname start_value start_date-time
+ * timeactive] [ B bidder_UID bid_value bid_date-time bid_sec_time]* [ E
+ * end_date-time end_sec_time]
+ *
+ */
+class ShowRecordResponse : public UdpPacket {
+public:
+  enum status { OK, NOK, ERR };
+  static constexpr const char *ID = "RRC";
+  status status;
+  std::string hostUID;
+  std::string auctionName;
+  std::string assetFilename;
+  uint32_t startValue;
+  time_t startDate;
+  uint32_t timeActive;
+  std::vector<std::tuple<std::string, uint32_t, time_t, uint32_t>> bids;
+  std::pair<time_t, uint32_t> end;
 
   std::stringstream serialize();
   void deserialize(std::stringstream &buffer);

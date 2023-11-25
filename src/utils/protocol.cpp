@@ -101,6 +101,16 @@ uint32_t UdpPacket::readInt(std::stringstream &buffer) {
   return (uint32_t)i;
 }
 
+time_t UdpPacket::readTime(std::stringstream &buffer) {
+  auto date = readString(buffer, 10);
+  readSpace(buffer);
+  auto time = readString(buffer, 8);
+  struct tm tm;
+  memset(&tm, 0, sizeof(struct tm));
+  strptime((date + " " + time).c_str(), "%Y-%m-%d %H:%M:%S", &tm);
+  return mktime(&tm);
+}
+
 std::stringstream LoginRequest::serialize() {
   std::stringstream buffer;
   buffer << LoginRequest::ID << " " << this->userID << " " << this->password
@@ -266,8 +276,42 @@ std::stringstream ListUserBidsRequest::serialize() {
 }
 
 void ListUserBidsRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
   buffer >> this->userID;
 }
+
+std::stringstream ListUserBidsResponse::serialize() {
+  // server stuff
+  std::stringstream buffer;
+  return buffer;
+};
+
+void ListUserBidsResponse::deserialize(std::stringstream &buffer) {
+  buffer >> std::noskipws;
+  readPacketId(buffer, ListUserBidsResponse::ID);
+  readSpace(buffer);
+  auto status_str = readString(buffer, 3);
+  if (status_str == "OK") {
+    status = OK;
+
+    while (buffer.peek() != '\n') {
+      readSpace(buffer);
+      auto auction_id = readString(buffer, 3);
+      readSpace(buffer);
+      auto state = readInt(buffer);
+      auctions.push_back(std::make_pair(auction_id, (uint8_t)state));
+    }
+  } else if (status_str == "NOK") {
+    status = NOK;
+  } else if (status_str == "NLG") {
+    status = NLG;
+  } else if (status_str == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(buffer);
+};
 
 std::stringstream ListAuctionsRequest::serialize() {
   std::stringstream buffer;
@@ -275,7 +319,41 @@ std::stringstream ListAuctionsRequest::serialize() {
   return buffer;
 }
 
-void ListAuctionsRequest::deserialize(std::stringstream &buffer) {}
+void ListAuctionsRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
+}
+
+std::stringstream ListAuctionsResponse::serialize() {
+  // server stuff
+  std::stringstream buffer;
+  return buffer;
+};
+
+void ListAuctionsResponse::deserialize(std::stringstream &buffer) {
+  buffer >> std::noskipws;
+  readPacketId(buffer, ListAuctionsResponse::ID);
+  readSpace(buffer);
+  auto status_str = readString(buffer, 3);
+  std::cout << status_str << std::endl;
+  if (status_str == "OK") {
+    status = OK;
+
+    while (buffer.peek() != '\n') {
+      readSpace(buffer);
+      auto auction_id = readString(buffer, 3);
+      readSpace(buffer);
+      auto state = readInt(buffer);
+      auctions.push_back(std::make_pair(auction_id, (uint8_t)state));
+    }
+  } else if (status_str == "NOK") {
+    status = NOK;
+  } else if (status_str == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(buffer);
+};
 
 std::stringstream ShowRecordRequest::serialize() {
   std::stringstream buffer;
@@ -284,8 +362,75 @@ std::stringstream ShowRecordRequest::serialize() {
 }
 
 void ShowRecordRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
   buffer >> this->auctionID;
 }
+
+std::stringstream ShowRecordResponse::serialize() {
+  // server stuff
+  std::stringstream buffer;
+  return buffer;
+};
+
+void ShowRecordResponse::deserialize(std::stringstream &buffer) {
+  buffer >> std::noskipws;
+  readPacketId(buffer, ShowRecordResponse::ID);
+  readSpace(buffer);
+  auto status_str = readString(buffer, 3);
+  if (status_str == "OK") {
+    status = OK;
+    readSpace(buffer);
+    auto user_id = readString(buffer, 6);
+    hostUID = user_id;
+    readSpace(buffer);
+    auto auction_name = readString(buffer, 10);
+    auctionName = auction_name;
+    readSpace(buffer);
+    auto asset_filename = readString(buffer, 24);
+    assetFilename = asset_filename;
+    readSpace(buffer);
+    auto start_price = readInt(buffer);
+    startValue = start_price;
+    readSpace(buffer);
+    auto start_date = readTime(buffer);
+    startDate = start_date;
+    readSpace(buffer);
+    auto active_time = readInt(buffer);
+    timeActive = active_time;
+
+    while (buffer.peek() != '\n') {
+      readSpace(buffer);
+      char b_or_e = readChar(buffer);
+      if (b_or_e == 'B') {
+        readSpace(buffer);
+        auto bidder_id = readString(buffer, 6);
+        readSpace(buffer);
+        auto bid_value = readInt(buffer);
+        readSpace(buffer);
+        auto bid_date = readTime(buffer);
+        readSpace(buffer);
+        auto bid_sec_time = readInt(buffer);
+        bids.push_back(
+            std::make_tuple(user_id, bid_value, bid_date, bid_sec_time));
+      } else if (b_or_e == 'E') {
+        readSpace(buffer);
+        auto end_date_time = readTime(buffer);
+        readSpace(buffer);
+        auto end_sec_time = readInt(buffer);
+        end = std::make_pair(end_date_time, end_sec_time);
+      } else {
+        continue;
+      }
+    }
+  } else if (status_str == "NOK") {
+    status = NOK;
+  } else if (status_str == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(buffer);
+};
 
 // Packet sending and receiving
 void send_packet(UdpPacket &packet, int socket, struct sockaddr *address,
