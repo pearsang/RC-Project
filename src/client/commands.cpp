@@ -108,6 +108,12 @@ void LoginCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void LogoutCommand::handleCommand(std::string args, UserState &state) {
+  if (parse_args(args).size() != 0) {
+    std::cout << "Invalid number of arguments: Expected 0, got "
+              << parse_args(args).size() << std::endl;
+    return;
+  }
+
   LogoutRequest logoutRequest;
   logoutRequest.userID = state.getUserID();
   logoutRequest.password = state.getPassword();
@@ -130,6 +136,12 @@ void LogoutCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void UnregisterCommand::handleCommand(std::string args, UserState &state) {
+  if (parse_args(args).size() != 0) {
+    std::cout << "Invalid number of arguments: Expected 0, got "
+              << parse_args(args).size() << std::endl;
+    return;
+  }
+
   UnregisterRequest unregisterRequest;
   unregisterRequest.userID = state.getUserID();
   unregisterRequest.password = state.getPassword();
@@ -152,16 +164,25 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void ExitCommand::handleCommand(std::string args, UserState &state) {
+  if (state.getUserID().length() != 0) {
+    std::cout << "Im useless for now" << std::endl;
+  }
 
   std::cout << "Exit command" << args << std::endl;
 }
 
 void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
+  if (state.getUserID().length() != 0) {
+    std::cout << "Im useless for now" << std::endl;
+  }
 
   std::cout << "Open command" << args << std::endl;
 }
 
 void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
+  if (state.getUserID().length() != 0) {
+    std::cout << "Im useless for now" << std::endl;
+  }
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);
 
@@ -187,6 +208,11 @@ void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
 
 void ListUserAuctionsCommand::handleCommand(std::string args,
                                             UserState &state) {
+  if (parse_args(args).size() != 0) {
+    std::cout << "Invalid number of arguments: Expected 0, got "
+              << parse_args(args).size() << std::endl;
+    return;
+  }
 
   ListUserAuctionsRequest listUserAuctionsRequest;
   listUserAuctionsRequest.userID = state.getUserID();
@@ -245,6 +271,12 @@ void ListUserAuctionsCommand::handleCommand(std::string args,
 
 void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
 
+  if (parse_args(args).size() != 0) {
+    std::cout << "Invalid number of arguments: Expected 0, got "
+              << parse_args(args).size() << std::endl;
+    return;
+  }
+
   ListUserBidsRequest listUserBidsRequest;
   listUserBidsRequest.userID = state.getUserID();
 
@@ -293,6 +325,12 @@ void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
 
 void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
 
+  if (parse_args(args).size() != 0) {
+    std::cout << "Invalid number of arguments: Expected 0, got "
+              << parse_args(args).size() << std::endl;
+    return;
+  }
+
   ListAuctionsRequest listAuctionsRequest;
 
   ListAuctionsResponse listAuctionsResponse;
@@ -337,6 +375,11 @@ void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
+
+  if (state.getUserID().length() != 0) {
+    std::cout << "Im useless for now" << std::endl;
+  }
+
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);
 
@@ -362,6 +405,9 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void BidCommand::handleCommand(std::string args, UserState &state) {
+  if (state.getUserID().length() != 0) {
+    std::cout << "Im useless for now" << std::endl;
+  }
   std::string auction_id;
   std::string bid_value;
   std::vector<std::string> params = parse_args(args);
@@ -422,15 +468,15 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
     std::tm *tm_info = std::localtime(&showRecordResponse.startDate);
 
     // Format the date and time
-    char date[20];
-    std::strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", tm_info);
+    char start_date[20];
+    std::strftime(start_date, sizeof(start_date), "%Y-%m-%d %H:%M:%S", tm_info);
 
     std::cout << "Show record successful!" << std::endl;
     std::cout << "Host ID: " << showRecordResponse.hostUID << "\t\t"
               << "Auction Name: " << showRecordResponse.auctionName << "\t"
               << "Asset Filename: " << showRecordResponse.assetFilename << "\t"
               << "Start Value: " << showRecordResponse.startValue << "\t"
-              << "Start Date: " << date << "\t\t"
+              << "Start Date: " << start_date << "\t\t"
               << "Active Time: " << showRecordResponse.timeActive << std::endl;
 
     // Print the top border
@@ -461,11 +507,12 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
       uint32_t bid_sec_time = std::get<3>(bid);
 
       // Convert time_t to a struct tm for extracting date and time components
-      std::tm *tm_info = std::localtime(&bid_date_time);
+      std::tm *bid_date_time_tm_info = std::localtime(&bid_date_time);
 
       // Format the date and time
       char date[20];
-      std::strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", tm_info);
+      std::strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S",
+                    bid_date_time_tm_info);
 
       std::cout << "|" << std::setw(columnWidth - 1) << std::left << bidder_UID
                 << "|" << std::setw(columnWidth - 1) << std::left << bid_value

@@ -255,7 +255,7 @@ void ListUserAuctionsResponse::deserialize(std::stringstream &buffer) {
       auto auction_id = readString(buffer, 3);
       readSpace(buffer);
       auto state = readInt(buffer);
-      auctions.push_back(std::make_pair(auction_id, (uint8_t)1));
+      auctions.push_back(std::make_pair(auction_id, (uint8_t)state));
     }
   } else if (status_str == "NOK") {
     status = NOK;
@@ -320,7 +320,10 @@ std::stringstream ListAuctionsRequest::serialize() {
 }
 
 void ListAuctionsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
+  // server stuff;
+  if (buffer.peek() != '\n') {
+    std::cout << "i dont know what to do" << std::endl;
+  }
 }
 
 std::stringstream ListAuctionsResponse::serialize() {

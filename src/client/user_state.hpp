@@ -124,14 +124,14 @@ public:
    *
    * @param userID The user ID.
    */
-  void setUserID(std::string &userID) { this->userID = userID; }
+  void setUserID(std::string &__userID) { this->userID = __userID; }
 
   /**
    * @brief Sets the password.
    *
    * @param password The password.
    */
-  void setPassword(std::string &password) { this->password = password; }
+  void setPassword(std::string &__password) { this->password = __password; }
 };
 
 #endif
