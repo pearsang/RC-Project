@@ -417,7 +417,7 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
 
   if (showRecordResponse.status == ShowRecordResponse::status::OK) {
 
-    const int columnWidth = 35;
+    const int columnWidth = 30;
 
     std::tm *tm_info = std::localtime(&showRecordResponse.startDate);
 
