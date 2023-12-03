@@ -70,7 +70,6 @@ public:
   const std::optional<const char *> usage;
   const char *description;
   virtual void handleCommand(std::string args, UserState &state) = 0;
-  
 };
 
 /**
