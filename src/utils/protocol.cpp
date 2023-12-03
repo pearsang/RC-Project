@@ -13,7 +13,7 @@
 #include "constants.hpp"
 #include <sys/socket.h>
 
-extern bool is_shutting_down;
+extern bool is_exiting;
 
 void UdpPacket::readPacketId(std::stringstream &buffer, const char *packet_id) {
   char current_char;
@@ -456,7 +456,7 @@ void wait_for_packet(UdpPacket &packet, int socket) {
   timeout.tv_usec = 0;
 
   int ready_fd = select(socket + 1, &file_descriptors, NULL, NULL, &timeout);
-  if (is_shutting_down) {
+  if (is_exiting) {
     throw OperationCancelledException();
   }
   if (ready_fd == -1) {

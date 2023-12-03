@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-extern bool is_shutting_down;
+extern bool is_exiting;
 
 void CommandManager::addCommand(std::shared_ptr<CommandHandler> handler) {
   // Add the handler to the list of handlers
@@ -123,7 +123,7 @@ void LogoutCommand::handleCommand(std::string args, UserState &state) {
 
   if (logoutResponse.status == LogoutResponse::status::OK) {
     std::cout << "Logout successful!" << std::endl;
-    std::string empty = " ";
+    std::string empty = "";
     state.setUserID(empty);
     state.setPassword(empty);
   } else if (logoutResponse.status == LogoutResponse::status::NOK) {
@@ -151,7 +151,7 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
 
   if (unregisterResponse.status == UnregisterResponse::status::OK) {
     std::cout << "Unregister successful!" << std::endl;
-    std::string empty = " ";
+    std::string empty = "";
     state.setUserID(empty);
     state.setPassword(empty);
   } else if (unregisterResponse.status == UnregisterResponse::status::NOK) {
@@ -164,11 +164,15 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void ExitCommand::handleCommand(std::string args, UserState &state) {
+  // args are not used
+  (void)args;
+  // user has not logged out
   if (state.getUserID().length() != 0) {
-    std::cout << "Im useless for now" << std::endl;
+    std::cout << "You are still logged in. Please logout first." << std::endl;
+    return;
   }
 
-  std::cout << "Exit command" << args << std::endl;
+  is_exiting = true;
 }
 
 void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {

@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-extern bool is_shutting_down;
+extern bool is_exiting;
 
 int main(int argc, char *argv[]) {
   try {
@@ -30,12 +30,12 @@ int main(int argc, char *argv[]) {
     CommandManager commandManager;
     registerCommands(commandManager);
 
-    while (!std::cin.eof() && !is_shutting_down) {
+    while (!std::cin.eof() && !is_exiting) {
       commandManager.waitForCommand(userState);
     }
 
     std::cout << std::endl
-              << "Shutting down... Press CTRL + C (again) to forcefully close "
+              << "Exiting... Press CTRL + C (again) to forcefully close "
                  "the application."
               << std::endl;
 

@@ -1,7 +1,7 @@
 #include "utils.hpp"
 
 // Flag to indicate whether the application is shutting down
-bool is_shutting_down = false;
+bool is_exiting = false;
 
 void validate_port_number(const std::string &port_number) {
   // Ensure that the port number is a valid number
@@ -68,10 +68,10 @@ void setup_custom_signal_handlers() {
 void terminate_signal_handler(int sig) {
   // ignore the signal if the application is already shutting down
   (void)sig;
-  if (is_shutting_down) {
+  if (is_exiting) {
     exit(EXIT_SUCCESS);
   }
-  is_shutting_down = true;
+  is_exiting = true;
 }
 
 std::vector<std::string> parse_args(std::string args) {

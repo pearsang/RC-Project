@@ -51,7 +51,7 @@ void setup_custom_signal_handlers();
  * @brief Handles the SIGINT and SIGTERM signals.
  *
  * This function is called when the application receives a SIGINT or SIGTERM
- * signal. It sets the global variable `is_shutting_down` to true, which is
+ * signal. It sets the global variable `is_exiting` to true, which is
  * checked by the main loop to determine whether the application should shut
  * down.
  *
