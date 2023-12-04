@@ -254,14 +254,21 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state)
 
   OpenAuctionRequest openAuctionRequest;
   openAuctionRequest.userID = state.getUserID();
+  openAuctionRequest.password = state.getPassword();
   openAuctionRequest.auctionName = auction_name;
   openAuctionRequest.assetFilename = asset_filename;
   openAuctionRequest.startValue = (uint32_t)start_value;
   openAuctionRequest.timeActive = (uint32_t)timeactive;
 
+  /// need to read the file !!!!!!!
+
+
   std::string message = "OAS " + openAuctionRequest.userID + " " +
-                        openAuctionRequest.auctionName + " " + openAuctionRequest.assetFilename +
-                        " " + std::to_string(openAuctionRequest.startValue) + " " + std::to_string(openAuctionRequest.timeActive);
+                        openAuctionRequest.password + " " +
+                        openAuctionRequest.auctionName + " " +
+                        openAuctionRequest.assetFilename + " " +
+                        std::to_string(openAuctionRequest.startValue) + " " +
+                        std::to_string(openAuctionRequest.timeActive);
 
   std::cout << message << std::endl;
 
