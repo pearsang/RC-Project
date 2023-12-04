@@ -446,9 +446,8 @@ std::stringstream OpenAuctionRequest::serialize() {
 
 void OpenAuctionRequest::deserialize(std::stringstream &buffer) {
   // server stuff
-  buffer >> this->userID >> this->password >>
-      this->auctionName >> this->assetFilename >> this->startValue >>
-      this->timeActive;
+  buffer >> this->userID >> this->password >> this->auctionName >>
+      this->assetFilename >> this->startValue >> this->timeActive;
 }
 
 // Packet sending and receiving

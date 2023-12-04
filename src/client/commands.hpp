@@ -255,4 +255,10 @@ int8_t validateAuctionID(std::string auctionId);
  */
 int8_t validateBidValue(std::string bidValue);
 
+/**
+ *
+ * @brief Validate the asset filename from the given string.
+ */
+int8_t validateAssetFilename(std::string assetFilename);
+
 #endif

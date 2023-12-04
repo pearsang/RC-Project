@@ -460,8 +460,6 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
-
-
 class TcpPacket {
 public:
   /**
@@ -485,7 +483,6 @@ public:
   virtual ~TcpPacket() = default;
 };
 
-
 class OpenAuctionRequest : public TcpPacket {
 public:
   static constexpr const char *ID = "OPA";
@@ -502,9 +499,6 @@ public:
   std::stringstream serialize();
   void deserialize(std::stringstream &buffer);
 };
-
-
-
 
 /**
  * @brief Sends a UDP packet.
