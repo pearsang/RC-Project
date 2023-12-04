@@ -168,7 +168,7 @@ void ExitCommand::handleCommand(std::string args, UserState &state) {
   // args are not used
   (void)args;
   // user has not logged out
-  if (state.getUserID().length() != 0) {
+  if (state.isLoggedIn()) {
     std::cout << "You are still logged in. Please logout first." << std::endl;
     return;
   }
@@ -177,8 +177,9 @@ void ExitCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
-  if (state.getUserID().length() != 0) {
+  if (!state.isLoggedIn()) {
     std::cout << "Im useless for now" << std::endl;
+    return;
   }
   std::vector<std::string> params = parse_args(args);
 
@@ -233,7 +234,7 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
-  if (state.getUserID().length() != 0) {
+  if (!state.isLoggedIn()) {
     std::cout << "Im useless for now" << std::endl;
   }
   std::string auction_id;
@@ -428,7 +429,7 @@ void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
 
 void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
 
-  if (state.getUserID().length() != 0) {
+  if (!state.isLoggedIn()) {
     std::cout << "Im useless for now" << std::endl;
   }
 
@@ -457,7 +458,7 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void BidCommand::handleCommand(std::string args, UserState &state) {
-  if (state.getUserID().length() != 0) {
+  if (!state.isLoggedIn()) {
     std::cout << "Im useless for now" << std::endl;
   }
   std::string auction_id;

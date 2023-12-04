@@ -492,3 +492,7 @@ void wait_for_packet(UdpPacket &packet, int socket) {
 
   packet.deserialize(data);
 }
+
+uint32_t get_file_size(std::string path) {
+  return (uint32_t)std::filesystem::file_size(path);
+}

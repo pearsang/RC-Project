@@ -261,4 +261,6 @@ int8_t validateBidValue(std::string bidValue);
  */
 int8_t validateAssetFilename(std::string assetFilename);
 
+/**/
+
 #endif

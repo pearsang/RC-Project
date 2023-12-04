@@ -132,6 +132,11 @@ public:
    * @param password The password.
    */
   void setPassword(std::string &__password) { this->password = __password; }
+
+  /**
+   * @brief Checks if there is a logged in user.
+   */
+  bool isLoggedIn() { return !this->userID.empty(); }
 };
 
 #endif

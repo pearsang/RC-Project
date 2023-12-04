@@ -519,4 +519,8 @@ void send_packet(UdpPacket &packet, int socket, struct sockaddr *address,
  */
 void wait_for_packet(UdpPacket &packet, int socket);
 
+/**
+ * @brief gets the size of a file
+ */
+uint32_t get_file_size(std::string path);
 #endif
