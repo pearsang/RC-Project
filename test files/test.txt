@@ -1,0 +1,5 @@
+login 192837 eusofixe
+open picasso32 picaso32.png 10000 1000
+exit
+logout
+exit

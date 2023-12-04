@@ -435,6 +435,22 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
   readPacketDelimiter(buffer);
 };
 
+std::stringstream OpenAuctionRequest::serialize() {
+  std::stringstream buffer;
+  buffer << OpenAuctionRequest::ID << " " << this->userID << " "
+         << this->password << " " << this->auctionName << " "
+         << this->assetFilename << " " << this->startValue << " "
+         << this->timeActive << std::endl;
+  return buffer;
+}
+
+void OpenAuctionRequest::deserialize(std::stringstream &buffer) {
+  // server stuff
+  buffer >> this->userID >> this->password >>
+      this->auctionName >> this->assetFilename >> this->startValue >>
+      this->timeActive;
+}
+
 // Packet sending and receiving
 void send_packet(UdpPacket &packet, int socket, struct sockaddr *address,
                  socklen_t addrlen) {

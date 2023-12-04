@@ -460,6 +460,52 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
+
+
+class TcpPacket {
+public:
+  /**
+   * @brief Serializes the packet into a stringstream.
+   *
+   * @return The serialized packet.
+   */
+  virtual std::stringstream serialize() = 0;
+
+  /**
+   * @brief Deserializes the packet from a stringstream.
+   *
+   * @param buffer The stringstream containing the packet data.
+   */
+  virtual void deserialize(std::stringstream &buffer) = 0;
+
+  /**
+   * @brief Destroys the TcpPacket object.
+   *
+   */
+  virtual ~TcpPacket() = default;
+};
+
+
+class OpenAuctionRequest : public TcpPacket {
+public:
+  static constexpr const char *ID = "OPA";
+  std::string userID;
+  std::string password;
+  std::string auctionName;
+  uint32_t startValue;
+  uint32_t timeActive;
+  std::string assetFilename;
+  size_t assetFileSize;
+  // data of the file
+  std::vector<char> assetFileData;
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
+
+
+
 /**
  * @brief Sends a UDP packet.
  *
