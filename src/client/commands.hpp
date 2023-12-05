@@ -261,6 +261,32 @@ int8_t validateBidValue(std::string bidValue);
  */
 int8_t validateAssetFilename(std::string assetFilename);
 
-/**/
+/**
+ *
+ * @brief Validate the start value from the given string.
+ *
+ */
+int8_t validateStartValue(std::string startValue);
+
+/**
+ *
+ * @brief Validate the auction duration from the given string.
+ *
+ */
+int8_t validateAuctionDuration(std::string auctionDuration);
+
+/**
+ *
+ * @brief Validate the asset name from the given string.
+ *
+ */
+int8_t validateAuctionName(std::string assetName);
+
+/**
+ *
+ * @brief Validate the file size of an asset.
+ *
+ */
+int8_t validateAssetFileSize(std::string ass);
 
 #endif

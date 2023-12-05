@@ -18,5 +18,10 @@
 
 #define FILENAME_MAX_LENGTH 24
 #define FILENAME_SPECIAL_CHARS "-_."
+#define ASSET_NAME_MAX 10
+#define START_VALUE_MAX 6
+#define AUCTION_DURATION_MAX 5
+
+#define FILESIZE_MAX 8
 
 #endif

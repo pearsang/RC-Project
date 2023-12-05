@@ -190,9 +190,18 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   }
 
   std::string auction_name = params[0];
-  std::string asset_filename = params[1];
+  std::string asset_fname = params[1];
+  std::string start_value = params[2];
+  std::string timeactive = params[3];
 
-  if (validateAssetFilename(asset_filename) == INVALID) {
+  if (validateAuctionName(auction_name) == INVALID) {
+    std::cout << "Invalid auction_name: Must be alphanumeric and 10 characters "
+                 "long"
+              << std::endl;
+    return;
+  }
+
+  if (validateAssetFilename(asset_fname) == INVALID) {
     std::cout << "Invalid asset_filename: Must be alphanumeric, 24 characters "
                  "including a 3 character long extension"
               << std::endl;
@@ -200,26 +209,26 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   }
 
   // check if start_value is numerical
-  if (!is_digits(params[2])) {
-    std::cout << "Invalid start value: Must be a positive number" << std::endl;
+  if (validateStartValue(start_value) == INVALID) {
+    std::cout << "Invalid start value: Must be a positive number up to 6 digits"
+              << std::endl;
     return;
   }
 
   // check if timeactive is numerical
-  if (!is_digits(params[3])) {
-    std::cout << "Invalid time active: Must be a positive number" << std::endl;
+  if (validateAuctionDuration(timeactive) == INVALID) {
+    std::cout << "Invalid time active: Must be a positive number up to 5 digits"
+              << std::endl;
     return;
   }
-  int start_value = std::stoi(params[2]);
-  int timeactive = std::stoi(params[3]);
 
   OpenAuctionRequest openAuctionRequest;
   openAuctionRequest.userID = state.getUserID();
   openAuctionRequest.password = state.getPassword();
   openAuctionRequest.auctionName = auction_name;
-  openAuctionRequest.assetFilename = asset_filename;
-  openAuctionRequest.startValue = (uint32_t)start_value;
-  openAuctionRequest.timeActive = (uint32_t)timeactive;
+  openAuctionRequest.assetFilename = asset_fname;
+  openAuctionRequest.startValue = (uint32_t)std::stoi(start_value);
+  openAuctionRequest.timeActive = (uint32_t)std::stoi(timeactive);
 
   /// need to read the file !!!!!!!
 
@@ -646,5 +655,34 @@ int8_t validateAssetFilename(std::string assetFilename) {
     return INVALID;
   }
 
+  return 0;
+}
+
+int8_t validateStartValue(std::string startValue) {
+  if (!is_digits(startValue) || startValue.length() > START_VALUE_MAX) {
+    return INVALID;
+  }
+  return 0;
+}
+
+int8_t validateAuctionDuration(std::string auctionDuration) {
+  if (!is_digits(auctionDuration) ||
+      auctionDuration.length() > AUCTION_DURATION_MAX) {
+    return INVALID;
+  }
+  return 0;
+}
+
+int8_t validateAuctionName(std::string name) {
+  if (name.length() > ASSET_NAME_MAX)
+    return INVALID;
+
+  return 0;
+}
+
+int8_t validateFileSize(std::string fileSize) {
+  if (!is_digits(fileSize) || fileSize.length() > FILESIZE_MAX) {
+    return INVALID;
+  }
   return 0;
 }
