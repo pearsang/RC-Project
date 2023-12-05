@@ -89,3 +89,58 @@ void UserState::sendUdpPacketAndWaitForReply(UdpPacket &request,
     }
   }
 }
+
+void UserState::sendTcpPacketAndWaitForReply(TcpPacket &out_packet,
+                                             TcpPacket &in_packet) {
+  try {
+    openTcpSocket();
+    sendTcpPacket(out_packet);
+    waitForTcpPacket(in_packet);
+  } catch (...) {
+    closeTcpSocket();
+    throw;
+  }
+  closeTcpSocket();
+};
+
+void UserState::sendTcpPacket(TcpPacket &packet) {
+  if (connect(tcpSocketFD, serverTcpAddr->ai_addr, serverTcpAddr->ai_addrlen) !=
+      0) {
+    throw ConnectionTimeoutException();
+  }
+  packet.send(tcpSocketFD);
+}
+
+void UserState::waitForTcpPacket(TcpPacket &packet) {
+  packet.receive(tcpSocketFD);
+}
+
+void UserState::openTcpSocket() {
+  if ((this->tcpSocketFD = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    throw FatalError("Failed to create a TCP socket", errno);
+  }
+  struct timeval read_timeout;
+  read_timeout.tv_sec = TCP_READ_TIMEOUT_SECONDS;
+  read_timeout.tv_usec = 0;
+  if (setsockopt(this->tcpSocketFD, SOL_SOCKET, SO_RCVTIMEO, &read_timeout,
+                 sizeof(read_timeout)) < 0) {
+    throw FatalError("Failed to set TCP read timeout socket option", errno);
+  }
+  struct timeval write_timeout;
+  write_timeout.tv_sec = TCP_WRITE_TIMEOUT_SECONDS;
+  write_timeout.tv_usec = 0;
+  if (setsockopt(this->tcpSocketFD, SOL_SOCKET, SO_SNDTIMEO, &write_timeout,
+                 sizeof(write_timeout)) < 0) {
+    throw FatalError("Failed to set TCP send timeout socket option", errno);
+  }
+}
+
+void UserState::closeTcpSocket() {
+  if (close(this->tcpSocketFD) != 0) {
+    if (errno == EBADF) {
+      // was already closed
+      return;
+    }
+    throw FatalError("Failed to close TCP socket", errno);
+  }
+}

@@ -461,43 +461,55 @@ public:
 };
 
 class TcpPacket {
+private:
+  char delimiter = 0;
+  void readChar(int fd, char chr);
+
+protected:
+  void writeString(int fd, const std::string &str);
+  void readPacketId(int fd, const char *id);
+  void readSpace(int fd);
+  char readChar(int fd);
+  void readPacketDelimiter(int fd);
+  std::string readString(const int fd);
+  uint32_t readInt(const int fd);
+  void readAndSaveToFile(const int fd, const std::string &file_name,
+                         const size_t file_size, const bool cancellable);
+
 public:
-  /**
-   * @brief Serializes the packet into a stringstream.
-   *
-   * @return The serialized packet.
-   */
-  virtual std::stringstream serialize() = 0;
+  virtual void send(int fd) = 0;
+  virtual void receive(int fd) = 0;
 
-  /**
-   * @brief Deserializes the packet from a stringstream.
-   *
-   * @param buffer The stringstream containing the packet data.
-   */
-  virtual void deserialize(std::stringstream &buffer) = 0;
-
-  /**
-   * @brief Destroys the TcpPacket object.
-   *
-   */
   virtual ~TcpPacket() = default;
 };
 
-class OpenAuctionRequest : public TcpPacket {
+class CloseAuctionRequest : public TcpPacket {
 public:
-  static constexpr const char *ID = "OPA";
+  static constexpr const char *ID = "CLS";
   std::string userID;
   std::string password;
-  std::string auctionName;
-  uint32_t startValue;
-  uint32_t timeActive;
-  std::string assetFilename;
-  size_t assetFileSize;
-  // data of the file
-  std::vector<char> assetFileData;
+  std::string auctionID;
 
-  std::stringstream serialize();
-  void deserialize(std::stringstream &buffer);
+  void send(int fd);
+  void receive(int fd);
+};
+
+class CloseAuctionResponse : public TcpPacket {
+public:
+  enum status { OK, EAU, NLG, EOW, END, ERR };
+  static constexpr const char *ID = "RCL";
+  status status;
+
+  void send(int fd);
+  void receive(int fd);
+};
+
+class ErrorTcpPacket : public TcpPacket {
+public:
+  static constexpr const char *ID = "ERR";
+
+  void send(int fd);
+  void receive(int fd);
 };
 
 /**
@@ -520,7 +532,17 @@ void send_packet(UdpPacket &packet, int socket, struct sockaddr *address,
 void wait_for_packet(UdpPacket &packet, int socket);
 
 /**
- * @brief gets the size of a file
+ * @brief Sends a file over a TCP connection.
+ *
+ * @param fd The file descriptor of the connection.
+ * @param image_path The path to the image file.
  */
-uint32_t get_file_size(std::string path);
+void sendFile(int fd, std::filesystem::path image_path);
+
+/**
+ * @brief Receives a file over a TCP connection.
+ *
+ * @param image_path The path to the image file.
+ */
+uint32_t getFileSize(std::filesystem::path file_path);
 #endif

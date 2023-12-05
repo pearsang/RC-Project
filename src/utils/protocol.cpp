@@ -435,20 +435,9 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
   readPacketDelimiter(buffer);
 };
 
-std::stringstream OpenAuctionRequest::serialize() {
-  std::stringstream buffer;
-  buffer << OpenAuctionRequest::ID << " " << this->userID << " "
-         << this->password << " " << this->auctionName << " "
-         << this->assetFilename << " " << this->startValue << " "
-         << this->timeActive << std::endl;
-  return buffer;
-}
+// TCP
 
-void OpenAuctionRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID >> this->password >> this->auctionName >>
-      this->assetFilename >> this->startValue >> this->timeActive;
-}
+// TCP END
 
 // Packet sending and receiving
 void send_packet(UdpPacket &packet, int socket, struct sockaddr *address,
@@ -493,6 +482,33 @@ void wait_for_packet(UdpPacket &packet, int socket) {
   packet.deserialize(data);
 }
 
-uint32_t get_file_size(std::string path) {
-  return (uint32_t)std::filesystem::file_size(path);
+void sendFile(int fd, std::filesystem::path file_path) {
+  std::ifstream file(file_path, std::ios::in | std::ios::binary);
+  if (!file) {
+    std::cerr << "Error opening file: " << file_path << std::endl;
+    throw PacketSerializationException();
+  }
+
+  char buffer[FILE_BUFFER_LEN];
+  while (file) {
+    file.read(buffer, FILE_BUFFER_LEN);
+    ssize_t bytes_read = (ssize_t)file.gcount();
+    ssize_t bytes_sent = 0;
+    while (bytes_sent < bytes_read) {
+      ssize_t sent =
+          write(fd, buffer + bytes_sent, (size_t)(bytes_read - bytes_sent));
+      if (sent < 0) {
+        throw PacketSerializationException();
+      }
+      bytes_sent += sent;
+    }
+  }
+}
+
+uint32_t getFileSize(std::filesystem::path file_path) {
+  try {
+    return (uint32_t)std::filesystem::file_size(file_path);
+  } catch (...) {
+    throw PacketSerializationException();
+  }
 }

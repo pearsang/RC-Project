@@ -183,6 +183,10 @@ void ExitCommand::handleCommand(std::string args, UserState &state) {
 void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   std::vector<std::string> params = parse_args(args);
 
+  if (!state.isLoggedIn()) {
+    std::cout << "Im useless for now REMOVE ME" << std::endl;
+  }
+
   if (params.size() != 4) {
     std::cout << "Invalid number of arguments: Expected 4, got "
               << params.size() << std::endl;
@@ -222,7 +226,7 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
     return;
   }
 
-  OpenAuctionRequest openAuctionRequest;
+  /* OpenAuctionRequest openAuctionRequest;
   openAuctionRequest.userID = state.getUserID();
   openAuctionRequest.password = state.getPassword();
   openAuctionRequest.auctionName = auction_name;
@@ -239,7 +243,7 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
                         std::to_string(openAuctionRequest.startValue) + " " +
                         std::to_string(openAuctionRequest.timeActive);
 
-  std::cout << message << std::endl;
+  std::cout << message << std::endl; */
 }
 
 void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {

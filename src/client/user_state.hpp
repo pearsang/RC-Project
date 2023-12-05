@@ -36,6 +36,25 @@ class UserState {
    */
   void resolveServerAddress(std::string &hostname, std::string &port);
 
+  /**
+   * @brief Sends a UDP packet.
+   *
+   * @param packet The packet to send.
+   */
+  void sendUdpPacket(UdpPacket &packet);
+
+  /**
+   * @brief Waits for a UDP packet.
+   *
+   * @param packet The packet to receive.
+   */
+  void waitForUdpPacket(UdpPacket &packet);
+
+  void openTcpSocket();
+  void sendTcpPacket(TcpPacket &packet);
+  void waitForTcpPacket(TcpPacket &packet);
+  void closeTcpSocket();
+
 public:
   /**
    * @brief Constructs a new UserState object.
@@ -52,26 +71,14 @@ public:
   ~UserState();
 
   /**
-   * @brief Sends a UDP packet.
-   *
-   * @param packet The packet to send.
-   */
-  void sendUdpPacket(UdpPacket &packet);
-
-  /**
-   * @brief Waits for a UDP packet.
-   *
-   * @param packet The packet to receive.
-   */
-  void waitForUdpPacket(UdpPacket &packet);
-
-  /**
    * @brief Sends a UDP packet and waits for a reply.
    *
-   * @param out_packet The packet to send.
-   * @param in_packet The packet to receive.
+   * @param request The packet to send.
+   * @param response The packet to receive.
    */
   void sendUdpPacketAndWaitForReply(UdpPacket &request, UdpPacket &response);
+
+  void sendTcpPacketAndWaitForReply(TcpPacket &request, TcpPacket &response);
 
   /**
    * @brief Gets the UDP socket file descriptor.
