@@ -517,9 +517,29 @@ void BidCommand::handleCommand(std::string args, UserState &state) {
     return;
   }
 
-  std::string message = "BID " + auction_id + " " + bid_value;
+  BidRequest bidRequest;
+  bidRequest.userID = state.getUserID();
+  bidRequest.password = state.getPassword();
+  bidRequest.auctionID = auction_id;
+  bidRequest.bidValue = (uint32_t)std::stoi(bid_value);
 
-  std::cout << message << std::endl;
+  BidResponse bidResponse;
+  state.sendTcpPacketAndWaitForReply(bidRequest, bidResponse);
+
+  if (bidResponse.status == BidResponse::status::ACC) {
+    std::cout << "Bid successful!" << std::endl;
+  } else if (bidResponse.status == BidResponse::status::NLG) {
+    std::cout << "Bid failed: You are not logged in" << std::endl;
+  } else if (bidResponse.status == BidResponse::status::NOK) {
+    std::cout << "Bid failed: The auction is not active" << std::endl;
+  } else if (bidResponse.status == BidResponse::status::REF) {
+    std::cout << "Bid failed: A larger bid has already been placed"
+              << std::endl;
+  } else if (bidResponse.status == BidResponse::status::ILG) {
+    std::cout << "Bid failed: Can not bid on your own auction" << std::endl;
+  } else if (bidResponse.status == BidResponse::status::ERR) {
+    std::cout << "Bid failed: Server error" << std::endl;
+  }
 }
 
 void ShowRecordCommand::handleCommand(std::string args, UserState &state) {

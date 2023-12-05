@@ -638,6 +638,45 @@ void CloseAuctionResponse::receive(int fd) {
   readPacketDelimiter(fd);
 }
 
+void BidRequest::send(int fd) {
+  std::stringstream stream;
+  stream << BidRequest::ID << " " << this->userID << " " << this->password
+         << " " << this->auctionID << " " << this->bidValue << std::endl;
+  writeString(fd, stream.str());
+}
+
+void BidRequest::receive(int fd) {
+  // Serverbound packets don't read their ID
+  readPacketDelimiter(fd);
+}
+
+void BidResponse::send(int fd) {
+  if (fd == -1)
+    return;
+  return;
+}
+
+void BidResponse::receive(int fd) {
+  readPacketId(fd, BidResponse::ID);
+  readSpace(fd);
+  auto status_str = readString(fd);
+  if (status_str == "ACC") {
+    this->status = ACC;
+  } else if (status_str == "NOK") {
+    this->status = NOK;
+  } else if (status_str == "NLG") {
+    this->status = NLG;
+  } else if (status_str == "REF") {
+    this->status = REF;
+  } else if (status_str == "ILG") {
+    this->status = ILG;
+  } else if (status_str == "ERR") {
+    this->status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+}
+
 // TCP END
 
 // Packet sending and receiving

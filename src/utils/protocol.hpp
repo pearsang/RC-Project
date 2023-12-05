@@ -517,6 +517,28 @@ public:
   void receive(int fd);
 };
 
+class BidRequest : public TcpPacket {
+public:
+  static constexpr const char *ID = "BID";
+  std::string userID;
+  std::string password;
+  std::string auctionID;
+  uint32_t bidValue;
+
+  void send(int fd);
+  void receive(int fd);
+};
+
+class BidResponse : public TcpPacket {
+public:
+  enum status { ACC, NOK, NLG, REF, ILG, ERR };
+  static constexpr const char *ID = "RBD";
+  status status;
+
+  void send(int fd);
+  void receive(int fd);
+};
+
 class ErrorTcpPacket : public TcpPacket {
 public:
   static constexpr const char *ID = "ERR";
