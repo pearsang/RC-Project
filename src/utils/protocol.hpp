@@ -90,6 +90,19 @@ public:
 };
 
 /**
+ * @class FatalError
+ *
+ * @brief Represents an exception thrown when an IO error occurs.
+ *
+ */
+class IOException : public std::runtime_error {
+public:
+  IOException()
+      : std::runtime_error(
+            "IO error while reading/writting from/to filesystem") {}
+};
+
+/**
  * @class UdpPacket
  *
  * @brief Represents a base class for implementing UDP packets.

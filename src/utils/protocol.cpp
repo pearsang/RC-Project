@@ -436,6 +436,207 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
 };
 
 // TCP
+void TcpPacket::writeString(int fd, const std::string &str) {
+  const char *buffer = str.c_str();
+  ssize_t bytes_to_send = (ssize_t)str.length();
+  ssize_t bytes_sent = 0;
+  while (bytes_sent < bytes_to_send) {
+    ssize_t sent =
+        write(fd, buffer + bytes_sent, (size_t)(bytes_to_send - bytes_sent));
+    if (sent < 0) {
+      throw PacketSerializationException();
+    }
+    bytes_sent += sent;
+  }
+}
+
+void TcpPacket::readPacketId(int fd, const char *packet_id) {
+  char current_char;
+  while (*packet_id != '\0') {
+    if (read(fd, &current_char, 1) != 1 || current_char != *packet_id) {
+      throw UnexpectedPacketException();
+    }
+    ++packet_id;
+  }
+}
+
+void TcpPacket::readChar(int fd, char chr) {
+  if (readChar(fd) != chr) {
+    throw InvalidPacketException();
+  }
+}
+
+char TcpPacket::readChar(int fd) {
+  char c = 0;
+  if (delimiter != 0) {
+    // use last read char instead, since it wasn't consumed yet
+    c = delimiter;
+    delimiter = 0;
+    return c;
+  }
+  if (read(fd, &c, 1) != 1) {
+    throw InvalidPacketException();
+  }
+  return c;
+}
+
+void TcpPacket::readSpace(int fd) { readChar(fd, ' '); }
+
+void TcpPacket::readPacketDelimiter(int fd) { readChar(fd, '\n'); }
+
+std::string TcpPacket::readString(const int fd) {
+  std::string result;
+  char c = 0;
+
+  while (!std::iswspace((wint_t)c)) {
+    if (read(fd, &c, 1) != 1) {
+      throw InvalidPacketException();
+    }
+    result += c;
+  }
+  delimiter = c;
+
+  result.pop_back();
+
+  return result;
+}
+
+uint32_t TcpPacket::readInt(const int fd) {
+  std::string int_str = readString(fd);
+  try {
+    size_t converted = 0;
+    int64_t result = std::stoll(int_str, &converted, 10);
+    if (converted != int_str.length() || std::iswspace((wint_t)int_str.at(0)) ||
+        result < 0 || result > INT32_MAX) {
+      throw InvalidPacketException();
+    }
+    return (uint32_t)result;
+  } catch (InvalidPacketException &ex) {
+    throw ex;
+  } catch (...) {
+    throw InvalidPacketException();
+  }
+}
+
+void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
+                                  const size_t file_size,
+                                  const bool cancellable) {
+  std::ofstream file(file_name);
+
+  if (!file.good()) {
+    throw IOException();
+  }
+
+  size_t remaining_size = file_size;
+  size_t to_read;
+  ssize_t n;
+  char buffer[FILE_BUFFER_LEN];
+
+  if (cancellable) {
+    std::cout << "Downloading file from server. Press ENTER to cancel download."
+              << std::endl;
+  }
+
+  bool skip_stdin = false;
+  while (remaining_size > 0) {
+    fd_set file_descriptors;
+    FD_ZERO(&file_descriptors);
+    FD_SET(fd, &file_descriptors);
+    if (!skip_stdin && cancellable) {
+      FD_SET(fileno(stdin), &file_descriptors);
+    }
+
+    struct timeval timeout;
+    timeout.tv_sec = TCP_READ_TIMEOUT_SECONDS;
+    timeout.tv_usec = 0;
+
+    int ready_fd = select(std::max(fd, fileno(stdin)) + 1, &file_descriptors,
+                          NULL, NULL, &timeout);
+    if (is_exiting) {
+      std::cout << "Cancelling TCP download, player is shutting down..."
+                << std::endl;
+      throw OperationCancelledException();
+    }
+    if (ready_fd == -1) {
+      perror("select");
+      throw ConnectionTimeoutException();
+    } else if (FD_ISSET(fd, &file_descriptors)) {
+      // Read from socket
+      to_read = std::min(remaining_size, (size_t)FILE_BUFFER_LEN);
+      n = read(fd, buffer, to_read);
+      if (n <= 0) {
+        file.close();
+        throw InvalidPacketException();
+      }
+      file.write(buffer, n);
+      if (!file.good()) {
+        file.close();
+        throw IOException();
+      }
+      remaining_size -= (size_t)n;
+
+      size_t downloaded_size = file_size - remaining_size;
+      if (((downloaded_size - (size_t)n) * 100 / file_size) %
+              PROGRESS_BAR_STEP_SIZE >
+          (downloaded_size * 100 / file_size) % PROGRESS_BAR_STEP_SIZE) {
+        std::cout << "Progress: " << downloaded_size * 100 / file_size << "%"
+                  << std::endl;
+      }
+    } else if (FD_ISSET(fileno(stdin), &file_descriptors)) {
+      if (std::cin.peek() != '\n') {
+        skip_stdin = true;
+        continue;
+      }
+      std::cin.get();
+      std::cout << "Cancelling TCP download" << std::endl;
+      throw OperationCancelledException();
+    } else {
+      throw ConnectionTimeoutException();
+    }
+  }
+
+  file.close();
+}
+
+void CloseAuctionRequest::send(int fd) {
+  std::stringstream stream;
+  stream << CloseAuctionRequest::ID << " " << this->userID << " "
+         << this->password << " " << this->auctionID << std::endl;
+  writeString(fd, stream.str());
+}
+
+void CloseAuctionRequest::receive(int fd) {
+  // Serverbound packets don't read their ID
+  readPacketDelimiter(fd);
+}
+
+void CloseAuctionResponse::send(int fd) {
+  if (fd == -1)
+    return;
+  return;
+}
+
+void CloseAuctionResponse::receive(int fd) {
+  readPacketId(fd, CloseAuctionResponse::ID);
+  readSpace(fd);
+  auto status_str = readString(fd);
+  if (status_str == "OK") {
+    this->status = OK;
+  } else if (status_str == "EAU") {
+    this->status = EAU;
+  } else if (status_str == "EOW") {
+    this->status = EOW;
+  } else if (status_str == "END") {
+    this->status = END;
+  } else if (status_str == "ERR") {
+    this->status = ERR;
+  } else if (status_str == "NLG") {
+    this->status = NLG;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(fd);
+}
 
 // TCP END
 

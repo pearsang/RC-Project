@@ -266,11 +266,30 @@ void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
     return;
   }
 
-  std::string message = "CLS " + auction_id;
+  CloseAuctionRequest closeAuctionRequest;
+  closeAuctionRequest.userID = state.getUserID();
+  closeAuctionRequest.password = state.getPassword();
+  closeAuctionRequest.auctionID = auction_id;
 
-  std::cout << message << std::endl;
+  CloseAuctionResponse closeAuctionResponse;
+  state.sendTcpPacketAndWaitForReply(closeAuctionRequest, closeAuctionResponse);
 
-  std::cout << "Close command" << args << std::endl;
+  if (closeAuctionResponse.status == CloseAuctionResponse::status::OK) {
+    std::cout << "Close auction successful!" << std::endl;
+  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::NLG) {
+    std::cout << "Close auction failed: You are not logged in" << std::endl;
+  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::EAU) {
+    std::cout << "Close auction failed: The auction does not exist"
+              << std::endl;
+  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::EOW) {
+    std::cout << "Close auction failed: You do not own this auction"
+              << std::endl;
+  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::END) {
+    std::cout << "Close auction failed: The auction has already ended"
+              << std::endl;
+  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::ERR) {
+    std::cout << "Close auction failed: Server error" << std::endl;
+  }
 }
 
 void ListUserAuctionsCommand::handleCommand(std::string args,
