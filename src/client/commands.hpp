@@ -289,4 +289,9 @@ int8_t validateAuctionName(std::string assetName);
  */
 int8_t validateAssetFileSize(std::string ass);
 
+/**
+ * @brief Validate a file based on its size.
+ */
+int8_t validateFileSize(std::string file_path);
+
 #endif

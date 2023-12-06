@@ -496,6 +496,31 @@ public:
   virtual ~TcpPacket() = default;
 };
 
+class OpenAuctionRequest : public TcpPacket {
+public:
+  static constexpr const char *ID = "OPA";
+  std::string userID;
+  std::string password;
+  std::string auctionName;
+  std::string assetFilename;
+  uint32_t startValue;
+  uint32_t timeActive;
+
+  void send(int fd);
+  void receive(int fd);
+};
+
+class OpenAuctionResponse : public TcpPacket {
+public:
+  enum status { OK, NOK, NLG, ERR };
+  static constexpr const char *ID = "ROA";
+  status status;
+  std::string auctionID;
+
+  void send(int fd);
+  void receive(int fd);
+};
+
 class CloseAuctionRequest : public TcpPacket {
 public:
   static constexpr const char *ID = "CLS";

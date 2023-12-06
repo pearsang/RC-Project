@@ -598,6 +598,54 @@ void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
   file.close();
 }
 
+void OpenAuctionRequest::send(int fd) {
+  std::stringstream stream;
+  stream << OpenAuctionRequest::ID << " " << this->userID << " "
+         << this->password << " " << this->auctionName << " "
+         << this->startValue << " " << this->timeActive << " "
+         << this->assetFilename << " " << getFileSize(this->assetFilename)
+         << " ";
+  writeString(fd, stream.str());
+
+  stream.str(std::string());
+  stream.clear();
+  sendFile(fd, this->assetFilename);
+
+  stream << std::endl;
+  writeString(fd, stream.str());
+}
+
+void OpenAuctionRequest::receive(int fd) {
+  // Serverbound packets don't read their ID
+  readPacketDelimiter(fd);
+}
+
+void OpenAuctionResponse::send(int fd) {
+  if (fd == -1)
+    return;
+  return;
+}
+
+void OpenAuctionResponse::receive(int fd) {
+  readPacketId(fd, OpenAuctionResponse::ID);
+  readSpace(fd);
+  auto status_str = readString(fd);
+  if (status_str == "OK") {
+    this->status = OK;
+    readSpace(fd);
+    this->auctionID = readString(fd);
+  } else if (status_str == "NOK") {
+    this->status = NOK;
+  } else if (status_str == "NLG") {
+    this->status = NLG;
+  } else if (status_str == "ERR") {
+    this->status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(fd);
+}
+
 void CloseAuctionRequest::send(int fd) {
   std::stringstream stream;
   stream << CloseAuctionRequest::ID << " " << this->userID << " "
@@ -728,8 +776,8 @@ void sendFile(int fd, std::filesystem::path file_path) {
     std::cerr << "Error opening file: " << file_path << std::endl;
     throw PacketSerializationException();
   }
-
   char buffer[FILE_BUFFER_LEN];
+
   while (file) {
     file.read(buffer, FILE_BUFFER_LEN);
     ssize_t bytes_read = (ssize_t)file.gcount();
