@@ -15,3 +15,6 @@ In order to run the client you must run:
 
     - make user
     -./user
+
+This project was developed as an assignment of the Computer Networks course.
+
