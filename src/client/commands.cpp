@@ -242,23 +242,11 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   openAuctionRequest.startValue = (uint32_t)std::stoi(start_value);
   openAuctionRequest.timeActive = (uint32_t)std::stoi(timeactive);
 
-  /// need to read the file !!!!!!!
-
-  std::string message = "OAS " + openAuctionRequest.userID + " " +
-                        openAuctionRequest.password + " " +
-                        openAuctionRequest.auctionName + " " +
-                        openAuctionRequest.assetFilename + " " +
-                        std::to_string(openAuctionRequest.startValue) + " " +
-                        std::to_string(openAuctionRequest.timeActive);
-
-  // erase this print
-  std::cout << message << std::endl;
-
   OpenAuctionResponse openAuctionResponse;
   state.sendTcpPacketAndWaitForReply(openAuctionRequest, openAuctionResponse);
 
   if (openAuctionResponse.status == OpenAuctionResponse::status::OK) {
-    std::cout << "Open auction successful: " << openAuctionResponse.status
+    std::cout << "Open auction successful: " << openAuctionResponse.auctionID
               << std::endl;
   } else if (openAuctionResponse.status == OpenAuctionResponse::status::NOK) {
     std::cout << "Open auction failed: Auction could not be started"

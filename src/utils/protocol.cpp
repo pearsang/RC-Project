@@ -602,8 +602,9 @@ void OpenAuctionRequest::send(int fd) {
   std::stringstream stream;
   stream << OpenAuctionRequest::ID << " " << this->userID << " "
          << this->password << " " << this->auctionName << " "
-         << this->startValue << " " << this->timeActive << this->assetFilename
-         << " " << getFileSize(this->assetFilename) << std::endl;
+         << this->startValue << " " << this->timeActive << " "
+         << this->assetFilename << " " << getFileSize(this->assetFilename)
+         << " ";
   writeString(fd, stream.str());
 
   stream.str(std::string());
@@ -627,11 +628,12 @@ void OpenAuctionResponse::send(int fd) {
 
 void OpenAuctionResponse::receive(int fd) {
   readPacketId(fd, OpenAuctionResponse::ID);
-  std::cout << "Received packet id" << std::endl;
   readSpace(fd);
   auto status_str = readString(fd);
   if (status_str == "OK") {
     this->status = OK;
+    readSpace(fd);
+    this->auctionID = readString(fd);
   } else if (status_str == "NOK") {
     this->status = NOK;
   } else if (status_str == "NLG") {
@@ -774,29 +776,19 @@ void sendFile(int fd, std::filesystem::path file_path) {
     std::cerr << "Error opening file: " << file_path << std::endl;
     throw PacketSerializationException();
   }
-  std::cout << "Sending file: " << file_path << std::endl;
-  int i = 0;
-  std::cout << "Sending file: " << file_path << std::endl;
-  std::cout << "File size: " << getFileSize(file_path) << std::endl;
   char buffer[FILE_BUFFER_LEN];
+
   while (file) {
     file.read(buffer, FILE_BUFFER_LEN);
     ssize_t bytes_read = (ssize_t)file.gcount();
-
     ssize_t bytes_sent = 0;
-    std::cout << "Bytes read: " << bytes_read << std::endl;
     while (bytes_sent < bytes_read) {
-      /* std::cout << "Sending file: " << bytes_sent << "/" << bytes_read
-                << std::endl; */
       ssize_t sent =
           write(fd, buffer + bytes_sent, (size_t)(bytes_read - bytes_sent));
-      std::cout << "Sent: " << sent << std::endl;
       if (sent < 0) {
-        std::cout << i << std::endl;
         throw PacketSerializationException();
       }
       bytes_sent += sent;
-      i++;
     }
   }
 }
