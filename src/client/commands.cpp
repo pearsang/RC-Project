@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
+#include <unistd.h>
 
 extern bool is_exiting;
 
@@ -226,7 +228,13 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
     return;
   }
 
-  /* OpenAuctionRequest openAuctionRequest;
+  // check file size
+  if (validateFileSize(asset_fname) == INVALID) {
+    std::cout << "Invalid file size: Must be less than 10MB" << std::endl;
+    return;
+  }
+
+  OpenAuctionRequest openAuctionRequest;
   openAuctionRequest.userID = state.getUserID();
   openAuctionRequest.password = state.getPassword();
   openAuctionRequest.auctionName = auction_name;
@@ -243,7 +251,23 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
                         std::to_string(openAuctionRequest.startValue) + " " +
                         std::to_string(openAuctionRequest.timeActive);
 
-  std::cout << message << std::endl; */
+  // erase this print
+  std::cout << message << std::endl;
+
+  OpenAuctionResponse openAuctionResponse;
+  state.sendTcpPacketAndWaitForReply(openAuctionRequest, openAuctionResponse);
+
+  if (openAuctionResponse.status == OpenAuctionResponse::status::OK) {
+    std::cout << "Open auction successful: " << openAuctionResponse.status
+              << std::endl;
+  } else if (openAuctionResponse.status == OpenAuctionResponse::status::NOK) {
+    std::cout << "Open auction failed: Auction could not be started"
+              << std::endl;
+  } else if (openAuctionResponse.status == OpenAuctionResponse::status::NLG) {
+    std::cout << "Open auction failed: You are not logged in" << std::endl;
+  } else if (openAuctionResponse.status == OpenAuctionResponse::status::ERR) {
+    std::cout << "Open auction failed: Server error" << std::endl;
+  }
 }
 
 void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
@@ -723,9 +747,15 @@ int8_t validateAuctionName(std::string name) {
   return 0;
 }
 
-int8_t validateFileSize(std::string fileSize) {
-  if (!is_digits(fileSize) || fileSize.length() > FILESIZE_MAX) {
+int8_t validateFileSize(std::string file_path) {
+  try {
+    uint32_t fileSize = (uint32_t)std::filesystem::file_size(file_path);
+    if (std::to_string(fileSize).length() > FILESIZE_MAX) {
+      return INVALID;
+    }
+  } catch (...) {
     return INVALID;
   }
+
   return 0;
 }

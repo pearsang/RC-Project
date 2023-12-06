@@ -598,6 +598,53 @@ void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
   file.close();
 }
 
+void OpenAuctionRequest::send(int fd) {
+  std::stringstream stream;
+  stream << OpenAuctionRequest::ID << " " << this->userID << " "
+         << this->password << " " << this->auctionName << " "
+         << this->startValue << " " << this->timeActive << this->assetFilename
+         << " " << getFileSize(this->assetFilename) << std::endl;
+  writeString(fd, stream.str());
+  
+  stream.str(std::string());
+  stream.clear();
+  sendFile(fd, this->assetFilename);
+  
+  stream << std::endl;
+  writeString(fd, stream.str());
+
+}
+
+void OpenAuctionRequest::receive(int fd) {
+  // Serverbound packets don't read their ID
+  readPacketDelimiter(fd);
+}
+
+void OpenAuctionResponse::send(int fd) {
+  if (fd == -1)
+    return;
+  return;
+}
+
+void OpenAuctionResponse::receive(int fd) {
+  readPacketId(fd, OpenAuctionResponse::ID);
+  std::cout << "Received packet id" << std::endl;
+  readSpace(fd);
+  auto status_str = readString(fd);
+  if (status_str == "OK") {
+    this->status = OK;
+  } else if (status_str == "NOK") {
+    this->status = NOK;
+  } else if (status_str == "NLG") {
+    this->status = NLG;
+  } else if (status_str == "ERR") {
+    this->status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(fd);
+}
+
 void CloseAuctionRequest::send(int fd) {
   std::stringstream stream;
   stream << CloseAuctionRequest::ID << " " << this->userID << " "
@@ -728,20 +775,31 @@ void sendFile(int fd, std::filesystem::path file_path) {
     std::cerr << "Error opening file: " << file_path << std::endl;
     throw PacketSerializationException();
   }
-
+  std::cout << "Sending file: " << file_path << std::endl;
+  int i=0;
+  std::cout << "Sending file: " << file_path << std::endl;
+  std::cout << "File size: " << getFileSize(file_path) << std::endl;
   char buffer[FILE_BUFFER_LEN];
   while (file) {
     file.read(buffer, FILE_BUFFER_LEN);
     ssize_t bytes_read = (ssize_t)file.gcount();
+    
     ssize_t bytes_sent = 0;
+    std::cout << "Bytes read: " << bytes_read << std::endl;
     while (bytes_sent < bytes_read) {
+      /* std::cout << "Sending file: " << bytes_sent << "/" << bytes_read
+                << std::endl; */
       ssize_t sent =
           write(fd, buffer + bytes_sent, (size_t)(bytes_read - bytes_sent));
+          std::cout << "Sent: " << sent << std::endl;
       if (sent < 0) {
+        std::cout << i << std::endl;
         throw PacketSerializationException();
       }
       bytes_sent += sent;
+      i++;
     }
+
   }
 }
 
