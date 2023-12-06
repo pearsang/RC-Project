@@ -605,14 +605,13 @@ void OpenAuctionRequest::send(int fd) {
          << this->startValue << " " << this->timeActive << this->assetFilename
          << " " << getFileSize(this->assetFilename) << std::endl;
   writeString(fd, stream.str());
-  
+
   stream.str(std::string());
   stream.clear();
   sendFile(fd, this->assetFilename);
-  
+
   stream << std::endl;
   writeString(fd, stream.str());
-
 }
 
 void OpenAuctionRequest::receive(int fd) {
@@ -776,14 +775,14 @@ void sendFile(int fd, std::filesystem::path file_path) {
     throw PacketSerializationException();
   }
   std::cout << "Sending file: " << file_path << std::endl;
-  int i=0;
+  int i = 0;
   std::cout << "Sending file: " << file_path << std::endl;
   std::cout << "File size: " << getFileSize(file_path) << std::endl;
   char buffer[FILE_BUFFER_LEN];
   while (file) {
     file.read(buffer, FILE_BUFFER_LEN);
     ssize_t bytes_read = (ssize_t)file.gcount();
-    
+
     ssize_t bytes_sent = 0;
     std::cout << "Bytes read: " << bytes_read << std::endl;
     while (bytes_sent < bytes_read) {
@@ -791,7 +790,7 @@ void sendFile(int fd, std::filesystem::path file_path) {
                 << std::endl; */
       ssize_t sent =
           write(fd, buffer + bytes_sent, (size_t)(bytes_read - bytes_sent));
-          std::cout << "Sent: " << sent << std::endl;
+      std::cout << "Sent: " << sent << std::endl;
       if (sent < 0) {
         std::cout << i << std::endl;
         throw PacketSerializationException();
@@ -799,7 +798,6 @@ void sendFile(int fd, std::filesystem::path file_path) {
       bytes_sent += sent;
       i++;
     }
-
   }
 }
 
