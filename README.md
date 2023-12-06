@@ -13,8 +13,8 @@ To learn the commands please read the [instructions](instructions.pdf).
 #### How to run 
 In order to run the client you must run:
 
-    - make user
-    -./user
+    make user
+    ./user
 
 This project was developed as an assignment of the Computer Networks course.
 
