@@ -598,6 +598,43 @@ void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
   file.close();
 }
 
+void ShowAssetRequest::send(int fd) {
+  std::stringstream stream;
+  stream << ShowAssetRequest::ID << " " << this->auctionID << std::endl;
+  writeString(fd, stream.str());
+}
+
+void ShowAssetRequest::receive(int fd) {
+  // Serverbound packets don't read their ID
+  readPacketDelimiter(fd);
+}
+
+void ShowAssetResponse::send(int fd) {
+  if (fd == -1)
+    return;
+  return;
+}
+
+void ShowAssetResponse::receive(int fd) {
+  readPacketId(fd, ShowAssetResponse::ID);
+  readSpace(fd);
+  auto status_str = readString(fd);
+  if (status_str == "OK") {
+    this->status = OK;
+    readSpace(fd);
+    assetFilename = readString(fd);
+    readSpace(fd);
+    assetSize = readInt(fd);
+    readSpace(fd);
+    readAndSaveToFile(fd, assetFilename, assetSize, true);
+  } else if (status_str == "NOK") {
+    this->status = NOK;
+  } else {
+    throw InvalidPacketException();
+  }
+  readPacketDelimiter(fd);
+}
+
 void OpenAuctionRequest::send(int fd) {
   std::stringstream stream;
   stream << OpenAuctionRequest::ID << " " << this->userID << " "

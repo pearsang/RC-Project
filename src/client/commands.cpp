@@ -494,11 +494,20 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
     return;
   }
 
-  std::string message = "SAS " + auction_id;
+  ShowAssetRequest showAssetRequest;
+  showAssetRequest.auctionID = auction_id;
 
-  std::cout << message << std::endl;
+  ShowAssetResponse showAssetResponse;
+  state.sendTcpPacketAndWaitForReply(showAssetRequest, showAssetResponse);
 
-  std::cout << "Show asset command" << args << std::endl;
+  if (showAssetResponse.status == ShowAssetResponse::status::OK) {
+    std::cout << "Show asset successful!" << std::endl;
+  } else if (showAssetResponse.status == ShowAssetResponse::status::NOK) {
+    std::cout << "Show asset failed: There is auction file available"
+              << std::endl;
+  } else if (showAssetResponse.status == ShowAssetResponse::status::ERR) {
+    std::cout << "Show asset failed: Server error" << std::endl;
+  }
 }
 
 void BidCommand::handleCommand(std::string args, UserState &state) {
