@@ -1,4 +1,5 @@
+l
+bid 638 20000
 login 192837 eusofixe
-show_asset 199
 logout
 exit

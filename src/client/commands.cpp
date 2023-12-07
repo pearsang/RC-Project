@@ -526,8 +526,10 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
 }
 
 void BidCommand::handleCommand(std::string args, UserState &state) {
+  // if there is no user logged in, bid fails
   if (!state.isLoggedIn()) {
-    std::cout << "Im useless for now" << std::endl;
+    std::cout << "Bid failed: You are not logged in" << std::endl;
+    return;
   }
   std::string auction_id;
   std::string bid_value;
