@@ -1,4 +1,4 @@
 login 192837 eusofixe
-show_asset 206
+show_asset 199
 logout
 exit
