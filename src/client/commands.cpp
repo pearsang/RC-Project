@@ -510,7 +510,13 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
   state.sendTcpPacketAndWaitForReply(showAssetRequest, showAssetResponse);
 
   if (showAssetResponse.status == ShowAssetResponse::status::OK) {
-    std::cout << "Show asset successful!" << std::endl;
+    std::cout << "Asset image downloaded successfully!" << std::endl;
+
+    std::cout << "File name: " << showAssetResponse.assetFilename << std::endl;
+
+    // show the file path
+    std::cout << "File saved to: " << std::filesystem::current_path() << "/"
+              << showAssetResponse.assetFilename << std::endl;
   } else if (showAssetResponse.status == ShowAssetResponse::status::NOK) {
     std::cout << "Show asset failed: There is auction file available"
               << std::endl;

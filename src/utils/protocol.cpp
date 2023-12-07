@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <sys/stat.h>
 
 #include "../utils/utils.hpp"
 #include "constants.hpp"

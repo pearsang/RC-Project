@@ -1,5 +1,4 @@
 login 192837 eusofixe
-open picasso32 Renoir_01.jpg 10000 1000
-exit
+show_asset 206
 logout
 exit
