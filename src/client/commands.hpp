@@ -33,8 +33,16 @@ class CommandManager {
 public:
   /**
    * @brief Waits for and handles incoming commands.
+   *
+   * @param state The current user state.
    */
   void waitForCommand(UserState &state);
+
+  /**
+   * @brief Registers a command handler with the manager.
+   *
+   * @param handler The command handler to register.
+   */
   void addCommand(std::shared_ptr<CommandHandler> handler);
 };
 

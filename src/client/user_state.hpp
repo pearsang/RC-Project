@@ -50,9 +50,30 @@ class UserState {
    */
   void waitForUdpPacket(UdpPacket &packet);
 
+  /**
+   * @brief Opens a TCP socket.
+   *
+   */
   void openTcpSocket();
+
+  /**
+   * @brief Sends a TCP packet.
+   *
+   * @param packet The packet to send.
+   */
   void sendTcpPacket(TcpPacket &packet);
+
+  /**
+   * @brief Waits for a TCP packet.
+   *
+   * @param packet The packet to receive.
+   */
   void waitForTcpPacket(TcpPacket &packet);
+
+  /**
+   * @brief Closes the TCP socket.
+   *
+   */
   void closeTcpSocket();
 
 public:

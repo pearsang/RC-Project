@@ -271,6 +271,14 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
+/**
+ * @class LogoutResponse
+ *
+ * @brief Represents a UDP packet for responding to a logout request.
+ * The packet has the following format:
+ * RLO <status>
+ *
+ */
 class LogoutResponse : public UdpPacket {
 public:
   enum status { OK, NOK, UNR, ERR };
@@ -416,7 +424,6 @@ public:
  * state takes value 1 if the auction is active, or 0 otherwise.
  *
  */
-
 class ListAuctionsResponse : public UdpPacket {
 public:
   enum status { OK, NOK, ERR };
@@ -473,29 +480,117 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
+/**
+ * @class TcpPacket
+ *
+ * @brief Represents a base class for implementing TCP packets.
+ *
+ */
 class TcpPacket {
 private:
   char delimiter = 0;
+  /**
+   * @brief Reads a character from the fd and checks if it is equal to the given
+   * character.
+   *
+   * @param fd The file descriptor of the connection.
+   * @param chr The character to check for.
+   */
   void readChar(int fd, char chr);
 
 protected:
+  /**
+   * @brief Writes a string to the fd.
+   *
+   * @param fd The file descriptor of the connection.
+   * @param str The string to write.
+   */
   void writeString(int fd, const std::string &str);
+
+  /**
+   * @brief Reads the packet ID from the fd and checks if it is equal to the
+   * given ID.
+   *
+   * @param fd The file descriptor of the connection.
+   * @param id The ID to check for.
+   */
   void readPacketId(int fd, const char *id);
+
+  /**
+   * @brief Reads a space character from the fd.
+   *
+   * @param fd The file descriptor of the connection.
+   */
   void readSpace(int fd);
+
+  /**
+   * @brief Reads a character from the fd.
+   *
+   * @param fd The file descriptor of the connection.
+   * @return The character that was read.
+   */
   char readChar(int fd);
+
+  /**
+   * @brief Reads the packet delimiter from the fd.
+   *
+   * @param fd The file descriptor of the connection.
+   */
   void readPacketDelimiter(int fd);
+
+  /**
+   * @brief Reads a string from the fd.
+   *
+   * @param fd The file descriptor of the connection.
+   * @return The string that was read.
+   */
   std::string readString(const int fd);
+
+  /**
+   * @brief Reads an integer from the fd.
+   *
+   * @param fd The file descriptor of the connection.
+   * @return The integer that was read.
+   */
   uint32_t readInt(const int fd);
+
+  /**
+   * @brief Reads an asset from the fd and saves it to a file.
+   *
+   * @param fd The file descriptor of the connection.
+   * @param file_name The name of the file to save the asset to.
+   * @param file_size The size of the file to read.
+   */
   void readAndSaveToFile(const int fd, const std::string &file_name,
                          const size_t file_size);
 
 public:
+  /**
+   * @brief send the packet to the fd.
+   */
   virtual void send(int fd) = 0;
+
+  /**
+   * @brief receive the packet from the fd.
+   */
   virtual void receive(int fd) = 0;
 
+  /**
+   * @brief Destroys the TcpPacket object.
+   *
+   */
   virtual ~TcpPacket() = default;
 };
 
+/**
+ * @class ShowAssetRequest
+ *
+ * @brief Represents a TCP packet for requesting an asset.
+ *
+ * The packet has the following format:
+ * SAS <AID>
+ *
+ */
 class ShowAssetRequest : public TcpPacket {
 public:
   static constexpr const char *ID = "SAS";
@@ -505,6 +600,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class ShowAssetResponse
+ *
+ * @brief Represents a TCP packet for responding to a show asset request.
+ *
+ * The packet has the following format:
+ * RSA <status> [ <asset_fname> <asset_size> <asset_data> ]
+ *
+ */
 class ShowAssetResponse : public TcpPacket {
 public:
   enum status { OK, NOK, ERR };
@@ -517,6 +621,16 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class OpenAuctionRequest
+ *
+ * @brief Represents a TCP packet for opening an auction.
+ *
+ * The packet has the following format:
+ * OPA <UID> <password> <auction_name> <start_value> <timeactive> <Fname>
+ * <Fsize> <Fdata>
+ *
+ */
 class OpenAuctionRequest : public TcpPacket {
 public:
   static constexpr const char *ID = "OPA";
@@ -531,6 +645,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class OpenAuctionResponse
+ *
+ * @brief Represents a TCP packet for responding to an open auction request.
+ *
+ * The packet has the following format:
+ * ROA <status> <AID>
+ *
+ */
 class OpenAuctionResponse : public TcpPacket {
 public:
   enum status { OK, NOK, NLG, ERR };
@@ -542,6 +665,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class CloseAuctionRequest
+ *
+ * @brief Represents a TCP packet for closing an auction.
+ *
+ * The packet has the following format:
+ * CLS <UID> <password> <AID>
+ *
+ */
 class CloseAuctionRequest : public TcpPacket {
 public:
   static constexpr const char *ID = "CLS";
@@ -553,6 +685,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class CloseAuctionResponse
+ *
+ * @brief Represents a TCP packet for responding to a close auction request.
+ *
+ * The packet has the following format:
+ * RCL <status>
+ *
+ */
 class CloseAuctionResponse : public TcpPacket {
 public:
   enum status { OK, EAU, NLG, EOW, END, ERR };
@@ -563,6 +704,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class BidRequest
+ *
+ * @brief Represents a TCP packet for bidding on an auction.
+ *
+ * The packet has the following format:
+ * BID <UID> <password> <AID> <bid_value>
+ *
+ */
 class BidRequest : public TcpPacket {
 public:
   static constexpr const char *ID = "BID";
@@ -575,6 +725,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class BidResponse
+ *
+ * @brief Represents a TCP packet for responding to a bid request.
+ *
+ * The packet has the following format:
+ * RBD <status>
+ *
+ */
 class BidResponse : public TcpPacket {
 public:
   enum status { ACC, NOK, NLG, REF, ILG, ERR };
@@ -585,6 +744,15 @@ public:
   void receive(int fd);
 };
 
+/**
+ * @class ErrorTcpPacket
+ *
+ * @brief Represents a TCP packet for responding to an error.
+ *
+ * The packet has the following format:
+ * ERR
+ *
+ */
 class ErrorTcpPacket : public TcpPacket {
 public:
   static constexpr const char *ID = "ERR";
