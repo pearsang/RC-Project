@@ -487,7 +487,7 @@ protected:
   std::string readString(const int fd);
   uint32_t readInt(const int fd);
   void readAndSaveToFile(const int fd, const std::string &file_name,
-                         const size_t file_size, const bool cancellable);
+                         const size_t file_size);
 
 public:
   virtual void send(int fd) = 0;

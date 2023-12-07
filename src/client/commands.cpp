@@ -105,6 +105,8 @@ void LoginCommand::handleCommand(std::string args, UserState &state) {
     std::cout << "Login failed: Incorrect password" << std::endl;
   } else if (loginResponse.status == LoginResponse::status::REG) {
     std::cout << "Login successful: You were registred" << std::endl;
+    state.setUserID(user_id);
+    state.setPassword(password);
   } else if (loginResponse.status == LoginResponse::status::ERR) {
     std::cout << "Login failed: Server error" << std::endl;
   }
@@ -146,6 +148,12 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
   if (parse_args(args).size() != 0) {
     std::cout << "Invalid number of arguments: Expected 0, got "
               << parse_args(args).size() << std::endl;
+    return;
+  }
+
+  // check if a user is logged in
+  if (!state.isLoggedIn()) {
+    std::cout << "You must be logged in to unregister" << std::endl;
     return;
   }
 
@@ -230,7 +238,8 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
 
   // check file size
   if (validateFileSize(asset_fname) == INVALID) {
-    std::cout << "Invalid file size: Must be less than 10MB" << std::endl;
+    std::cout << "Invalid file size: File must exist or be less than 10MB"
+              << std::endl;
     return;
   }
 

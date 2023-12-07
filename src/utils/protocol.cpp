@@ -519,8 +519,7 @@ uint32_t TcpPacket::readInt(const int fd) {
 }
 
 void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
-                                  const size_t file_size,
-                                  const bool cancellable) {
+                                  const size_t file_size) {
   std::ofstream file(file_name);
 
   if (!file.good()) {
@@ -532,19 +531,10 @@ void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
   ssize_t n;
   char buffer[FILE_BUFFER_LEN];
 
-  if (cancellable) {
-    std::cout << "Downloading file from server. Press ENTER to cancel download."
-              << std::endl;
-  }
-
-  bool skip_stdin = false;
   while (remaining_size > 0) {
     fd_set file_descriptors;
     FD_ZERO(&file_descriptors);
     FD_SET(fd, &file_descriptors);
-    if (!skip_stdin && cancellable) {
-      FD_SET(fileno(stdin), &file_descriptors);
-    }
 
     struct timeval timeout;
     timeout.tv_sec = TCP_READ_TIMEOUT_SECONDS;
@@ -575,16 +565,8 @@ void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
       }
       remaining_size -= (size_t)n;
 
-      size_t downloaded_size = file_size - remaining_size;
-      if (((downloaded_size - (size_t)n) * 100 / file_size) %
-              PROGRESS_BAR_STEP_SIZE >
-          (downloaded_size * 100 / file_size) % PROGRESS_BAR_STEP_SIZE) {
-        std::cout << "Progress: " << downloaded_size * 100 / file_size << "%"
-                  << std::endl;
-      }
     } else if (FD_ISSET(fileno(stdin), &file_descriptors)) {
       if (std::cin.peek() != '\n') {
-        skip_stdin = true;
         continue;
       }
       std::cin.get();
@@ -626,7 +608,7 @@ void ShowAssetResponse::receive(int fd) {
     readSpace(fd);
     assetSize = readInt(fd);
     readSpace(fd);
-    readAndSaveToFile(fd, assetFilename, assetSize, true);
+    readAndSaveToFile(fd, assetFilename, assetSize);
   } else if (status_str == "NOK") {
     this->status = NOK;
   } else {
