@@ -281,8 +281,10 @@ std::stringstream ListUserAuctionsRequest::serialize() {
 }
 
 void ListUserAuctionsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID;
+  buffer >> std::noskipws;
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ListUserAuctionsResponse::serialize() {
