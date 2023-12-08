@@ -342,8 +342,10 @@ std::stringstream ListUserBidsRequest::serialize() {
 }
 
 void ListUserBidsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID;
+  buffer >> std::noskipws;
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ListUserBidsResponse::serialize() {
