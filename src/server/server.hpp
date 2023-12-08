@@ -6,6 +6,8 @@
 #include "../utils/constants.hpp"
 #include "../utils/utils.hpp"
 
+#include "../utils/protocol.hpp"
+
 class ServerConfig {
 public:
   char *programPath;
@@ -18,4 +20,5 @@ public:
   void printHelp(std::ostream &stream);
 };
 
+void waitForUdpPacket(UdpPacket &packet);
 #endif

@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// flag to indicate whether the client is terminating
 extern bool is_exiting;
 
 int main(int argc, char *argv[]) {

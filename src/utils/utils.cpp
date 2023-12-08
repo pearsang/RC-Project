@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-// Flag to indicate whether the application is shutting down
+// Flag to indicate whether the application is terminating
 bool is_exiting = false;
 
 void validate_port_number(const std::string &port_number) {
