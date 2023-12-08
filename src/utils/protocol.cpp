@@ -704,9 +704,27 @@ void ShowAssetRequest::receive(int fd) {
 }
 
 void ShowAssetResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << ShowAssetResponse::ID << " ";
+
+  if (status == OK) {
+    stream << "OK";
+    stream << " " << assetFilename << " " << assetSize << " ";
+    writeString(fd, stream.str());
+
+    stream.str(std::string());
+    stream.clear();
+    sendFile(fd, assetFilename);
+  } else if (status == NOK) {
+    stream << "NOK";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
+  
 }
 
 void ShowAssetResponse::receive(int fd) {
