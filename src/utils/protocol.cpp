@@ -794,9 +794,26 @@ void CloseAuctionRequest::receive(int fd) {
 }
 
 void CloseAuctionResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << CloseAuctionResponse::ID << " ";
+
+  if (status == OK) {
+    stream << "OK";
+  } else if (status == EAU) {
+    stream << "EAU";
+  } else if (status == NLG) {
+    stream << "NLG";
+  } else if (status == EOW) {
+    stream << "EOW";
+  } else if (status == END) {
+    stream << "END";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void CloseAuctionResponse::receive(int fd) {
