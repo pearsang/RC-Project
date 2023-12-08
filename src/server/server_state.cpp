@@ -1,10 +1,13 @@
 #include "server_state.hpp"
 
+#include <unistd.h>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <unistd.h>
+
+#include "../utils/protocol.hpp"
+#include "handlers.hpp"
 
 void AuctionServerState::resolveServerAddress(std::string &port) {
   struct addrinfo hints;
@@ -82,4 +85,19 @@ void AuctionServerState::setupTcpSocket() {
                  sizeof(timeoutWrite)) < 0) {
     throw FatalError("Failed to set TCP write timeout socket option", errno);
   }
+}
+
+void AuctionServerState::registerHandlers() {
+  registerUdpPacketHandlers();
+  registerTcpPacketHandlers();
+}
+
+void AuctionServerState::registerUdpPacketHandlers() {
+
+	// add to UDP packet handlers 
+	//UdpPacketHandlers.insert({LoginRequest::ID, handleLogin}); - FIX THIS
+}
+
+void AuctionServerState::registerTcpPacketHandlers(){
+	// add to TCP packet handlers 
 }

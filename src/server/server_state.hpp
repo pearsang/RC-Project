@@ -2,11 +2,11 @@
 #define SERVER_STATE_H
 
 #include <netdb.h>
-
 #include <filesystem>
-#include <iostream>
+#include <mutex>
 #include <optional>
-#include <sstream>
+#include <stdexcept>
+#include <vector>
 #include <unordered_map>
 
 #include "../utils/constants.hpp"
@@ -71,17 +71,17 @@ public:
   /**
    * @brief Registers all server handlers
    */
-  void registerHandles();
+  void registerHandlers();
 
   /**
    * @brief Registers a UDP packet handler with the server.
    */
-  void registerUdpPacketHandler();
+  void registerUdpPacketHandlers();
 
   /**
    * @brief Registers a TCP packet handler with the server.
    */
-  void registerTcpPacketHandler();
+  void registerTcpPacketHandlers();
 };
 
 #endif
