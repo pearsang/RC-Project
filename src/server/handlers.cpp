@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include "../utils/protocol.hpp"
 #include "../utils/utils.hpp"
 #include "server_state.hpp"
 
@@ -14,6 +15,11 @@ void handleLogin(AuctionServerState &state, std::stringstream &buf,
   (void)state;
   (void)buf;
   (void)addressFrom;
+
+  // check if directory names ASDIR exists
+  // if not, create it
+  if (!std::filesystem::exists(ASDIR))
+    std::filesystem::create_directory(ASDIR);
 }
 
 void handleLogout(AuctionServerState &state, std::stringstream &buf,

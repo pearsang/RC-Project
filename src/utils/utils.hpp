@@ -99,4 +99,11 @@ bool is_alphanumeric(const std::string &str);
  */
 std::vector<std::string> parse_args(std::string args);
 
+/**
+ * @brief Creates a directory with the given path.
+ *
+ * @param path A reference to a string containing the path of the directory to
+ * be created.
+ */
+void create_directory(const std::string &path);
 #endif

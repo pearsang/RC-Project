@@ -30,4 +30,8 @@
 
 #define SERVER_TIMEOUT 3
 
+#define ASDIR "AS-DB"
+#define USERDIR "AS-DB/USERS"
+#define AUCTIONDIR "AS-DB/AUCTIONS"
+
 #endif

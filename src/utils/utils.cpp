@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <filesystem>
 
 // Flag to indicate whether the application is terminating
 bool is_exiting = false;
@@ -86,4 +87,12 @@ std::vector<std::string> parse_args(std::string args) {
   }
 
   return parameters;
+}
+
+void create_directory(const std::string &path) {
+  if (!std::filesystem::exists(path)) {
+    std::filesystem::create_directory(path);
+    return;
+  }
+  return;
 }

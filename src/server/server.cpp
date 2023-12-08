@@ -12,18 +12,22 @@ extern bool is_exiting;
 int main(int argc, char *argv[]) {
 
   try {
+
     ServerConfig config(argc, argv);
+
     if (config.help) {
       config.printHelp(std::cout);
       return EXIT_SUCCESS;
     }
 
     setup_custom_signal_handlers();
+    setupDB();
 
     // TODO: print verbose mode activated if so
 
     while (!is_exiting) {
     }
+
   } catch (...) {
     std::cerr << "An error has ocurred while running the application. "
                  "Shutting down..."
@@ -69,3 +73,9 @@ void ServerConfig::printHelp(std::ostream &stream) {
   stream << "  -p ASport: Set the port number to listen on" << std::endl;
   stream << "  -v: Enable verbose logging" << std::endl;
 }
+
+void setupDB() {
+  create_directory(ASDIR);
+  create_directory(USERDIR);
+  create_directory(AUCTIONDIR);
+};

@@ -20,4 +20,6 @@ public:
 };
 
 void waitForUdpPacket(UdpPacket &packet);
+
+void setupDB();
 #endif
