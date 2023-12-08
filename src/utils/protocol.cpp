@@ -349,8 +349,23 @@ void ListUserBidsRequest::deserialize(std::stringstream &buffer) {
 }
 
 std::stringstream ListUserBidsResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
+  buffer << ListUserBidsResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+    for (auto auction : auctions) {
+      buffer << " " << auction.first << " " << auction.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == NLG) {
+    buffer << "NLG";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
