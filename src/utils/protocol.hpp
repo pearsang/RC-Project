@@ -638,6 +638,7 @@ public:
   std::string password;
   std::string auctionName;
   std::string assetFilename;
+  uint32_t assetSize;
   uint32_t startValue;
   uint32_t timeActive;
 

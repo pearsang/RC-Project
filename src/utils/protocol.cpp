@@ -724,7 +724,6 @@ void ShowAssetResponse::send(int fd) {
   }
   stream << std::endl;
   writeString(fd, stream.str());
-  
 }
 
 void ShowAssetResponse::receive(int fd) {
@@ -752,8 +751,7 @@ void OpenAuctionRequest::send(int fd) {
   stream << OpenAuctionRequest::ID << " " << this->userID << " "
          << this->password << " " << this->auctionName << " "
          << this->startValue << " " << this->timeActive << " "
-         << this->assetFilename << " " << getFileSize(this->assetFilename)
-         << " ";
+         << this->assetFilename << " " << assetSize << " ";
   writeString(fd, stream.str());
 
   stream.str(std::string());
@@ -765,14 +763,43 @@ void OpenAuctionRequest::send(int fd) {
 }
 
 void OpenAuctionRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  userID = readString(fd);
+  readSpace(fd);
+  password = readString(fd);
+  readSpace(fd);
+  auctionName = readString(fd);
+  readSpace(fd);
+  startValue = readInt(fd);
+  readSpace(fd);
+  timeActive = readInt(fd);
+  readSpace(fd);
+  assetFilename = readString(fd);
+  readSpace(fd);
+  assetSize = readInt(fd);
+  readSpace(fd);
+  readAndSaveToFile(fd, assetFilename, assetSize);
   readPacketDelimiter(fd);
 }
 
 void OpenAuctionResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << OpenAuctionResponse::ID << " ";
+
+  if (status == OK) {
+    stream << "OK";
+    stream << " " << auctionID;
+  } else if (status == NOK) {
+    stream << "NOK";
+  } else if (status == NLG) {
+    stream << "NLG";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void OpenAuctionResponse::receive(int fd) {

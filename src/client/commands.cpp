@@ -250,6 +250,7 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   openAuctionRequest.assetFilename = asset_fname;
   openAuctionRequest.startValue = (uint32_t)std::stoi(start_value);
   openAuctionRequest.timeActive = (uint32_t)std::stoi(timeactive);
+  openAuctionRequest.assetSize = getFileSize(asset_fname);
 
   OpenAuctionResponse openAuctionResponse;
   state.sendTcpPacketAndWaitForReply(openAuctionRequest, openAuctionResponse);
