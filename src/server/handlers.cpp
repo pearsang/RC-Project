@@ -98,7 +98,7 @@ void handleCloseAuction(AuctionServerState &state, std::stringstream &buf,
 }
 
 void handleShowAsset(AuctionServerState &state, std::stringstream &buf,
-                      SocketAddress &addressFrom) {
+                     SocketAddress &addressFrom) {
   std::cout << "Handling show assets request" << std::endl;
 
   (void)state;

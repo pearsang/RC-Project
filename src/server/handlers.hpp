@@ -6,7 +6,6 @@
 #include "../utils/constants.hpp"
 #include "server_state.hpp"
 
-
 // UDP handlers
 
 /**
@@ -18,7 +17,6 @@
  */
 void handleLogin(AuctionServerState &state, std::stringstream &buf,
                  SocketAddress &addressFrom);
-
 
 /**
  * @brief Handles a logout request.
@@ -36,24 +34,24 @@ void handleLogout(AuctionServerState &state, std::stringstream &buf,
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
- 
+
 */
 void handleUnregister(AuctionServerState &state, std::stringstream &buf,
                       SocketAddress &addressFrom);
 
 /**
  * @brief Handles an exit request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
-*/
+ */
 void handleExit(AuctionServerState &state, std::stringstream &buf,
                 SocketAddress &addressFrom);
 
 /**
  *  @brief Handles a list user auctions request.
- *  
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
@@ -63,27 +61,27 @@ void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
 
 /**
  * @brief Handles a list user bids request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
-*/
+ */
 void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
                         SocketAddress &addressFrom);
 
 /**
  * @brief Handles a list auction request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
  */
 void handleListAuctions(AuctionServerState &state, std::stringstream &buf,
-                       SocketAddress &addressFrom);
+                        SocketAddress &addressFrom);
 
 /**
  * @brief Handles a show record of an aution request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
@@ -95,7 +93,7 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
 
 /**
  * @brief Handles an open auction request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
@@ -104,7 +102,7 @@ void handleOpenAuction(AuctionServerState &state, std::stringstream &buf,
                        SocketAddress &addressFrom);
 /**
  * @brief Handles a close auction request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
@@ -114,7 +112,7 @@ void handleCloseAuction(AuctionServerState &state, std::stringstream &buf,
 
 /**
  * @brief Handles a show auction asset request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
@@ -124,7 +122,7 @@ void handleShowAsset(AuctionServerState &state, std::stringstream &buf,
 
 /**
  * @brief Handles an auction bid request.
- * 
+ *
  * @param state The current server state.
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.

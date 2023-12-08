@@ -1,10 +1,10 @@
 #include "server_state.hpp"
 
-#include <unistd.h>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <unistd.h>
 
 #include "../utils/protocol.hpp"
 #include "handlers.hpp"
@@ -94,10 +94,10 @@ void AuctionServerState::registerHandlers() {
 
 void AuctionServerState::registerUdpPacketHandlers() {
 
-	// add to UDP packet handlers 
-	//UdpPacketHandlers.insert({LoginRequest::ID, handleLogin}); - FIX THIS
+  // add to UDP packet handlers
+  // UdpPacketHandlers.insert({LoginRequest::ID, handleLogin}); - FIX THIS
 }
 
-void AuctionServerState::registerTcpPacketHandlers(){
-	// add to TCP packet handlers 
+void AuctionServerState::registerTcpPacketHandlers() {
+  // add to TCP packet handlers
 }

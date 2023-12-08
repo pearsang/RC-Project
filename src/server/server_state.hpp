@@ -1,13 +1,13 @@
 #ifndef SERVER_STATE_H
 #define SERVER_STATE_H
 
-#include <netdb.h>
 #include <filesystem>
 #include <mutex>
+#include <netdb.h>
 #include <optional>
 #include <stdexcept>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "../utils/constants.hpp"
 #include "../utils/utils.hpp"
