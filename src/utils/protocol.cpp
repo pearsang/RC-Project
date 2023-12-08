@@ -403,10 +403,8 @@ std::stringstream ListAuctionsRequest::serialize() {
 }
 
 void ListAuctionsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff;
-  if (buffer.peek() != '\n') {
-    std::cout << "i dont know what to do" << std::endl;
-  }
+  buffer >> std::noskipws;
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ListAuctionsResponse::serialize() {
