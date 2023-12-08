@@ -784,7 +784,12 @@ void CloseAuctionRequest::send(int fd) {
 }
 
 void CloseAuctionRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  userID = readString(fd);
+  readSpace(fd);
+  password = readString(fd);
+  readSpace(fd);
+  auctionID = readString(fd);
   readPacketDelimiter(fd);
 }
 
@@ -824,7 +829,6 @@ void BidRequest::send(int fd) {
 }
 
 void BidRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
   readSpace(fd);
   userID = readString(fd);
   readSpace(fd);
