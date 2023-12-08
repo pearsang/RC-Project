@@ -222,9 +222,20 @@ void UnregisterRequest::deserialize(std::stringstream &buffer) {
 }
 
 std::stringstream UnregisterResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  buffer << UnregisterResponse::ID << " " << this->status << std::endl;
+  buffer << UnregisterResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == UNR) {
+    buffer << "UNR";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
