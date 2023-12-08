@@ -130,9 +130,20 @@ void LoginRequest::deserialize(std::stringstream &buffer) {
 }
 
 std::stringstream LoginResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  buffer << LoginResponse::ID << " " << this->status << std::endl;
+  buffer << LoginResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == REG) {
+    buffer << "REG";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
