@@ -6,10 +6,7 @@
 #include <iostream>
 #include <thread>
 
-
-int main(){
-  return 0;
-}
+int main() { return 0; }
 
 ServerConfig::ServerConfig(int argc, char *argv[]) {
   programPath = argv[0];

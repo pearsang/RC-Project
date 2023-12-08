@@ -18,6 +18,4 @@ public:
   void printHelp(std::ostream &stream);
 };
 
-
-
 #endif
