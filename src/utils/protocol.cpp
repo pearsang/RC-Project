@@ -825,6 +825,13 @@ void BidRequest::send(int fd) {
 
 void BidRequest::receive(int fd) {
   // Serverbound packets don't read their ID
+  userID = readString(fd);
+  readSpace(fd);
+  password = readString(fd);
+  readSpace(fd);
+  auctionID = readString(fd);
+  readSpace(fd);
+  bidValue = readInt(fd);
   readPacketDelimiter(fd);
 }
 
