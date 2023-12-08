@@ -93,11 +93,21 @@ void AuctionServerState::registerHandlers() {
 }
 
 void AuctionServerState::registerUdpPacketHandlers() {
-
   // add to UDP packet handlers
-  // UdpPacketHandlers.insert({LoginRequest::ID, handleLogin}); - FIX THIS
+  UdpPacketHandlers.insert({LoginRequest::ID, handleLogin});
+  UdpPacketHandlers.insert({LogoutRequest::ID, handleLogout});
+  UdpPacketHandlers.insert({UnregisterRequest::ID, handleUnregister});
+  UdpPacketHandlers.insert(
+      {ListUserAuctionsRequest::ID, handleListUserAuctions});
+  UdpPacketHandlers.insert({ListUserBidsRequest::ID, handleListUserBids});
+  UdpPacketHandlers.insert({ListAuctionsRequest::ID, handleListAuctions});
+  UdpPacketHandlers.insert({ShowRecordRequest::ID, handleShowRecord});
 }
 
 void AuctionServerState::registerTcpPacketHandlers() {
   // add to TCP packet handlers
+  TcpPacketHandlers.insert({OpenAuctionRequest::ID, handleOpenAuction});
+  TcpPacketHandlers.insert({CloseAuctionRequest::ID, handleCloseAuction});
+  TcpPacketHandlers.insert({ShowAssetRequest::ID, handleShowAsset});
+  TcpPacketHandlers.insert({BidRequest::ID, handleBid});
 }

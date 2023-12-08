@@ -26,9 +26,9 @@ public:
   socklen_t size;
 };
 
-typedef void (*UdpPacketHandler)(std::stringstream &, SocketAddress &,
-                                 AuctionServerState &);
-typedef void (*TcpPacketHandler)(int fd, AuctionServerState &);
+typedef void (*UdpPacketHandler)(AuctionServerState &, std::stringstream &,
+                                 SocketAddress &);
+typedef void (*TcpPacketHandler)(AuctionServerState &, int fd);
 
 /**
  * @class ServerState

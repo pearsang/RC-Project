@@ -49,26 +49,15 @@ ServerConfig::ServerConfig(int argc, char *argv[]) {
       return;
       break;
     case 'v':
+      std::cout << "Verbose mode activated" << std::endl;
       verbose = true;
       break;
-    case 1:
-      if (wordFilePath.empty()) {
-        wordFilePath = std::string(optarg);
-      }
-      break;
+
     default:
       std::cerr << std::endl;
       printHelp(std::cerr);
       exit(EXIT_FAILURE);
     }
-  }
-
-  if (wordFilePath.empty()) {
-    std::cerr << programPath << ": required argument 'word_file' not provided"
-              << std::endl
-              << std::endl;
-    printHelp(std::cerr);
-    exit(EXIT_FAILURE);
   }
 
   validate_port_number(port);

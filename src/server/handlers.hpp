@@ -40,16 +40,6 @@ void handleUnregister(AuctionServerState &state, std::stringstream &buf,
                       SocketAddress &addressFrom);
 
 /**
- * @brief Handles an exit request.
- *
- * @param state The current server state.
- * @param buf The packet buffer.
- * @param addressFrom The address of the sender.
- */
-void handleExit(AuctionServerState &state, std::stringstream &buf,
-                SocketAddress &addressFrom);
-
-/**
  *  @brief Handles a list user auctions request.
  *
  * @param state The current server state.
@@ -98,8 +88,7 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
  */
-void handleOpenAuction(AuctionServerState &state, std::stringstream &buf,
-                       SocketAddress &addressFrom);
+void handleOpenAuction(AuctionServerState &state, int fd);
 /**
  * @brief Handles a close auction request.
  *
@@ -107,8 +96,7 @@ void handleOpenAuction(AuctionServerState &state, std::stringstream &buf,
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
  */
-void handleCloseAuction(AuctionServerState &state, std::stringstream &buf,
-                        SocketAddress &addressFrom);
+void handleCloseAuction(AuctionServerState &state, int fd);
 
 /**
  * @brief Handles a show auction asset request.
@@ -117,8 +105,7 @@ void handleCloseAuction(AuctionServerState &state, std::stringstream &buf,
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
  */
-void handleShowAsset(AuctionServerState &state, std::stringstream &buf,
-                     SocketAddress &addressFrom);
+void handleShowAsset(AuctionServerState &state, int fd);
 
 /**
  * @brief Handles an auction bid request.
@@ -127,7 +114,6 @@ void handleShowAsset(AuctionServerState &state, std::stringstream &buf,
  * @param buf The packet buffer.
  * @param addressFrom The address of the sender.
  */
-void handleBid(AuctionServerState &state, std::stringstream &buf,
-               SocketAddress &addressFrom);
+void handleBid(AuctionServerState &state, int fd);
 
 #endif

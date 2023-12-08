@@ -11,7 +11,6 @@
 class ServerConfig {
 public:
   char *programPath;
-  std::string wordFilePath;
   std::string port = DEFAULT_PORT;
   bool help = false;
   bool verbose = false;

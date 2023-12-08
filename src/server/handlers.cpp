@@ -34,15 +34,6 @@ void handleUnregister(AuctionServerState &state, std::stringstream &buf,
   (void)addressFrom;
 }
 
-void handleExit(AuctionServerState &state, std::stringstream &buf,
-                SocketAddress &addressFrom) {
-  std::cout << "Handling exit request" << std::endl;
-
-  (void)state;
-  (void)buf;
-  (void)addressFrom;
-}
-
 void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
                             SocketAddress &addressFrom) {
   std::cout << "Handling list user auctions request" << std::endl;
@@ -79,38 +70,30 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
   (void)addressFrom;
 }
 
-void handleOpenAuction(AuctionServerState &state, std::stringstream &buf,
-                       SocketAddress &addressFrom) {
+void handleOpenAuction(AuctionServerState &state, int fd) {
   std::cout << "Handling open auction request" << std::endl;
 
   (void)state;
-  (void)buf;
-  (void)addressFrom;
+  (void)fd;
 }
 
-void handleCloseAuction(AuctionServerState &state, std::stringstream &buf,
-                        SocketAddress &addressFrom) {
+void handleCloseAuction(AuctionServerState &state, int fd) {
   std::cout << "Handling close auction request" << std::endl;
 
   (void)state;
-  (void)buf;
-  (void)addressFrom;
+  (void)fd;
 }
 
-void handleShowAsset(AuctionServerState &state, std::stringstream &buf,
-                     SocketAddress &addressFrom) {
+void handleShowAsset(AuctionServerState &state, int fd) {
   std::cout << "Handling show assets request" << std::endl;
 
   (void)state;
-  (void)buf;
-  (void)addressFrom;
+  (void)fd;
 }
 
-void handleBid(AuctionServerState &state, std::stringstream &buf,
-               SocketAddress &addressFrom) {
+void handleBid(AuctionServerState &state, int fd) {
   std::cout << "Handling bid request" << std::endl;
 
   (void)state;
-  (void)buf;
-  (void)addressFrom;
+  (void)fd;
 }
