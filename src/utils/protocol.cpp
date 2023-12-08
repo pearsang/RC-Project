@@ -120,8 +120,13 @@ std::stringstream LoginRequest::serialize() {
 }
 
 void LoginRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID >> this->password;
+  buffer >> std::noskipws;
+  // requests deserialize dont need to read ID
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readSpace(buffer);
+  password = readString(buffer, 8);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream LoginResponse::serialize() {
