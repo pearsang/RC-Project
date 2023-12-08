@@ -408,9 +408,20 @@ void ListAuctionsRequest::deserialize(std::stringstream &buffer) {
 }
 
 std::stringstream ListAuctionsResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  return buffer;
+  buffer << ListAuctionsResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+    for (auto auction : auctions) {
+      buffer << " " << auction.first << " " << auction.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
 };
 
 void ListAuctionsResponse::deserialize(std::stringstream &buffer) {
