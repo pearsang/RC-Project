@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "constants.hpp"
+
 /**
  * @class FatalError
  *
@@ -105,5 +107,119 @@ std::vector<std::string> parse_args(std::string args);
  * @param path A reference to a string containing the path of the directory to
  * be created.
  */
-void create_directory(const std::string &path);
+void create_new_directory(const std::string &path);
+
+/**
+ * @brief Creates a file with the given path.
+ *
+ * @param path A reference to a string containing the path of the file to be
+ * created.
+ */
+void create_new_file(const std::string &path);
+
+/**
+ * @brief Checks if a directory exists.
+ *
+ * @param path A reference to a string containing the path of the file to be
+ * checked.
+ *
+ * @return Return -1 if the directory does not exist, 0 if it exists.
+ */
+int8_t directory_exists(const std::string &path);
+
+/**
+ * @brief Checks if a file exists.
+ *
+ * @param path A reference to a string containing the path of the file to be
+ * checked.
+ *
+ * @return Return -1 if the file does not exist, 0 if it exists.
+ */
+int8_t file_exists(const std::string &path);
+
+/**
+ * @brief writes text on a file
+ *
+ * @param path A reference to a string containing the path of the file to be
+ * written.
+ * @param text A reference to a string containing the text to be written.
+ */
+void write_to_file(const std::string &path, const std::string &text);
+
+/**
+ * @brief reads text from a file
+ *
+ * @param path A reference to a string containing the path of the file to be
+ * read.
+ * @param text A reference to a string containing the text to be read.
+ */
+void read_from_file(const std::string &path, std::string &text);
+
+/**
+ *
+ * @brief Validates the user ID from the given string.
+ *
+ */
+int8_t validateUserID(std::string userID);
+
+/**
+ *
+ * @brief Validate the user password from the given string.
+ *
+ */
+int8_t validatePassword(std::string password);
+
+/**
+ *
+ * @brief Validate the auction ID from the given string.
+ *
+ */
+int8_t validateAuctionID(std::string auctionId);
+
+/**
+ *
+ * @brief Validate the bid value from the given string.
+ *
+ */
+int8_t validateBidValue(std::string bidValue);
+
+/**
+ *
+ * @brief Validate the asset filename from the given string.
+ */
+int8_t validateAssetFilename(std::string assetFilename);
+
+/**
+ *
+ * @brief Validate the start value from the given string.
+ *
+ */
+int8_t validateStartValue(std::string startValue);
+
+/**
+ *
+ * @brief Validate the auction duration from the given string.
+ *
+ */
+int8_t validateAuctionDuration(std::string auctionDuration);
+
+/**
+ *
+ * @brief Validate the asset name from the given string.
+ *
+ */
+int8_t validateAuctionName(std::string assetName);
+
+/**
+ *
+ * @brief Validate the file size of an asset.
+ *
+ */
+int8_t validateAssetFileSize(std::string ass);
+
+/**
+ * @brief Validate a file based on its size.
+ */
+int8_t validateFileSize(std::string file_path);
+
 #endif

@@ -75,7 +75,7 @@ void ServerConfig::printHelp(std::ostream &stream) {
 }
 
 void setupDB() {
-  create_directory(ASDIR);
-  create_directory(USERDIR);
-  create_directory(AUCTIONDIR);
+  create_new_directory(ASDIR);
+  create_new_directory(USERDIR);
+  create_new_directory(AUCTIONDIR);
 };
