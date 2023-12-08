@@ -825,6 +825,7 @@ void BidRequest::send(int fd) {
 
 void BidRequest::receive(int fd) {
   // Serverbound packets don't read their ID
+  readSpace(fd);
   userID = readString(fd);
   readSpace(fd);
   password = readString(fd);
@@ -877,6 +878,7 @@ void BidResponse::receive(int fd) {
   } else {
     throw InvalidPacketException();
   }
+  readPacketDelimiter(fd);
 }
 
 // TCP END
