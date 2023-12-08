@@ -836,9 +836,26 @@ void BidRequest::receive(int fd) {
 }
 
 void BidResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << BidResponse::ID << " ";
+
+  if (status == ACC) {
+    stream << "ACC";
+  } else if (status == NOK) {
+    stream << "NOK";
+  } else if (status == NLG) {
+    stream << "NLG";
+  } else if (status == REF) {
+    stream << "REF";
+  } else if (status == ILG) {
+    stream << "ILG";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void BidResponse::receive(int fd) {
