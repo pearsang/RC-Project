@@ -422,6 +422,8 @@ std::stringstream ListAuctionsResponse::serialize() {
   } else {
     throw InvalidPacketException();
   }
+  buffer << std::endl;
+  return buffer;
 };
 
 void ListAuctionsResponse::deserialize(std::stringstream &buffer) {
@@ -484,6 +486,8 @@ std::stringstream ShowRecordResponse::serialize() {
   } else {
     throw InvalidPacketException();
   }
+  buffer << std::endl;
+  return buffer;
 };
 
 void ShowRecordResponse::deserialize(std::stringstream &buffer) {
