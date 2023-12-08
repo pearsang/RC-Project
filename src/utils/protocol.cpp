@@ -457,8 +457,10 @@ std::stringstream ShowRecordRequest::serialize() {
 }
 
 void ShowRecordRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->auctionID;
+  buffer >> std::noskipws;
+  readSpace(buffer);
+  auctionID = readString(buffer, 3);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ShowRecordResponse::serialize() {
