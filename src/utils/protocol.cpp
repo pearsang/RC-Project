@@ -698,7 +698,8 @@ void ShowAssetRequest::send(int fd) {
 }
 
 void ShowAssetRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  auctionID = readString(fd);
   readPacketDelimiter(fd);
 }
 
