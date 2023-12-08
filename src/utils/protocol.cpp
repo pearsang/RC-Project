@@ -464,9 +464,26 @@ void ShowRecordRequest::deserialize(std::stringstream &buffer) {
 }
 
 std::stringstream ShowRecordResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  return buffer;
+  buffer << ShowRecordResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK"
+           << " " << hostUID << " " << auctionName << " " << assetFilename
+           << " " << startValue << " " << startDate << " " << timeActive;
+    for (auto bid : bids) {
+      buffer << " B " << std::get<0>(bid) << " " << std::get<1>(bid) << " "
+             << std::get<2>(bid) << " " << std::get<3>(bid);
+    }
+    if (end.first != 0) {
+      buffer << " E " << end.first << " " << end.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
 };
 
 void ShowRecordResponse::deserialize(std::stringstream &buffer) {
