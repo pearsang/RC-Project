@@ -1,6 +1,8 @@
 #include "utils.hpp"
+#include <filesystem>
+#include <fstream>
 
-// Flag to indicate whether the application is shutting down
+// Flag to indicate whether the application is terminating
 bool is_exiting = false;
 
 void validate_port_number(const std::string &port_number) {
@@ -86,4 +88,152 @@ std::vector<std::string> parse_args(std::string args) {
   }
 
   return parameters;
+}
+
+void create_new_directory(const std::string &path) {
+  if (!std::filesystem::exists(path)) {
+    std::cout << "Creating new directory: " << path << std::endl;
+    std::filesystem::create_directory(path);
+    return;
+  }
+  return;
+}
+
+void create_new_file(const std::string &path) {
+  if (!std::filesystem::exists(path)) {
+    std::cout << "Creating new file: " << path << std::endl;
+    std::ofstream ofs(path);
+    ofs.close();
+  }
+  return;
+}
+
+int8_t directory_exists(const std::string &path) {
+  if (!std::filesystem::exists(path)) {
+    return INVALID;
+  }
+  return 0;
+}
+
+int8_t file_exists(const std::string &path) {
+  if (!std::filesystem::exists(path)) {
+    return INVALID;
+  }
+  return 0;
+}
+
+void write_to_file(const std::string &path, const std::string &text) {
+  try {
+    std::ofstream file(path);
+    file << text;
+    file.close();
+  } catch (...) {
+    throw std::exception();
+  }
+}
+
+void read_from_file(const std::string &path, std::string &text) {
+
+  try {
+    std::ifstream file(path);
+    if (file.is_open()) {
+      std::getline(file, text, '\0');
+      file.close();
+    }
+  } catch (...) {
+    throw std::exception();
+  }
+}
+
+int8_t validateUserID(std::string userID) {
+  if (!is_digits(userID) || userID.length() != USER_ID_LENGTH) {
+    return INVALID;
+  }
+
+  uint32_t id = (uint32_t)std::stoi(userID);
+  if (id > USER_ID_MAX) {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validatePassword(std::string password) {
+
+  if (password.length() != 8 || !is_alphanumeric(password)) {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validateAuctionID(std::string auctionID) {
+  if (!is_digits(auctionID) || auctionID.length() != AUCTION_ID_LENGTH) {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validateBidValue(std::string bidValue) {
+  if (!is_digits(bidValue)) {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validateAssetFilename(std::string assetFilename) {
+  if (assetFilename.length() > FILENAME_MAX_LENGTH) {
+    return INVALID;
+  }
+
+  // test if chars are either alphanumeric or special chars
+  for (char c : assetFilename) {
+    if (!std::isalnum(c) && c != '-' && c != '_' && c != '.') {
+      return INVALID;
+    }
+  }
+
+  // check  if there is an extension
+  if (assetFilename[assetFilename.length() - 4] != '.') {
+    return INVALID;
+  }
+
+  return 0;
+}
+
+int8_t validateStartValue(std::string startValue) {
+  if (!is_digits(startValue) || startValue.length() > START_VALUE_MAX) {
+    return INVALID;
+  }
+  return 0;
+}
+
+int8_t validateAuctionDuration(std::string auctionDuration) {
+  if (!is_digits(auctionDuration) ||
+      auctionDuration.length() > AUCTION_DURATION_MAX) {
+    return INVALID;
+  }
+  return 0;
+}
+
+int8_t validateAuctionName(std::string name) {
+  if (name.length() > ASSET_NAME_MAX)
+    return INVALID;
+
+  return 0;
+}
+
+int8_t validateFileSize(std::string file_path) {
+  try {
+    uint32_t fileSize = (uint32_t)std::filesystem::file_size(file_path);
+    if (std::to_string(fileSize).length() > FILESIZE_MAX) {
+      return INVALID;
+    }
+  } catch (...) {
+    return INVALID;
+  }
+
+  return 0;
 }

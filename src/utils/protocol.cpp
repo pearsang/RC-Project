@@ -120,14 +120,30 @@ std::stringstream LoginRequest::serialize() {
 }
 
 void LoginRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID >> this->password;
+  buffer >> std::noskipws;
+  // requests deserialize dont need to read ID
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readSpace(buffer);
+  password = readString(buffer, 8);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream LoginResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  buffer << LoginResponse::ID << " " << this->status << std::endl;
+  buffer << LoginResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == REG) {
+    buffer << "REG";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -158,14 +174,30 @@ std::stringstream LogoutRequest::serialize() {
 }
 
 void LogoutRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID >> this->password;
+  buffer >> std::noskipws;
+  // requests deserialize dont need to read ID
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readSpace(buffer);
+  password = readString(buffer, 8);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream LogoutResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  buffer << LogoutResponse::ID << " " << this->status << std::endl;
+  buffer << LogoutResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == UNR) {
+    buffer << "UNR";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -196,14 +228,30 @@ std::stringstream UnregisterRequest::serialize() {
 }
 
 void UnregisterRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID >> this->password;
+  buffer >> std::noskipws;
+  // requests deserialize dont need to read ID
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readSpace(buffer);
+  password = readString(buffer, 8);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream UnregisterResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
-  buffer << UnregisterResponse::ID << " " << this->status << std::endl;
+  buffer << UnregisterResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == UNR) {
+    buffer << "UNR";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -233,13 +281,30 @@ std::stringstream ListUserAuctionsRequest::serialize() {
 }
 
 void ListUserAuctionsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID;
+  buffer >> std::noskipws;
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ListUserAuctionsResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
+  buffer << ListUserAuctionsResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+    for (auto auction : auctions) {
+      buffer << " " << auction.first << " " << auction.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == NLG) {
+    buffer << "NLG";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -277,13 +342,30 @@ std::stringstream ListUserBidsRequest::serialize() {
 }
 
 void ListUserBidsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->userID;
+  buffer >> std::noskipws;
+  readSpace(buffer);
+  userID = readString(buffer, 6);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ListUserBidsResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
+  buffer << ListUserBidsResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+    for (auto auction : auctions) {
+      buffer << " " << auction.first << " " << auction.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == NLG) {
+    buffer << "NLG";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -321,15 +403,26 @@ std::stringstream ListAuctionsRequest::serialize() {
 }
 
 void ListAuctionsRequest::deserialize(std::stringstream &buffer) {
-  // server stuff;
-  if (buffer.peek() != '\n') {
-    std::cout << "i dont know what to do" << std::endl;
-  }
+  buffer >> std::noskipws;
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ListAuctionsResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
+  buffer << ListAuctionsResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK";
+    for (auto auction : auctions) {
+      buffer << " " << auction.first << " " << auction.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -366,13 +459,34 @@ std::stringstream ShowRecordRequest::serialize() {
 }
 
 void ShowRecordRequest::deserialize(std::stringstream &buffer) {
-  // server stuff
-  buffer >> this->auctionID;
+  buffer >> std::noskipws;
+  readSpace(buffer);
+  auctionID = readString(buffer, 3);
+  readPacketDelimiter(buffer);
 }
 
 std::stringstream ShowRecordResponse::serialize() {
-  // server stuff
   std::stringstream buffer;
+  buffer << ShowRecordResponse::ID << " ";
+  if (status == OK) {
+    buffer << "OK"
+           << " " << hostUID << " " << auctionName << " " << assetFilename
+           << " " << startValue << " " << startDate << " " << timeActive;
+    for (auto bid : bids) {
+      buffer << " B " << std::get<0>(bid) << " " << std::get<1>(bid) << " "
+             << std::get<2>(bid) << " " << std::get<3>(bid);
+    }
+    if (end.first != 0) {
+      buffer << " E " << end.first << " " << end.second;
+    }
+  } else if (status == NOK) {
+    buffer << "NOK";
+  } else if (status == ERR) {
+    buffer << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  buffer << std::endl;
   return buffer;
 };
 
@@ -435,6 +549,14 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
   }
   readPacketDelimiter(buffer);
 };
+
+std::stringstream ErrorUdpPacket::serialize() {
+  std::stringstream buffer;
+  buffer << ErrorUdpPacket::ID << std::endl;
+  return buffer;
+};
+
+void ErrorUdpPacket::deserialize(std::stringstream &buffer) { (void)buffer; };
 
 // TCP
 void TcpPacket::writeString(int fd, const std::string &str) {
@@ -588,14 +710,32 @@ void ShowAssetRequest::send(int fd) {
 }
 
 void ShowAssetRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  auctionID = readString(fd);
   readPacketDelimiter(fd);
 }
 
 void ShowAssetResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << ShowAssetResponse::ID << " ";
+
+  if (status == OK) {
+    stream << "OK";
+    stream << " " << assetFilename << " " << assetSize << " ";
+    writeString(fd, stream.str());
+
+    stream.str(std::string());
+    stream.clear();
+    sendFile(fd, assetFilename);
+  } else if (status == NOK) {
+    stream << "NOK";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void ShowAssetResponse::receive(int fd) {
@@ -623,8 +763,7 @@ void OpenAuctionRequest::send(int fd) {
   stream << OpenAuctionRequest::ID << " " << this->userID << " "
          << this->password << " " << this->auctionName << " "
          << this->startValue << " " << this->timeActive << " "
-         << this->assetFilename << " " << getFileSize(this->assetFilename)
-         << " ";
+         << this->assetFilename << " " << assetSize << " ";
   writeString(fd, stream.str());
 
   stream.str(std::string());
@@ -636,14 +775,43 @@ void OpenAuctionRequest::send(int fd) {
 }
 
 void OpenAuctionRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  userID = readString(fd);
+  readSpace(fd);
+  password = readString(fd);
+  readSpace(fd);
+  auctionName = readString(fd);
+  readSpace(fd);
+  startValue = readInt(fd);
+  readSpace(fd);
+  timeActive = readInt(fd);
+  readSpace(fd);
+  assetFilename = readString(fd);
+  readSpace(fd);
+  assetSize = readInt(fd);
+  readSpace(fd);
+  readAndSaveToFile(fd, assetFilename, assetSize);
   readPacketDelimiter(fd);
 }
 
 void OpenAuctionResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << OpenAuctionResponse::ID << " ";
+
+  if (status == OK) {
+    stream << "OK";
+    stream << " " << auctionID;
+  } else if (status == NOK) {
+    stream << "NOK";
+  } else if (status == NLG) {
+    stream << "NLG";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void OpenAuctionResponse::receive(int fd) {
@@ -674,14 +842,36 @@ void CloseAuctionRequest::send(int fd) {
 }
 
 void CloseAuctionRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  userID = readString(fd);
+  readSpace(fd);
+  password = readString(fd);
+  readSpace(fd);
+  auctionID = readString(fd);
   readPacketDelimiter(fd);
 }
 
 void CloseAuctionResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << CloseAuctionResponse::ID << " ";
+
+  if (status == OK) {
+    stream << "OK";
+  } else if (status == EAU) {
+    stream << "EAU";
+  } else if (status == NLG) {
+    stream << "NLG";
+  } else if (status == EOW) {
+    stream << "EOW";
+  } else if (status == END) {
+    stream << "END";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void CloseAuctionResponse::receive(int fd) {
@@ -714,14 +904,38 @@ void BidRequest::send(int fd) {
 }
 
 void BidRequest::receive(int fd) {
-  // Serverbound packets don't read their ID
+  readSpace(fd);
+  userID = readString(fd);
+  readSpace(fd);
+  password = readString(fd);
+  readSpace(fd);
+  auctionID = readString(fd);
+  readSpace(fd);
+  bidValue = readInt(fd);
   readPacketDelimiter(fd);
 }
 
 void BidResponse::send(int fd) {
-  if (fd == -1)
-    return;
-  return;
+  std::stringstream stream;
+  stream << BidResponse::ID << " ";
+
+  if (status == ACC) {
+    stream << "ACC";
+  } else if (status == NOK) {
+    stream << "NOK";
+  } else if (status == NLG) {
+    stream << "NLG";
+  } else if (status == REF) {
+    stream << "REF";
+  } else if (status == ILG) {
+    stream << "ILG";
+  } else if (status == ERR) {
+    stream << "ERR";
+  } else {
+    throw InvalidPacketException();
+  }
+  stream << std::endl;
+  writeString(fd, stream.str());
 }
 
 void BidResponse::receive(int fd) {
@@ -743,6 +957,7 @@ void BidResponse::receive(int fd) {
   } else {
     throw InvalidPacketException();
   }
+  readPacketDelimiter(fd);
 }
 
 // TCP END

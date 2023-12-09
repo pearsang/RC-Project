@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
@@ -26,6 +27,14 @@
 
 #define TCP_WRITE_TIMEOUT_SECONDS 20
 #define TCP_READ_TIMEOUT_SECONDS 20
-#define PROGRESS_BAR_STEP_SIZE 10
+#define PROGRESS_BAR_STEP_SIZE 10 // not needed
+
+#define SERVER_TIMEOUT 3
+
+#define ASDIR "AS-DB"
+#define USERDIR "AS-DB/USERS"
+#define AUCTIONDIR "AS-DB/AUCTIONS"
+#define EXCEPTION_RETRY_MAX_TRIALS 3
+#define PACKET_ID_LEN 3
 
 #endif

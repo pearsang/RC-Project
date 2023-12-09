@@ -1,3 +1,4 @@
+#pragma once
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
@@ -234,72 +235,5 @@ public:
   ShowRecordCommand()
       : CommandHandler("show_record", "sr", "SRC", "Show Auction Record") {}
 };
-
-/**
- *
- * @brief Validates the user ID from the given string.
- *
- */
-int8_t validateUserID(std::string userID);
-
-/**
- *
- * @brief Validate the user password from the given string.
- *
- */
-int8_t validatePassword(std::string password);
-
-/**
- *
- * @brief Validate the auction ID from the given string.
- *
- */
-int8_t validateAuctionID(std::string auctionId);
-
-/**
- *
- * @brief Validate the bid value from the given string.
- *
- */
-int8_t validateBidValue(std::string bidValue);
-
-/**
- *
- * @brief Validate the asset filename from the given string.
- */
-int8_t validateAssetFilename(std::string assetFilename);
-
-/**
- *
- * @brief Validate the start value from the given string.
- *
- */
-int8_t validateStartValue(std::string startValue);
-
-/**
- *
- * @brief Validate the auction duration from the given string.
- *
- */
-int8_t validateAuctionDuration(std::string auctionDuration);
-
-/**
- *
- * @brief Validate the asset name from the given string.
- *
- */
-int8_t validateAuctionName(std::string assetName);
-
-/**
- *
- * @brief Validate the file size of an asset.
- *
- */
-int8_t validateAssetFileSize(std::string ass);
-
-/**
- * @brief Validate a file based on its size.
- */
-int8_t validateFileSize(std::string file_path);
 
 #endif

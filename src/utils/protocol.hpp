@@ -1,3 +1,4 @@
+#pragma once
 #ifndef PROTOCOL_HPP
 #define PROTOCOL_HPP
 
@@ -480,6 +481,14 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
+class ErrorUdpPacket : public UdpPacket {
+public:
+  static constexpr const char *ID = "ERR";
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
 /**
  * @class TcpPacket
  *
@@ -638,6 +647,7 @@ public:
   std::string password;
   std::string auctionName;
   std::string assetFilename;
+  uint32_t assetSize;
   uint32_t startValue;
   uint32_t timeActive;
 
