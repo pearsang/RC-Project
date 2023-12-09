@@ -20,13 +20,13 @@ public:
   void printHelp(std::ostream &stream);
 };
 
-void waitForUdpPacket(UdpPacket &packet);
-
-void setupDB();
-
+/**
+ * @brief Waits for an UDP packet to arrive.
+ */
 void wait_for_udp_packet(AuctionServerState &state);
 
 void handle_packet(AuctionServerState &state, std::stringstream &buffer,
                    SocketAddress &source_addr);
 
+void setupDB();
 #endif

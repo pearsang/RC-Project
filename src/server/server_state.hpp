@@ -9,8 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../utils/constants.hpp"
-#include "../utils/utils.hpp"
+#include "server_user.hpp"
 
 class DebugStream {
   bool active;
@@ -85,6 +84,7 @@ public:
   struct addrinfo *serverUdpAddr = NULL;
   struct addrinfo *serverTcpAddr = NULL;
   DebugStream cdebug;
+  UserManager usersManager;
 
   AuctionServerState(std::string &port, bool verbose);
 
@@ -125,6 +125,8 @@ public:
 
   void callUdpPacketHandler(std::string packet_id, std::stringstream &stream,
                             SocketAddress &addr_from);
+
+  uint8_t existsDB();
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "../utils/protocol.hpp"
+#include "../utils/utils.hpp"
 #include "handlers.hpp"
 
 AuctionServerState::AuctionServerState(std::string &port, bool verbose)
@@ -144,4 +145,13 @@ void AuctionServerState::callUdpPacketHandler(std::string packet_id,
   }
 
   handler->second(*this, stream, source_addr);
+}
+
+int8_t existsDB() {
+  if (directory_exists(ASDIR) == INVALID ||
+      directory_exists(USERDIR) == INVALID ||
+      directory_exists(AUCTIONDIR) == INVALID) {
+    return INVALID;
+  }
+  return 0;
 }

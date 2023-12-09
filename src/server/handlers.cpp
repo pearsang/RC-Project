@@ -5,64 +5,46 @@
 #include <iostream>
 
 #include "../utils/protocol.hpp"
-#include "../utils/utils.hpp"
-#include "server_state.hpp"
 
 void handleLogin(AuctionServerState &state, std::stringstream &buf,
                  SocketAddress &addressFrom) {
-  std::cout << "Handling login request" << std::endl;
-
   LoginRequest request;
   LoginResponse response;
-  std::string buffer;
 
-  (void)state;
-  (void)addressFrom;
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[Login] User " << request.userID << " requested to login"
+                 << std::endl;
 
-  if (directory_exists(ASDIR) == INVALID ||
-      directory_exists(USERDIR) == INVALID) {
-    std::cout << "Directory does not exist" << std::endl;
-    response.status = LoginResponse::ERR;
-    return;
-  }
+    if (state.usersManager.userExists(request.userID) == 0) {
+      state.usersManager.login(request.userID, request.password);
+      response.status = LoginResponse::OK;
+    } else {
+      state.usersManager.registerUser(request.userID, request.password);
+      response.status = LoginResponse::REG;
+    }
 
-  request.deserialize(buf);
-
-  // validate password and userID
-  if (validateUserID(request.userID) == INVALID ||
-      validatePassword(request.password) == INVALID) {
-    std::cout << "Invalid userID or password" << std::endl;
-    response.status = LoginResponse::ERR;
-  }
-
-  // check if user is registered and create directory if not
-  std::string userPath = USERDIR;
-  std::string passwordPath;
-  userPath += "/" + request.userID;
-  passwordPath = userPath + "/" + request.userID + "_pass.txt";
-
-  if (directory_exists(userPath) == INVALID) {
-    std::cout << "User is not registered" << std::endl;
-    create_new_directory(userPath);
-    create_new_file(passwordPath);
-    write_to_file(passwordPath, request.password);
-    // set response status to REG
-    response.status = LoginResponse::REG;
-  }
-
-  // check if user is already logged in
-  if (file_exists(userPath + "/" + request.userID + "login") != INVALID) {
-    std::cout << "User is already logged in" << std::endl;
-    response.status = LoginResponse::ERR;
-    return;
-  }
-
-  read_from_file(passwordPath, buffer);
-  // check if password is correct
-  if (request.password != buffer) {
-    std::cout << "Password is incorrect" << std::endl;
+    state.cdebug << "[Login] User " << request.userID
+                 << " successfully logged in" << std::endl;
+  } catch (InvalidCredentialsException &e) {
+    state.cdebug << "User " << request.userID
+                 << " tried to login with invalid "
+                    "credentials"
+                 << std::endl;
     response.status = LoginResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[Login] Invalid packet received" << std::endl;
+    response.status = LoginResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[Login] There was an unhandled exception that prevented "
+                 "the user from logging in"
+              << e.what() << std::endl;
+
+    return;
   }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleLogout(AuctionServerState &state, std::stringstream &buf,

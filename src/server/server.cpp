@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <string>
 #include <thread>
 
 // flag to indicate whether the server is terminating

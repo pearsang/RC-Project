@@ -108,7 +108,6 @@ void create_new_file(const std::string &path) {
 
 int8_t directory_exists(const std::string &path) {
   if (!std::filesystem::exists(path)) {
-    // throw FatalError("Directory does not exist");
     return INVALID;
   }
   return 0;
@@ -116,25 +115,31 @@ int8_t directory_exists(const std::string &path) {
 
 int8_t file_exists(const std::string &path) {
   if (!std::filesystem::exists(path)) {
-    // throw FatalError("File does not exist");
     return INVALID;
   }
   return 0;
 }
 
 void write_to_file(const std::string &path, const std::string &text) {
-  std::ofstream file(path);
-  file << text;
-  file.close();
+  try {
+    std::ofstream file(path);
+    file << text;
+    file.close();
+  } catch (...) {
+    throw std::exception();
+  }
 }
 
 void read_from_file(const std::string &path, std::string &text) {
-  std::ifstream file(path);
-  if (file.is_open()) {
-    std::getline(file, text, '\0');
-    file.close();
-  } else {
-    std::cerr << "Unable to open file: " << path << std::endl;
+
+  try {
+    std::ifstream file(path);
+    if (file.is_open()) {
+      std::getline(file, text, '\0');
+      file.close();
+    }
+  } catch (...) {
+    throw std::exception();
   }
 }
 
