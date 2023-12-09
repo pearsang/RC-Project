@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SERVER_USER_H
 #define SERVER_USER_H
 

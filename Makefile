@@ -13,10 +13,10 @@ UTILS_SOURCES := $(wildcard src/utils/*.cpp)
 SERVER_SOURCES := $(wildcard src/server/*.cpp)
 SOURCES := $(CLIENT_SOURCES) $(UTILS_SOURCES) $(SERVER_SOURCES)
 
-CLIENT_HEADERS := $(wildcard src/client/*.hpp)
-UTILS_HEADERS := $(wildcard src/utils/*.hpp)
-SERVER_HEADERS := $(wildcard src/server/*.hpp)
-HEADERS := $(CLIENT_HEADERS) $(UTILS_HEADERS) $(SERVER_HEADERS)
+#CLIENT_HEADERS := $(wildcard src/client/*.hpp)
+#UTILS_HEADERS := $(wildcard src/utils/*.hpp)
+#SERVER_HEADERS := $(wildcard src/server/*.hpp)
+#HEADERS := $(CLIENT_HEADERS) $(UTILS_HEADERS) $(SERVER_HEADERS)
 
 CLIENT_OBJECTS := $(CLIENT_SOURCES:.cpp=.o)
 UTILS_OBJECTS := $(UTILS_SOURCES:.cpp=.o)
@@ -55,14 +55,14 @@ LDFLAGS += -pthread
 
 all: $(TARGET_EXECS)
 
-fmt: $(SOURCES) $(HEADERS)
+fmt: $(SOURCES) #$(HEADERS)
 	clang-format -i $^
 
-fmt-check: $(SOURCES) $(HEADERS)
+fmt-check: $(SOURCES) #$(HEADERS)
 	clang-format -n --Werror $^
 
-src/server/server: $(SERVER_OBJECTS) $(SERVER_HEADERS) $(UTILS_OBJECTS) $(UTILS_HEADERS)
-src/client/user: $(CLIENT_OBJECTS) $(CLIENT_HEADERS) $(UTILS_OBJECTS) $(UTILS_HEADERS)
+src/server/server: $(SERVER_OBJECTS) $(UTILS_OBJECTS) #$(SERVER_HEADERS) #$(UTILS_HEADERS)
+src/client/user: $(CLIENT_OBJECTS) $(UTILS_OBJECTS) #$(CLIENT_HEADERS) #$(UTILS_HEADERS)
 
 AS: src/server/server
 	cp src/server/server AS
@@ -73,7 +73,7 @@ clean:
 	rm -f $(OBJECTS) $(TARGETS) $(TARGET_EXECS) project.zip
 
 clean-data:
-	rm -rf .data
+	rm -rf AS-DB
 
 package:
 	cp README.md readme.txt
