@@ -1,7 +1,7 @@
 #include "server_user.hpp"
 #include "../utils/protocol.hpp"
 
-int8_t isUserLoggedIn(std::string userID) {
+int8_t UserManager::isUserLoggedIn(std::string userID) {
   std::string userPath = ASDIR;
   userPath += "/" + userID;
   if (file_exists(userPath + "/" + userID + "_login.txt")) {
@@ -10,7 +10,7 @@ int8_t isUserLoggedIn(std::string userID) {
   return INVALID;
 }
 
-void login(std::string userID, std::string password) {
+void UserManager::login(std::string userID, std::string password) {
   if (validateUserID(userID) == INVALID ||
       validatePassword(password) == INVALID) {
     throw InvalidPacketException();
@@ -30,7 +30,7 @@ void login(std::string userID, std::string password) {
   }
 }
 
-void registerUser(std::string userID, std::string password) {
+void UserManager::registerUser(std::string userID, std::string password) {
 
   if (validateUserID(userID) == INVALID ||
       validatePassword(password) == INVALID) {
@@ -53,6 +53,6 @@ void registerUser(std::string userID, std::string password) {
   }
 }
 
-int8_t userExists(std::string userID) {
+int8_t UserManager::userExists(std::string userID) {
   return file_exists(ASDIR + userID + ".txt");
 }

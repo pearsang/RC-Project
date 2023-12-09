@@ -16,9 +16,9 @@ public:
   int8_t isUserLoggedIn(std::string userID);
 
   // constructor
-  UserManager();
+  UserManager() = default;
   // destructor
-  ~UserManager();
+  ~UserManager() = default;
 };
 
 class InvalidCredentialsException : public std::runtime_error {
