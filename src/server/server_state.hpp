@@ -2,6 +2,7 @@
 #define SERVER_STATE_H
 
 #include <filesystem>
+#include <iostream>
 #include <mutex>
 #include <netdb.h>
 #include <optional>

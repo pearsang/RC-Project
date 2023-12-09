@@ -5,6 +5,7 @@
 
 #include "../utils/constants.hpp"
 #include "server_state.hpp"
+#include "server_user.hpp"
 
 // UDP handlers
 

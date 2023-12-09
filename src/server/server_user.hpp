@@ -1,9 +1,10 @@
 #ifndef SERVER_USER_H
 #define SERVER_USER_H
 
+#include "../utils/constants.hpp"
+#include "../utils/utils.hpp"
+#include <stdexcept>
 #include <string>
-
-#include "server.hpp"
 
 class UserManager {
 public:
@@ -12,6 +13,12 @@ public:
   void unregisterUser(std::string userID, std::string password);
   void login(std::string userID, std::string password);
   void logout(std::string userID, std::string password);
+  int8_t isUserLoggedIn(std::string userID);
+
+  // constructor
+  UserManager();
+  // destructor
+  ~UserManager();
 };
 
 class InvalidCredentialsException : public std::runtime_error {

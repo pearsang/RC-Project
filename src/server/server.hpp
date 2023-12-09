@@ -5,6 +5,7 @@
 
 #include "../utils/constants.hpp"
 #include "../utils/utils.hpp"
+#include "handlers.hpp"
 #include "server_state.hpp"
 
 #include "../utils/protocol.hpp"
