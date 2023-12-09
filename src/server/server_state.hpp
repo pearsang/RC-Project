@@ -12,6 +12,41 @@
 #include "../utils/constants.hpp"
 #include "../utils/utils.hpp"
 
+class DebugStream {
+  bool active;
+
+public:
+  DebugStream(bool __active) : active{__active} {};
+
+  template <class T> DebugStream &operator<<(T val) {
+    if (active) {
+      std::cout << val;
+    }
+    return *this;
+  }
+
+  DebugStream &operator<<(std::ostream &(*f)(std::ostream &)) {
+    if (active) {
+      f(std::cout);
+    }
+    return *this;
+  }
+
+  DebugStream &operator<<(std::ostream &(*f)(std::ios &)) {
+    if (active) {
+      f(std::cout);
+    }
+    return *this;
+  }
+
+  DebugStream &operator<<(std::ostream &(*f)(std::ios_base &)) {
+    if (active) {
+      f(std::cout);
+    }
+    return *this;
+  }
+};
+
 class AuctionServerState;
 
 /**
@@ -39,16 +74,21 @@ typedef void (*TcpPacketHandler)(AuctionServerState &, int fd);
  * server's port, word file path, and a map of usernames to passwords.
  */
 class AuctionServerState {
-  int udpSocketFD = -1;
-  int tcpSocketFD = -1;
-  struct addrinfo *serverUdpAddr = NULL;
-  struct addrinfo *serverTcpAddr = NULL;
 
   // Maps the command string to the handler type
   std::unordered_map<std::string, UdpPacketHandler> UdpPacketHandlers;
   std::unordered_map<std::string, TcpPacketHandler> TcpPacketHandlers;
 
 public:
+  int udpSocketFD = -1;
+  int tcpSocketFD = -1;
+  struct addrinfo *serverUdpAddr = NULL;
+  struct addrinfo *serverTcpAddr = NULL;
+  DebugStream cdebug;
+
+  AuctionServerState(std::string &port, bool verbose);
+
+  ~AuctionServerState();
   /**
    * @brief Sets up a UDP socket.
    *
@@ -82,6 +122,9 @@ public:
    * @brief Registers a TCP packet handler with the server.
    */
   void registerTcpPacketHandlers();
+
+  void callUdpPacketHandler(std::string packet_id, std::stringstream &stream,
+                            SocketAddress &addr_from);
 };
 
 #endif

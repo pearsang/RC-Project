@@ -550,6 +550,14 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
   readPacketDelimiter(buffer);
 };
 
+std::stringstream ErrorUdpPacket::serialize() {
+  std::stringstream buffer;
+  buffer << ErrorUdpPacket::ID << std::endl;
+  return buffer;
+};
+
+void ErrorUdpPacket::deserialize(std::stringstream &buffer) { (void)buffer; };
+
 // TCP
 void TcpPacket::writeString(int fd, const std::string &str) {
   const char *buffer = str.c_str();

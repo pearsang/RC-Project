@@ -9,6 +9,28 @@
 #include "../utils/protocol.hpp"
 #include "handlers.hpp"
 
+AuctionServerState::AuctionServerState(std::string &port, bool verbose)
+    : cdebug{DebugStream(verbose)} {
+  this->setupUdpSocket();
+  this->setupTcpSocket();
+  this->resolveServerAddress(port);
+}
+
+AuctionServerState::~AuctionServerState() {
+  if (this->udpSocketFD != -1) {
+    close(this->udpSocketFD);
+  }
+  if (this->tcpSocketFD != -1) {
+    close(this->tcpSocketFD);
+  }
+  if (this->serverUdpAddr != NULL) {
+    freeaddrinfo(this->serverUdpAddr);
+  }
+  if (this->serverTcpAddr != NULL) {
+    freeaddrinfo(this->serverTcpAddr);
+  }
+}
+
 void AuctionServerState::resolveServerAddress(std::string &port) {
   struct addrinfo hints;
   int addr_res;
@@ -110,4 +132,16 @@ void AuctionServerState::registerTcpPacketHandlers() {
   TcpPacketHandlers.insert({CloseAuctionRequest::ID, handleCloseAuction});
   TcpPacketHandlers.insert({ShowAssetRequest::ID, handleShowAsset});
   TcpPacketHandlers.insert({BidRequest::ID, handleBid});
+}
+
+void AuctionServerState::callUdpPacketHandler(std::string packet_id,
+                                              std::stringstream &stream,
+                                              SocketAddress &source_addr) {
+  auto handler = this->UdpPacketHandlers.find(packet_id);
+  if (handler == this->UdpPacketHandlers.end()) {
+    cdebug << "Received unknown Packet ID" << std::endl;
+    throw InvalidPacketException();
+  }
+
+  handler->second(*this, stream, source_addr);
 }

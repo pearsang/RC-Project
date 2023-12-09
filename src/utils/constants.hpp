@@ -33,5 +33,7 @@
 #define ASDIR "AS-DB"
 #define USERDIR "AS-DB/USERS"
 #define AUCTIONDIR "AS-DB/AUCTIONS"
+#define EXCEPTION_RETRY_MAX_TRIALS 3
+#define PACKET_ID_LEN 3
 
 #endif

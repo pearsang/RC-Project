@@ -480,6 +480,14 @@ public:
   void deserialize(std::stringstream &buffer);
 };
 
+class ErrorUdpPacket : public UdpPacket {
+public:
+  static constexpr const char *ID = "ERR";
+
+  std::stringstream serialize();
+  void deserialize(std::stringstream &buffer);
+};
+
 /**
  * @class TcpPacket
  *
