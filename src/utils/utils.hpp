@@ -118,7 +118,6 @@ void create_new_directory(const std::string &path);
  */
 void create_new_file(const std::string &path);
 
-
 /**
  * @brief Deletes a file with the given path.
  *
@@ -127,8 +126,6 @@ void create_new_file(const std::string &path);
  */
 void delete_file(const std::string &path);
 
-
-
 /**
  * @brief Deletes a directory with the given path.
  *
@@ -136,8 +133,6 @@ void delete_file(const std::string &path);
  * be deleted.
  */
 void delete_directory(const std::string &path);
-
-
 
 /**
  * @brief Checks if a directory exists.
