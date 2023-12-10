@@ -118,6 +118,15 @@ void create_new_directory(const std::string &path);
  */
 void create_new_file(const std::string &path);
 
+
+/**
+ * @brief Deletes a file with the given path.
+ *
+ * @param path A reference to a string containing the path of the file to be
+ * deleted.
+ */
+void delete_file(const std::string &path);
+
 /**
  * @brief Checks if a directory exists.
  *

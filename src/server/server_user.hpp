@@ -15,6 +15,7 @@ public:
   void login(std::string userID, std::string password);
   void logout(std::string userID, std::string password);
   int8_t isUserLoggedIn(std::string userID);
+  std::string getUserPassword(std::string userID);
 
   // constructor
   UserManager() = default;
