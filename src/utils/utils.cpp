@@ -99,30 +99,59 @@ void create_new_directory(const std::string &path) {
 }
 
 void create_new_file(const std::string &path) {
-  if (!std::filesystem::exists(path)) {
-    std::ofstream ofs(path);
-    ofs.close();
+  try {
+    if (!std::filesystem::exists(path)) {
+      std::ofstream ofs(path);
+      ofs.close();
+    }
+  } catch (...) {
+    throw std::exception();
   }
+
   return;
 }
 
 void delete_file(const std::string &path) {
-  if (std::filesystem::exists(path)) {
-    std::filesystem::remove(path);
+  try {
+    if (std::filesystem::exists(path)) {
+      std::filesystem::remove(path);
+    }
+  } catch (...) {
+    throw std::exception();
   }
   return;
 }
 
+void delete_directory(const std::string &path) {
+  try {
+    if (std::filesystem::exists(path)) {
+      std::filesystem::remove_all(path);
+    }
+  } catch (...) {
+    throw std::exception();
+  }
+
+  return;
+}
+
 int8_t directory_exists(const std::string &path) {
-  if (!std::filesystem::exists(path)) {
-    return INVALID;
+  try {
+    if (!std::filesystem::exists(path)) {
+      return INVALID;
+    }
+  } catch (...) {
+    throw std::exception();
   }
   return 0;
 }
 
 int8_t file_exists(const std::string &path) {
-  if (!std::filesystem::exists(path)) {
-    return INVALID;
+  try {
+    if (!std::filesystem::exists(path)) {
+      return INVALID;
+    }
+  } catch (...) {
+    throw std::exception();
   }
   return 0;
 }

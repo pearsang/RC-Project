@@ -81,8 +81,32 @@ void UserManager::logout(std::string userID, std::string password) {
     throw InvalidCredentialsException();
   }
 
-  std::string loginPath = USERDIR;
-  loginPath += "/" + userID;
-  loginPath += "/" + userID + "_login.txt";
-  delete_file(loginPath);
+  try {
+    std::string loginPath = USERDIR;
+    loginPath += "/" + userID;
+    loginPath += "/" + userID + "_login.txt";
+    delete_file(loginPath);
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+void UserManager::unregisterUser(std::string userID, std::string password) {
+
+  if (validateUserID(userID) == INVALID ||
+      validatePassword(password) == INVALID) {
+    throw InvalidPacketException();
+  }
+
+  if (password != getUserPassword(userID)) {
+    throw InvalidCredentialsException();
+  }
+
+  try {
+    std::string userPath = USERDIR;
+    userPath += "/" + userID;
+    delete_directory(userPath);
+  } catch (std::exception &e) {
+    throw;
+  }
 }

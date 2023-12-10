@@ -97,11 +97,51 @@ void handleLogout(AuctionServerState &state, std::stringstream &buf,
 
 void handleUnregister(AuctionServerState &state, std::stringstream &buf,
                       SocketAddress &addressFrom) {
-  std::cout << "Handling unregister request" << std::endl;
+  UnregisterRequest request;
+  UnregisterResponse response;
 
-  (void)state;
-  (void)buf;
-  (void)addressFrom;
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[Unregister] User " << request.userID
+                 << " requested to unregister with password "
+                 << request.password << std::endl;
+    if (state.usersManager.userExists(request.userID) == 0) {
+      if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
+        state.usersManager.logout(request.userID, request.password);
+        state.cdebug << "[Unregister] User " << request.userID
+                     << " successfully logged out" << std::endl;
+        state.usersManager.unregisterUser(request.userID, request.password);
+        response.status = UnregisterResponse::OK;
+        state.cdebug << "[Unregister] User " << request.userID
+                     << " successfully unregistered" << std::endl;
+      } else {
+        response.status = UnregisterResponse::NOK;
+        state.cdebug << "[Unregister] User " << request.userID
+                     << " is not logged in" << std::endl;
+      }
+    } else {
+      response.status = UnregisterResponse::UNR;
+      state.cdebug << "[Unregister] User " << request.userID
+                   << " is not registered" << std::endl;
+    }
+  } catch (InvalidCredentialsException &e) {
+    state.cdebug << "User " << request.userID
+                 << " tried to unregister with invalid "
+                    "credentials"
+                 << std::endl;
+    response.status = UnregisterResponse::ERR;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[Unregister] Invalid packet received" << std::endl;
+    response.status = UnregisterResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[Unregister] There was an unhandled exception that prevented "
+                 "the user from unregistering"
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
