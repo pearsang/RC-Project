@@ -37,7 +37,7 @@ public:
   AuctionServerState &state;
 
   TcpWorkerPool(AuctionServerState &_state);
-  void delegateConnection(int fd);
+  void giveConnection(int fd);
   void freeWorker(uint32_t workerID);
 };
 

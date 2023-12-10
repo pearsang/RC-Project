@@ -5,11 +5,8 @@
 #include <csignal>
 
 #include "../utils/constants.hpp"
-#include "../utils/utils.hpp"
-#include "handlers.hpp"
 #include "server_state.hpp"
-
-#include "../utils/protocol.hpp"
+#include "tcp_worker_pool.hpp"
 
 class ServerConfig {
 public:
@@ -27,8 +24,16 @@ public:
  */
 void wait_for_udp_packet(AuctionServerState &state);
 
+void tcpMainThread(AuctionServerState &state);
+
 void handle_packet(AuctionServerState &state, std::stringstream &buffer,
                    SocketAddress &source_addr);
 
+void handle_packet(std::stringstream &buffer, SocketAddress &source_addr,
+                   AuctionServerState &state);
+
+void wait_for_tcp_packet(AuctionServerState &state, TcpWorkerPool &pool);
+
 void setupDB();
+
 #endif

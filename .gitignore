@@ -2,3 +2,6 @@
 .vscode
 cli
 AS-DB
+*.o
+AS
+user

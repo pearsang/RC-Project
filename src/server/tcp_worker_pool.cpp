@@ -48,8 +48,8 @@ void Worker::execute() {
                 << std::endl;
     }
 
-    pool->state.cdebug << "[Worker number" << workerID
-                       << "] Closing connection..." << std::endl;
+    pool->state.cdebug << "Worker number" << workerID
+                       << " Closing connection..." << std::endl;
     close(tcpSocketFD);
     to_execute = false;
     pool->freeWorker(workerID);
@@ -64,7 +64,7 @@ TcpWorkerPool::TcpWorkerPool(AuctionServerState &_state) : state{_state} {
   }
 }
 
-void TcpWorkerPool::delegateConnection(int fd) {
+void TcpWorkerPool::giveConnection(int fd) {
   std::scoped_lock<std::mutex> slock(busy_threads_lock);
 
   for (size_t i = 0; i < POOL_SIZE; ++i) {

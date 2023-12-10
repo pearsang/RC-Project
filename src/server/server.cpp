@@ -7,6 +7,9 @@
 #include <string>
 #include <thread>
 
+#include "../utils/protocol.hpp"
+#include "../utils/utils.hpp"
+
 // flag to indicate whether the server is terminating
 extern bool is_exiting;
 
@@ -29,6 +32,7 @@ int main(int argc, char *argv[]) {
 
     state.cdebug << "Server is running on verbose mode" << std::endl;
 
+    std::thread tcp_thread(tcpMainThread, std::ref(state));
     uint32_t ex_trial = 0;
     while (!is_exiting) {
       try {
@@ -53,6 +57,8 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "Shutting down UDP server..." << std::endl;
+
+    tcp_thread.join();
 
   } catch (std::exception &e) {
     std::cerr << "Encountered a fatal error while running the "
@@ -167,5 +173,80 @@ void handle_packet(AuctionServerState &state, std::stringstream &buffer,
     std::cerr << "Failed to handle UDP packet: " << e.what() << std::endl;
   } catch (...) {
     std::cerr << "Failed to handle UDP packet: unknown" << std::endl;
+  }
+}
+
+void tcpMainThread(AuctionServerState &state) {
+  TcpWorkerPool pool(state);
+
+  if (listen(state.tcpSocketFD, TCP_MAX_CONNECTIONS) < 0) {
+    perror("Error while executing listen");
+    std::cerr << "TCP server is being shutdown..." << std::endl;
+    is_exiting = true;
+    return;
+  }
+
+  uint32_t ex_trial = 0;
+  while (!is_exiting) {
+    try {
+      wait_for_tcp_packet(state, pool);
+      ex_trial = 0;
+    } catch (std::exception &e) {
+      std::cerr << "Encountered fatal error while running the "
+                   "application. Retrying..."
+                << std::endl
+                << e.what() << std::endl;
+      ex_trial++;
+    } catch (...) {
+      std::cerr << "Encountered fatal error while running the "
+                   "application. Retrying..."
+                << std::endl;
+      ex_trial++;
+    }
+    if (ex_trial >= EXCEPTION_RETRY_MAX_TRIALS) {
+      std::cerr << "Max attempts, shutting down..." << std::endl;
+      is_exiting = true;
+    }
+  }
+
+  std::cout << "Shutting down TCP server..." << std::endl;
+}
+
+void wait_for_tcp_packet(AuctionServerState &state, TcpWorkerPool &pool) {
+  SocketAddress source_addr;
+
+  source_addr.size = sizeof(source_addr.addr);
+  int connection_fd =
+      accept(state.tcpSocketFD, (struct sockaddr *)&source_addr.addr,
+             &source_addr.size);
+  if (is_exiting) {
+    return;
+  }
+  if (connection_fd < 0) {
+    if (errno == EAGAIN) { // timeout, just go around and keep listening
+      return;
+    }
+    throw FatalError("[ERROR] Failed to accept a connection", errno);
+  }
+
+  struct timeval read_timeout;
+  read_timeout.tv_sec = TCP_READ_TIMEOUT_SECONDS;
+  read_timeout.tv_usec = 0;
+  if (setsockopt(connection_fd, SOL_SOCKET, SO_RCVTIMEO, &read_timeout,
+                 sizeof(read_timeout)) < 0) {
+    throw FatalError("Failed to set TCP read timeout socket option", errno);
+  }
+
+  char addr_str[INET_ADDRSTRLEN + 1] = {0};
+  inet_ntop(AF_INET, &source_addr.addr.sin_addr, addr_str, INET_ADDRSTRLEN);
+  std::cout << "Receiving incoming TCP connection from " << addr_str << ":"
+            << ntohs(source_addr.addr.sin_port) << std::endl;
+
+  try {
+    pool.giveConnection(connection_fd);
+  } catch (std::exception &e) {
+    close(connection_fd);
+    throw FatalError(std::string("Failed to give connection to worker: ") +
+                     e.what() + "\nClosing connection.");
   }
 }

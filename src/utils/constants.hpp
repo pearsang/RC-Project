@@ -38,5 +38,6 @@
 #define PACKET_ID_LEN 3
 
 #define POOL_SIZE 50
+#define TCP_MAX_CONNECTIONS 5
 
 #endif
