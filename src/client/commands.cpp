@@ -127,6 +127,9 @@ void LogoutCommand::handleCommand(std::string args, UserState &state) {
   logoutRequest.userID = state.getUserID();
   logoutRequest.password = state.getPassword();
 
+  logoutRequest.userID = "192837";
+  logoutRequest.password = "eusogayy";
+
   LogoutResponse logoutResponse;
   state.sendUdpPacketAndWaitForReply(logoutRequest, logoutResponse);
 

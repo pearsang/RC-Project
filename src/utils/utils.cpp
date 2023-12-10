@@ -92,7 +92,6 @@ std::vector<std::string> parse_args(std::string args) {
 
 void create_new_directory(const std::string &path) {
   if (!std::filesystem::exists(path)) {
-    std::cout << "Creating new directory: " << path << std::endl;
     std::filesystem::create_directory(path);
     return;
   }
@@ -101,9 +100,15 @@ void create_new_directory(const std::string &path) {
 
 void create_new_file(const std::string &path) {
   if (!std::filesystem::exists(path)) {
-    std::cout << "Creating new file: " << path << std::endl;
     std::ofstream ofs(path);
     ofs.close();
+  }
+  return;
+}
+
+void delete_file(const std::string &path) {
+  if (std::filesystem::exists(path)) {
+    std::filesystem::remove(path);
   }
   return;
 }

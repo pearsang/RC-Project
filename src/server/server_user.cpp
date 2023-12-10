@@ -10,6 +10,18 @@ int8_t UserManager::isUserLoggedIn(std::string userID) {
   return INVALID;
 }
 
+std::string UserManager::getUserPassword(std::string userID) {
+  std::string passwordPath = USERDIR;
+  std::string validPassword;
+  try {
+    passwordPath += "/" + userID + "/" + userID + "_pass.txt";
+    read_from_file(passwordPath, validPassword);
+  } catch (...) {
+    throw std::exception();
+  }
+  return validPassword;
+}
+
 void UserManager::login(std::string userID, std::string password) {
   if (validateUserID(userID) == INVALID ||
       validatePassword(password) == INVALID) {
@@ -17,11 +29,7 @@ void UserManager::login(std::string userID, std::string password) {
   }
 
   try {
-    std::string passwordPath = USERDIR;
-    passwordPath += "/" + userID + "/" + userID + "_pass.txt";
-    std::string validPassword;
-    read_from_file(passwordPath, validPassword);
-    if (password != validPassword) {
+    if (password != getUserPassword(userID)) {
       throw InvalidCredentialsException();
     }
     std::string loginPath = USERDIR;
@@ -51,7 +59,6 @@ void UserManager::registerUser(std::string userID, std::string password) {
     write_to_file(passwordPath, password);
     login(userID, password);
   } catch (std::exception &e) {
-    printf("Error Zé: %s\n", e.what());
     throw;
   }
 }
@@ -61,4 +68,21 @@ int8_t UserManager::userExists(std::string userID) {
   userPath += "/" + userID;
   userPath += "/" + userID + "_pass.txt";
   return file_exists(userPath);
+}
+
+void UserManager::logout(std::string userID, std::string password) {
+
+  if (validateUserID(userID) == INVALID ||
+      validatePassword(password) == INVALID) {
+    throw InvalidPacketException();
+  }
+
+  if (password != getUserPassword(userID)) {
+    throw InvalidCredentialsException();
+  }
+
+  std::string loginPath = USERDIR;
+  loginPath += "/" + userID;
+  loginPath += "/" + userID + "_login.txt";
+  delete_file(loginPath);
 }
