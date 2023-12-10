@@ -128,6 +128,8 @@ public:
   void callUdpPacketHandler(std::string packet_id, std::stringstream &stream,
                             SocketAddress &addr_from);
 
+  void callTcpPacketHandler(std::string packet_id, int fd);
+
   uint8_t existsDB();
 };
 

@@ -37,4 +37,6 @@
 #define EXCEPTION_RETRY_MAX_TRIALS 3
 #define PACKET_ID_LEN 3
 
+#define POOL_SIZE 50
+
 #endif

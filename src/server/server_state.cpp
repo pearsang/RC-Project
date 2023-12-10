@@ -147,6 +147,16 @@ void AuctionServerState::callUdpPacketHandler(std::string packet_id,
   handler->second(*this, stream, source_addr);
 }
 
+void AuctionServerState::callTcpPacketHandler(std::string packet_id, int fd) {
+  auto handler = this->TcpPacketHandlers.find(packet_id);
+  if (handler == this->TcpPacketHandlers.end()) {
+    cdebug << "Received unknown Packet ID" << std::endl;
+    throw InvalidPacketException();
+  }
+
+  handler->second(*this, fd);
+}
+
 int8_t existsDB() {
   if (directory_exists(ASDIR) == INVALID ||
       directory_exists(USERDIR) == INVALID ||

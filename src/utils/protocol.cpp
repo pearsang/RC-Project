@@ -641,6 +641,13 @@ uint32_t TcpPacket::readInt(const int fd) {
   }
 }
 
+void ErrorTcpPacket::send(int fd) {
+  writeString(fd, ErrorTcpPacket::ID);
+  writeString(fd, "\n");
+}
+
+void ErrorTcpPacket::receive(int fd) { (void)fd; }
+
 void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
                                   const size_t file_size) {
   std::ofstream file(file_name);

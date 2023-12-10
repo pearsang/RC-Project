@@ -48,7 +48,6 @@ CXXFLAGS += -Wswitch-enum
 CXXFLAGS += -Wundef
 CXXFLAGS += -Wunreachable-code
 CXXFLAGS += -Wunused
-CXXFLAGS += -Wclang-format-violations
 LDFLAGS += -pthread
 
 
