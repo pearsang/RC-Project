@@ -796,6 +796,14 @@ void OpenAuctionRequest::receive(int fd) {
   assetFilename = readString(fd);
   readSpace(fd);
   assetSize = readInt(fd);
+
+  // convert assetSize to str
+  std::stringstream ss;
+  ss << assetSize;
+  std::string assetSizeStr = ss.str();
+  if (assetSizeStr.length() > FILESIZE_MAX) {
+    throw InvalidPacketException();
+  }
   readSpace(fd);
   readAndSaveToFile(fd, assetFilename, assetSize);
   readPacketDelimiter(fd);

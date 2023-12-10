@@ -181,10 +181,43 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
 }
 
 void handleOpenAuction(AuctionServerState &state, int fd) {
-  std::cout << "Handling open auction request" << std::endl;
+  OpenAuctionRequest request;
+  OpenAuctionResponse response;
+  try {
+    request.receive(fd);
+    state.cdebug << "[OpenAuction] User " << request.userID
+                 << " requested to open an auction" << std::endl;
 
-  (void)state;
-  (void)fd;
+    if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
+      // state.auctionsManager.openAuction(
+      //     request.userID, request.password, request.auctionName,
+      //  request.startValue, request.assetFilename, request.assetSize);
+      // esponse.status = OpenAuctionResponse::OK;
+      state.cdebug << "[OpenAuction] Auction "
+                   << " successfully opened" << std::endl;
+    } else {
+      response.status = OpenAuctionResponse::NOK;
+      state.cdebug << "[OpenAuction] User " << request.userID
+                   << " is not logged in" << std::endl;
+    }
+  } catch (InvalidCredentialsException &e) {
+    state.cdebug << "User " << request.userID
+                 << " tried to open an auction with invalid "
+                    "credentials"
+                 << std::endl;
+    response.status = OpenAuctionResponse::ERR;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[OpenAuction] Invalid packet received" << std::endl;
+    response.status = OpenAuctionResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr
+        << "[OpenAuction] There was an unhandled exception that prevented "
+           "the user from opening an auction"
+        << e.what() << std::endl;
+    return;
+  }
+
+  response.send(fd);
 }
 
 void handleCloseAuction(AuctionServerState &state, int fd) {

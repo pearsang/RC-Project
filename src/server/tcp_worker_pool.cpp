@@ -56,7 +56,8 @@ void Worker::execute() {
   }
 }
 
-TcpWorkerPool::TcpWorkerPool(AuctionServerState &_state) : state{_state} {
+TcpWorkerPool::TcpWorkerPool(AuctionServerState &auctionState)
+    : state{auctionState} {
   for (uint32_t i = 0; i < POOL_SIZE; ++i) {
     busy_threads[i] = false;
     workers[i].pool = this;

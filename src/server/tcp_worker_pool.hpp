@@ -36,7 +36,7 @@ class TcpWorkerPool {
 public:
   AuctionServerState &state;
 
-  TcpWorkerPool(AuctionServerState &_state);
+  TcpWorkerPool(AuctionServerState &auctionState);
   void giveConnection(int fd);
   void freeWorker(uint32_t workerID);
 };
