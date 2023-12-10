@@ -103,9 +103,15 @@ void UserManager::unregisterUser(std::string userID, std::string password) {
   }
 
   try {
+    std::string loginPath, passwordPath;
     std::string userPath = USERDIR;
     userPath += "/" + userID;
-    delete_directory(userPath);
+    loginPath = userPath;
+    passwordPath = userPath;
+    loginPath += "/" + userID + "_login.txt";
+    passwordPath += "/" + userID + "_pass.txt";
+    delete_file(loginPath);
+    delete_file(passwordPath);
   } catch (std::exception &e) {
     throw;
   }

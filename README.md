@@ -18,4 +18,3 @@ In order to run the client you must run:
 
 This project was developed as an assignment of the Computer Networks course.
 
-
