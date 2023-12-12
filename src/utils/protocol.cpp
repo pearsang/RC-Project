@@ -786,7 +786,9 @@ void OpenAuctionRequest::receive(int fd) {
   userID = readString(fd);
   readSpace(fd);
   password = readString(fd);
-  if (password != getUserPassword(userID)) {
+
+  // must confirm the user password is correct
+  if (this->password != getUserPassword(userID)) {
     throw InvalidPacketException();
   }
 
@@ -801,13 +803,13 @@ void OpenAuctionRequest::receive(int fd) {
   readSpace(fd);
   assetSize = readInt(fd);
 
-  // convert assetSize to str
-  std::stringstream ss;
-  ss << assetSize;
-  std::string assetSizeStr = ss.str();
-  if (assetSizeStr.length() > FILESIZE_MAX) {
+  try {
+    validateOpenAuctionArgs(userID, password, auctionName, startValue,
+                            timeActive, assetFilename, assetSize);
+  } catch (...) {
     throw InvalidPacketException();
   }
+
   readSpace(fd);
   readAndSaveToFile(fd, assetFilename, assetSize);
   readPacketDelimiter(fd);

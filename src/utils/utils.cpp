@@ -306,3 +306,14 @@ std::string getStartFullTime() {
   std::string timeActiveStr = std::to_string(currentTimeSeconds);
   return timeActiveStr;
 }
+
+int8_t validateAssetFileSize(uint32_t assetSize) {
+  // convert assetSize to str
+  std::stringstream ss;
+  ss << assetSize;
+  std::string assetSizeStr = ss.str();
+  if (assetSizeStr.length() > FILESIZE_MAX) {
+    return INVALID;
+  }
+  return 0;
+}

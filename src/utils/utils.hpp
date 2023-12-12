@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "constants.hpp"
+#include "protocol.hpp"
 
 /**
  * @class FatalError
@@ -228,10 +229,10 @@ int8_t validateAuctionName(std::string assetName);
 
 /**
  *
- * @brief Validate the file size of an asset.
+ * @brief Validate the file size of an asset's image.
  *
  */
-int8_t validateAssetFileSize(std::string ass);
+int8_t validateAssetFileSize(uint32_t assetSize);
 
 /**
  * @brief Validate a file based on its size.
