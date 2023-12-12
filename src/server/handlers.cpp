@@ -189,14 +189,20 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
                  << " requested to open an auction" << std::endl;
 
     if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
-      // state.auctionsManager.openAuction(
-      //     request.userID, request.password, request.auctionName,
-      //  request.startValue, request.assetFilename, request.assetSize);
-      // esponse.status = OpenAuctionResponse::OK;
-      state.cdebug << "[OpenAuction] Auction "
-                   << " successfully opened" << std::endl;
+      uint32_t auctionID = state.auctionManager.openAuction(
+          request.userID, request.auctionName, request.startValue,
+          request.timeActive, request.assetFilename);
+      if (auctionID == (uint32_t)INVALID) {
+        response.status = OpenAuctionResponse::NOK;
+        state.cdebug << "[OpenAuction] Auction "
+                     << " failed to open" << std::endl;
+      } else {
+        response.status = OpenAuctionResponse::OK;
+        state.cdebug << "[OpenAuction] Auction "
+                     << " successfully opened" << std::endl;
+      }
     } else {
-      response.status = OpenAuctionResponse::NOK;
+      response.status = OpenAuctionResponse::NLG;
       state.cdebug << "[OpenAuction] User " << request.userID
                    << " is not logged in" << std::endl;
     }

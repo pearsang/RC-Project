@@ -786,6 +786,10 @@ void OpenAuctionRequest::receive(int fd) {
   userID = readString(fd);
   readSpace(fd);
   password = readString(fd);
+  if (password != getUserPassword(userID)) {
+    throw InvalidPacketException();
+  }
+
   readSpace(fd);
   auctionName = readString(fd);
   readSpace(fd);
@@ -812,6 +816,7 @@ void OpenAuctionRequest::receive(int fd) {
 void OpenAuctionResponse::send(int fd) {
   std::stringstream stream;
   stream << OpenAuctionResponse::ID << " ";
+  std::cout << "status: " << status << std::endl;
 
   if (status == OK) {
     stream << "OK";

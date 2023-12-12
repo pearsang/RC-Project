@@ -238,4 +238,10 @@ int8_t validateAssetFileSize(std::string ass);
  */
 int8_t validateFileSize(std::string file_path);
 
+std::string getUserPassword(std::string userID);
+
+std::string getCurrentTimeFormated();
+
+std::string getStartFullTime();
+
 #endif

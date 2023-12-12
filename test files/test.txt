@@ -3,3 +3,4 @@ bid 638 20000
 login 192837 eusofixe
 logout
 exit
+open pikadeaço Picasso_01.jpg 100 100

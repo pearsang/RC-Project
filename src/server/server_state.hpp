@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "server_auction.hpp"
 #include "server_user.hpp"
 
 class DebugStream {
@@ -87,6 +88,7 @@ public:
   struct addrinfo *serverTcpAddr = NULL;
   DebugStream cdebug;
   UserManager usersManager;
+  AuctionManager auctionManager;
 
   AuctionServerState(std::string &port, bool verbose);
 

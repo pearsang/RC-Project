@@ -271,3 +271,38 @@ int8_t validateFileSize(std::string file_path) {
 
   return 0;
 }
+
+std::string getUserPassword(std::string userID) {
+  std::string passwordPath = USERDIR;
+  std::string validPassword;
+  try {
+    passwordPath += "/" + userID + "/" + userID + "_pass.txt";
+    read_from_file(passwordPath, validPassword);
+  } catch (...) {
+    throw std::exception();
+  }
+  return validPassword;
+}
+
+std::string getCurrentTimeFormated() {
+  // Get the current time point
+  auto now = std::chrono::system_clock::now();
+
+  // Convert the time point to a time_t object
+  std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+  // Convert the time_t object to a tm struct
+  std::tm *timeInfo = std::localtime(&currentTime);
+
+  // Format the date and time
+  char buffer[20];
+  std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeInfo);
+
+  return std::string(buffer);
+}
+
+std::string getStartFullTime() {
+  std::time_t currentTimeSeconds = std::time(nullptr);
+  std::string timeActiveStr = std::to_string(currentTimeSeconds);
+  return timeActiveStr;
+}
