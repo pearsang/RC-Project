@@ -1,4 +1,3 @@
-#pragma once
 #ifndef SERVER_STATE_H
 #define SERVER_STATE_H
 

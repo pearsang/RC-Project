@@ -1,4 +1,3 @@
-#pragma once
 #ifndef USER_STATE_H
 #define USER_STATE_H
 
