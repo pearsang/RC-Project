@@ -1,4 +1,5 @@
 #include "server_auction.hpp"
+#include "../utils/protocol.hpp"
 
 uint32_t AuctionManager::openAuction(std::string userID,
                                      std::string auctionName,
@@ -99,6 +100,53 @@ std::string AuctionManager::getNextAuctionID() {
     write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
 
     return nextAuctionID;
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+std::vector<std::pair<std::string, uint8_t>>
+AuctionManager::listUserAuctions(std::string userID) {
+
+  std::vector<std::pair<std::string, uint8_t>> auctions;
+  std::vector<std::pair<std::string, uint8_t>> userAuctions;
+
+  try {
+    AuctionManager auctionManager;
+
+    auctions = auctionManager.listAuctions();
+    std::cout << "LALALALLALAL" << std::endl;
+    std::cout << "auctions size: " << auctions.size() << std::endl;
+    for (auto auction : auctions) {
+      std::string auctionInfo = auctionManager.getAuctionInfo(auction.first);
+      std::string auctionOwner = auctionInfo.substr(0, auctionInfo.find(" "));
+      std::cout << "auction owner: " << auctionOwner << std::endl;
+      if (auctionOwner == userID) {
+        std::cout << "AUCTION MATCH" << std::endl;
+        userAuctions.push_back(auction);
+      }
+    }
+
+    if (userAuctions.size() == 0) {
+      throw NoAuctionsException();
+    }
+    return userAuctions;
+
+  } catch (NoAuctionsException &e) {
+    throw;
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+std::string AuctionManager::getAuctionInfo(std::string auctionID) {
+  try {
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
+    std::string auctionInfo;
+    read_from_file(start, auctionInfo);
+    return auctionInfo;
   } catch (std::exception &e) {
     throw;
   }

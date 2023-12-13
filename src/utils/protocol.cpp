@@ -293,7 +293,7 @@ std::stringstream ListUserAuctionsResponse::serialize() {
   if (status == OK) {
     buffer << "OK";
     for (auto auction : auctions) {
-      buffer << " " << auction.first << " " << auction.second;
+      buffer << " " << auction.first << " " << std::to_string(auction.second);
     }
   } else if (status == NOK) {
     buffer << "NOK";

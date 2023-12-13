@@ -4,6 +4,8 @@
 #include "../utils/constants.hpp"
 #include "../utils/protocol.hpp"
 #include "../utils/utils.hpp"
+#include "server_user.hpp"
+
 #include <random>
 
 #include <string>
@@ -17,6 +19,11 @@ public:
   std::string getNextAuctionID();
 
   std::vector<std::pair<std::string, uint8_t>> listAuctions();
+
+  std::vector<std::pair<std::string, uint8_t>>
+  listUserAuctions(std::string userID);
+
+  std::string getAuctionInfo(std::string auctionID);
 
   // constructor
   AuctionManager() = default;

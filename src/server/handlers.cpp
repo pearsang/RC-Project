@@ -151,6 +151,41 @@ void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
   (void)state;
   (void)buf;
   (void)addressFrom;
+
+  ListUserAuctionsRequest request;
+  ListUserAuctionsResponse response;
+
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[ListUserAuctions] User "
+                 << " requested to list auctions" << std::endl;
+
+    if (state.usersManager.isUserLoggedIn(request.userID) != INVALID) {
+      response.auctions = state.auctionManager.listUserAuctions(request.userID);
+      response.status = ListUserAuctionsResponse::OK;
+      state.cdebug << "[ListUserAuctions] Auctions listed successfully"
+                   << std::endl;
+    } else {
+      response.status = ListUserAuctionsResponse::NLG;
+      state.cdebug << "[ListUserAuctions] User " << request.userID
+                   << " is not logged in" << std::endl;
+    }
+
+  } catch (NoAuctionsException &e) {
+    state.cdebug << "[ListUserAuctions] No auctions to list" << std::endl;
+    response.status = ListUserAuctionsResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[ListUserAuctions] Invalid packet received" << std::endl;
+    response.status = ListUserAuctionsResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[ListUserAuctions] There was an unhandled exception that "
+                 "prevented the user from listing auctions"
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
@@ -165,9 +200,6 @@ void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
 void handleListAuctions(AuctionServerState &state, std::stringstream &buf,
                         SocketAddress &addressFrom) {
   std::cout << "Handling list auctions request" << std::endl;
-
-  (void)buf;
-  (void)addressFrom;
 
   ListAuctionsRequest request;
   ListAuctionsResponse response;
