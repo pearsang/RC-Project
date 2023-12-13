@@ -15,9 +15,9 @@
 #include <tuple>
 #include <vector>
 
+#include "../server/server_auction.hpp"
 #include "constants.hpp"
 #include "utils.hpp"
-#include "../server/server_auction.hpp"
 
 /**
  * @class UnexpectedPacketException

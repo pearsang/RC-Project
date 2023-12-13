@@ -317,5 +317,3 @@ int8_t validateAssetFileSize(uint32_t assetSize) {
   }
   return 0;
 }
-
-
