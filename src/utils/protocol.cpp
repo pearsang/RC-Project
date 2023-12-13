@@ -417,10 +417,8 @@ std::stringstream ListAuctionsResponse::serialize() {
       buffer << " " << auction.first << " " << std::to_string(auction.second);
     }
   } else if (status == NOK) {
-    std::cout << "NOK" << std::endl;
     buffer << "NOK";
   } else if (status == ERR) {
-    std::cout << "ERR" << std::endl;
     buffer << "ERR";
   } else {
     std::cout << "InvalidPacketException" << std::endl;
