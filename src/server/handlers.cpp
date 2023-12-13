@@ -192,6 +192,7 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
     // ------ if yes, open auction
 
     if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
+
       uint32_t auctionID = state.auctionManager.openAuction(
           request.userID, request.auctionName, request.startValue,
           request.timeActive, request.assetFilename);

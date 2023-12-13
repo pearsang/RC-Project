@@ -15,6 +15,7 @@ public:
   uint32_t openAuction(std::string userID, std::string auctionName,
                        uint32_t startValue, uint32_t timeActive,
                        std::string assetFilename);
+  std::string getnextAuctionID();
 
   // constructor
   AuctionManager() = default;

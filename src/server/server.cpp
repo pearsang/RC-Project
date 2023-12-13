@@ -117,9 +117,9 @@ void setupDB() {
   create_new_directory(AUCTIONDIR);
 
   std::string nextAuctionFile = AUCTIONDIR;
-  nextAuctionFile += "/next_aution.txt";
+  nextAuctionFile += "/next_auction.txt";
   create_new_file(nextAuctionFile);
-  write_to_file(nextAuctionFile, "1");
+  write_to_file(nextAuctionFile, "1\n");
 };
 
 void wait_for_udp_packet(AuctionServerState &state) {

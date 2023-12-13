@@ -7,16 +7,17 @@ uint32_t AuctionManager::openAuction(std::string userID,
   // validations of arguments already performed
 
   try {
-    std::random_device rd;
+    /* std::random_device rd;
     std::mt19937 gen(rd());
 
     // Define the distribution for integers between 0 and 999
     std::uniform_int_distribution<int> distribution(0, 999);
 
     // Generate a random integer
-    int randomInteger = distribution(gen);
-    // to sr
-    std::string auctionID = std::to_string(randomInteger);
+    int randomInteger = distribution(gen); */
+
+    std::string auctionID = getnextAuctionID();
+
     std::cout << "Creating auction for user " << userID << std::endl;
     std::string auctionPath = AUCTIONDIR;
     auctionPath += "/" + auctionID;
@@ -33,5 +34,23 @@ uint32_t AuctionManager::openAuction(std::string userID,
     return (uint32_t)std::stoi(auctionID);
   } catch (std::exception &e) {
     return 1;
+  }
+}
+
+std::string AuctionManager::getnextAuctionID() {
+  try {
+    std::string nextAuctionID;
+    std::string nextAuctionPath = AUCTIONDIR;
+    nextAuctionPath += "/next_auction.txt";
+    read_from_file(nextAuctionPath, nextAuctionID);
+
+    // update next auction id
+    int nextAuctionID_int = std::stoi(nextAuctionID);
+    nextAuctionID_int++;
+    write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
+
+    return nextAuctionID;
+  } catch (std::exception &e) {
+    throw;
   }
 }
