@@ -54,3 +54,19 @@ std::string AuctionManager::getnextAuctionID() {
     throw;
   }
 }
+
+void validateOpenAuctionArgs(std::string userID, std::string password,
+                             std::string auctionName, uint32_t startValue,
+                             uint32_t timeActive, std::string assetFilename,
+                             uint32_t assetSize) {
+  if (validateUserID(userID) == INVALID ||
+      validatePassword(password) == INVALID ||
+      validateAuctionName(auctionName) == INVALID ||
+      validateAssetFilename(assetFilename) == INVALID ||
+      validateStartValue(std::to_string(startValue)) == INVALID ||
+      validateAuctionDuration(std::to_string(timeActive)) == INVALID ||
+      validateAssetFileSize(assetSize) == INVALID) {
+    throw InvalidPacketException();
+  }
+  return;
+}
