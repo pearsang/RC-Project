@@ -85,3 +85,21 @@ std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
 
   return auctions;
 }
+
+std::string AuctionManager::getNextAuctionID() {
+  try {
+    std::string nextAuctionID;
+    std::string nextAuctionPath = AUCTIONDIR;
+    nextAuctionPath += "/next_auction.txt";
+    read_from_file(nextAuctionPath, nextAuctionID);
+
+    // update next auction id
+    int nextAuctionID_int = std::stoi(nextAuctionID);
+    nextAuctionID_int++;
+    write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
+
+    return nextAuctionID;
+  } catch (std::exception &e) {
+    throw;
+  }
+}

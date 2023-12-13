@@ -14,6 +14,8 @@ public:
                        uint32_t startValue, uint32_t timeActive,
                        std::string assetFilename);
 
+  std::string getNextAuctionID();
+
   std::vector<std::pair<std::string, uint8_t>> listAuctions();
 
   // constructor
