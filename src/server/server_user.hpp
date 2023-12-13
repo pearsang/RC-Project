@@ -28,4 +28,5 @@ public:
   InvalidCredentialsException()
       : std::runtime_error("The password does not match that userID's") {}
 };
+
 #endif

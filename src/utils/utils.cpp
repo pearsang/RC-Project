@@ -306,3 +306,16 @@ std::string getStartFullTime() {
   std::string timeActiveStr = std::to_string(currentTimeSeconds);
   return timeActiveStr;
 }
+
+std::string intToStringWithZeros(int number) {
+  // Ensure the number is within the valid range
+  if (number < 0 || number > 999) {
+    throw std::runtime_error("Invalid number");
+  }
+
+  // Use stringstream to convert int to string with leading zeros
+  std::ostringstream oss;
+  oss << std::setw(3) << std::setfill('0') << number;
+
+  return oss.str();
+}
