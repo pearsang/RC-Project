@@ -115,14 +115,10 @@ AuctionManager::listUserAuctions(std::string userID) {
     AuctionManager auctionManager;
 
     auctions = auctionManager.listAuctions();
-    std::cout << "LALALALLALAL" << std::endl;
-    std::cout << "auctions size: " << auctions.size() << std::endl;
     for (auto auction : auctions) {
       std::string auctionInfo = auctionManager.getAuctionInfo(auction.first);
       std::string auctionOwner = auctionInfo.substr(0, auctionInfo.find(" "));
-      std::cout << "auction owner: " << auctionOwner << std::endl;
       if (auctionOwner == userID) {
-        std::cout << "AUCTION MATCH" << std::endl;
         userAuctions.push_back(auction);
       }
     }
