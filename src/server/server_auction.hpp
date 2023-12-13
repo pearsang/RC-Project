@@ -14,10 +14,18 @@ public:
                        uint32_t startValue, uint32_t timeActive,
                        std::string assetFilename);
 
+  std::vector<std::pair<std::string, uint8_t>> listAuctions();
+
   // constructor
   AuctionManager() = default;
   // destructor
   ~AuctionManager() = default;
+};
+
+class NoAuctionsException : public std::runtime_error {
+public:
+  NoAuctionsException()
+      : std::runtime_error("No auctions have been opened yet") {}
 };
 
 #endif

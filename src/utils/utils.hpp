@@ -244,4 +244,5 @@ std::string getCurrentTimeFormated();
 
 std::string getStartFullTime();
 
+std::string intToStringWithZeros(int number);
 #endif

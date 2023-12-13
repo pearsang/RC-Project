@@ -40,3 +40,48 @@ uint32_t AuctionManager::openAuction(std::string userID,
     return 1;
   }
 }
+
+std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
+
+  std::vector<std::pair<std::string, uint8_t>> auctions;
+  if (directory_exists(AUCTIONDIR) == INVALID) {
+    throw std::exception();
+  }
+  // get number of auctions in DB
+  std::string next_auction_path = AUCTIONDIR;
+  next_auction_path += "/next_auction.txt";
+  std::string nextAuctionID;
+
+  read_from_file(next_auction_path, nextAuctionID);
+  int nAuctions = std::stoi(nextAuctionID) - 1;
+
+  // no auctions in DB
+  if (nAuctions == 0) {
+    throw NoAuctionsException();
+  }
+
+  // get all auctions
+  for (int i = 1; i <= nAuctions; i++) {
+    std::string auction_dir = AUCTIONDIR;
+    auction_dir += "/" + intToStringWithZeros(i);
+    std::string auction_end_file =
+        auction_dir + "/" + "END_" + intToStringWithZeros(i) + ".txt";
+
+    // if auction directory does not exist - auction count was compromissed
+    if (directory_exists(auction_dir) == INVALID) {
+      throw std::exception();
+    }
+
+    // auction still active - no end file
+    if (file_exists(auction_end_file) == INVALID) {
+
+      auctions.push_back(std::make_pair(intToStringWithZeros(i), 1));
+    }
+    // auction ended
+    else {
+      auctions.push_back(std::make_pair(intToStringWithZeros(i), 0));
+    }
+  }
+
+  return auctions;
+}
