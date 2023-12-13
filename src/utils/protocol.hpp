@@ -573,8 +573,8 @@ protected:
    * @param file_name The name of the file to save the asset to.
    * @param file_size The size of the file to read.
    */
-  void readAndSaveToFile(const int fd, const std::string &file_name,
-                         const size_t file_size);
+  std::string readAndSaveToFile(const int fd, const std::string &file_name,
+                         const size_t file_size, bool flag);
 
 public:
   /**
@@ -628,6 +628,7 @@ public:
   status status;
   std::string assetFilename;
   uint32_t assetSize;
+  std::string assetFilePath;
 
   void send(int fd);
   void receive(int fd);
@@ -653,6 +654,7 @@ public:
   uint32_t assetSize;
   uint32_t startValue;
   uint32_t timeActive;
+  std::string assetFilePath;
 
   void send(int fd);
   void receive(int fd);
@@ -807,4 +809,6 @@ void sendFile(int fd, std::filesystem::path image_path);
  * @param image_path The path to the image file.
  */
 uint32_t getFileSize(std::filesystem::path file_path);
+
+std::string generateUniqueIdentifier();
 #endif

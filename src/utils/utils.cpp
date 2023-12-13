@@ -111,6 +111,17 @@ void create_new_file(const std::string &path) {
   return;
 }
 
+void rename_file(const std::string &oldPath, const std::string &newPath) {
+  try {
+    if (std::filesystem::exists(oldPath)) {
+      std::filesystem::rename(oldPath, newPath);
+    }
+  } catch (...) {
+    throw std::exception();
+  }
+  return;
+}
+
 void delete_file(const std::string &path) {
   try {
     if (std::filesystem::exists(path)) {

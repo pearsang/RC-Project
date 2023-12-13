@@ -172,6 +172,8 @@ void write_to_file(const std::string &path, const std::string &text);
  */
 void read_from_file(const std::string &path, std::string &text);
 
+void rename_file(const std::string &oldPath, const std::string &newPath);
+
 /**
  *
  * @brief Validates the user ID from the given string.
@@ -244,5 +246,6 @@ std::string getUserPassword(std::string userID);
 std::string getCurrentTimeFormated();
 
 std::string getStartFullTime();
+
 
 #endif

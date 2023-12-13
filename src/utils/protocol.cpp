@@ -3,10 +3,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <string>
 #include <sys/stat.h>
 
@@ -646,10 +648,30 @@ void ErrorTcpPacket::send(int fd) {
 
 void ErrorTcpPacket::receive(int fd) { (void)fd; }
 
-void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
-                                  const size_t file_size) {
-  std::ofstream file(file_name);
+std::string generateUniqueIdentifier() {
+  // Use current time as a seed for the random number generator
+  auto seed =
+      std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  std::mt19937 generator(static_cast<unsigned int>(seed));
 
+  // Generate a random number and convert it to a string
+  std::uniform_int_distribution<unsigned long long> distribution;
+  unsigned long long random_number = distribution(generator);
+
+  // Convert the random number to a string
+  std::string unique_identifier = std::to_string(random_number);
+
+  return unique_identifier;
+}
+
+std::string TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
+                                  const size_t file_size, bool flag) {
+  // set filepath
+  std::string filepath = generateUniqueIdentifier();
+  create_new_directory(filepath);
+  filepath += "/" + file_name;
+  std::cout << "Saving file to " << filepath << std::endl;
+  std::ofstream file(filepath);
   if (!file.good()) {
     throw IOException();
   }
@@ -706,6 +728,9 @@ void TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
   }
 
   file.close();
+  // print filepath
+  std::cout << "File saved to " << file_name << std::endl;
+  return filepath;
 }
 
 void ShowAssetRequest::send(int fd) {
@@ -754,7 +779,7 @@ void ShowAssetResponse::receive(int fd) {
     readSpace(fd);
     assetSize = readInt(fd);
     readSpace(fd);
-    readAndSaveToFile(fd, assetFilename, assetSize);
+    assetFilePath =  readAndSaveToFile(fd, assetFilename, assetSize , false);
   } else if (status_str == "NOK") {
     this->status = NOK;
   } else {
@@ -801,15 +826,12 @@ void OpenAuctionRequest::receive(int fd) {
   readSpace(fd);
   assetSize = readInt(fd);
 
-  try {
-    validateOpenAuctionArgs(userID, password, auctionName, startValue,
-                            timeActive, assetFilename, assetSize);
-  } catch (...) {
+  if (assetSize > 99999999) {
     throw InvalidPacketException();
   }
 
   readSpace(fd);
-  readAndSaveToFile(fd, assetFilename, assetSize);
+  assetFilePath = readAndSaveToFile(fd, assetFilename, assetSize, true);
   readPacketDelimiter(fd);
 }
 
