@@ -711,7 +711,7 @@ public:
  */
 class CloseAuctionResponse : public TcpPacket {
 public:
-  enum status { OK, EAU, NLG, EOW, END, ERR };
+  enum status { OK, NOK, EAU, NLG, EOW, END, ERR };
   static constexpr const char *ID = "RCL";
   status status;
 

@@ -270,7 +270,8 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
 
 void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
   if (!state.isLoggedIn()) {
-    std::cout << "Im useless for now REMOVE ME" << std::endl;
+    std::cout << "Close auction failed: You are not logged in" << std::endl;
+    return;
   }
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);

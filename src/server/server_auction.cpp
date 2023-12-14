@@ -241,3 +241,63 @@ AuctionManager::getAuctionsBiddedByUser(std::string userID) {
     throw;
   }
 }
+
+std::string AuctionManager::getAuctionOwner(std::string auctionID) {
+  try {
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
+    std::string auctionInfo;
+    read_from_file(start, auctionInfo);
+    std::string auctionOwner = auctionInfo.substr(0, auctionInfo.find(" "));
+    return auctionOwner;
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+void AuctionManager::closeAuction(std::string userID, std::string password,
+                                  std::string auctionID) {
+  try {
+    UserManager userManager;
+
+    if (validateUserID(userID) == INVALID ||
+        validatePassword(password) == INVALID ||
+        validateAuctionID(auctionID) == INVALID) {
+      throw InvalidPacketException();
+    }
+
+    if (userManager.userExists(userID) == INVALID ||
+        userManager.getUserPassword(userID) != password) {
+      throw InvalidCredentialsException();
+    }
+
+    if (userManager.isUserLoggedIn(userID) == INVALID) {
+      throw UserNotLoggedInException();
+    }
+
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    if (directory_exists(auctionPath) == INVALID) {
+      throw AuctionNotFoundException();
+    }
+
+    if (getAuctionOwner(auctionID) != userID) {
+      throw IncorrectAuctionOwnerException();
+    }
+
+    std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
+    if (file_exists(end) != INVALID) {
+      throw NonActiveAuctionException();
+    }
+
+    // close auction
+    create_new_file(end);
+    std::string end_datetime = getCurrentTimeFormated();
+    write_to_file(end, end_datetime);
+
+    return;
+  } catch (std::exception &e) {
+    throw;
+  }
+}

@@ -337,6 +337,70 @@ void handleCloseAuction(AuctionServerState &state, int fd) {
 
   (void)state;
   (void)fd;
+
+  CloseAuctionRequest request;
+  CloseAuctionResponse response;
+
+  try {
+    request.receive(fd);
+    state.cdebug << "[CloseAuction] User " << request.userID
+                 << " requested to close an auction" << std::endl;
+
+    state.auctionManager.closeAuction(request.userID, request.password,
+                                      request.auctionID);
+
+    response.status = CloseAuctionResponse::OK;
+
+    state.cdebug << "[CloseAuction] Auction "
+                 << " successfully closed" << std::endl;
+  } catch (UserNotLoggedInException &e) {
+    response.status = CloseAuctionResponse::NLG;
+
+    state.cdebug << "[CloseAuction] User " << request.userID
+                 << " is not logged in" << std::endl;
+
+  } catch (InvalidCredentialsException &e) {
+    response.status = CloseAuctionResponse::NOK;
+
+    state.cdebug << "User " << request.userID
+                 << " tried to close an auction with invalid "
+                    "credentials or it does not exist"
+                 << std::endl;
+  } catch (AuctionNotFoundException &e) {
+    response.status = CloseAuctionResponse::EAU;
+
+    state.cdebug << "User " << request.userID
+                 << " tried to close an auction "
+                    "that does not exist"
+                 << std::endl;
+
+  } catch (IncorrectAuctionOwnerException &e) {
+    response.status = CloseAuctionResponse::EOW;
+
+    state.cdebug << "User " << request.userID
+                 << " tried to close an auction"
+                    " that is owned by another user"
+                 << std::endl;
+  } catch (NonActiveAuctionException &e) {
+    response.status = CloseAuctionResponse::END;
+
+    state.cdebug << "User " << request.userID
+                 << " tried to close an auction"
+                    " that is not active"
+                 << std::endl;
+  } catch (InvalidPacketException &e) {
+    response.status = CloseAuctionResponse::ERR;
+    state.cdebug << "[CloseAuction] Invalid packet received" << std::endl;
+
+  } catch (std::exception &e) {
+    std::cerr
+        << "[CloseAuction] There was an unhandled exception that prevented "
+           "the user from closing an auction"
+        << e.what() << std::endl;
+    return;
+  }
+
+  response.send(fd);
 }
 
 void handleShowAsset(AuctionServerState &state, int fd) {
