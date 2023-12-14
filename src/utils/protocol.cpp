@@ -664,8 +664,11 @@ std::string generateUniqueIdentifier() {
   return unique_identifier;
 }
 
-std::string TcpPacket::readAndSaveToFile(const int fd, const std::string &file_name,
-                                  const size_t file_size, bool flag) {
+std::string TcpPacket::readAndSaveToFile(const int fd,
+                                         const std::string &file_name,
+                                         const size_t file_size, bool flag) {
+
+  (void)flag;
   // set filepath
   std::string filepath = generateUniqueIdentifier();
   create_new_directory(filepath);
@@ -779,7 +782,7 @@ void ShowAssetResponse::receive(int fd) {
     readSpace(fd);
     assetSize = readInt(fd);
     readSpace(fd);
-    assetFilePath =  readAndSaveToFile(fd, assetFilename, assetSize , false);
+    assetFilePath = readAndSaveToFile(fd, assetFilename, assetSize, false);
   } else if (status_str == "NOK") {
     this->status = NOK;
   } else {

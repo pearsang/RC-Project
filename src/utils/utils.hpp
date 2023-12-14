@@ -247,5 +247,4 @@ std::string getCurrentTimeFormated();
 
 std::string getStartFullTime();
 
-
 #endif

@@ -37,6 +37,7 @@ uint32_t AuctionManager::openAuction(std::string userID,
         assetFilePath.substr(0, assetFilePath.find_first_of("/"));
     delete_directory(assetFilenamePathSubstr);
 
+    /// FALTA ATUALZAR O NEXT AUCTION FILE?????
     return (uint32_t)std::stoi(auctionID);
   } catch (std::exception &e) {
     throw;

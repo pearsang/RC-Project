@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include <csignal>
+#include <filesystem>
 
 #include "../utils/constants.hpp"
 #include "server_state.hpp"

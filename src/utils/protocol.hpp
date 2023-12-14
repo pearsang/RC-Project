@@ -574,7 +574,7 @@ protected:
    * @param file_size The size of the file to read.
    */
   std::string readAndSaveToFile(const int fd, const std::string &file_name,
-                         const size_t file_size, bool flag);
+                                const size_t file_size, bool flag);
 
 public:
   /**
