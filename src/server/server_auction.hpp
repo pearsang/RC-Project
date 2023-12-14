@@ -32,6 +32,11 @@ public:
   /* lists auctions in which an user has bidded*/
   std::vector<std::pair<std::string, uint8_t>> listUserBids(std::string userID);
 
+  std::string getAuctionOwner(std::string auctionID);
+
+  void closeAuction(std::string userID, std::string password,
+                    std::string auctionID);
+
   // constructor
   AuctionManager() = default;
   // destructor
@@ -60,6 +65,24 @@ public:
   AuctionsLimitExceededException()
       : std::runtime_error("The server has reached the maximum number of "
                            "auctions") {}
+};
+
+class IncorrectAuctionOwnerException : public std::runtime_error {
+public:
+  IncorrectAuctionOwnerException()
+      : std::runtime_error("The user is not the owner of the auction") {}
+};
+
+class NonActiveAuctionException : public std::runtime_error {
+public:
+  NonActiveAuctionException()
+      : std::runtime_error("The auction is no longer active") {}
+};
+
+class AuctionNotFoundException : public std::runtime_error {
+public:
+  AuctionNotFoundException()
+      : std::runtime_error("The auction requested does not exist") {}
 };
 
 #endif

@@ -28,4 +28,10 @@ public:
       : std::runtime_error("The password does not match that userID's") {}
 };
 
+class UserNotLoggedInException : public std::runtime_error {
+public:
+  UserNotLoggedInException()
+      : std::runtime_error("The user is not logged in") {}
+};
+
 #endif
