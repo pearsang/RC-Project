@@ -335,9 +335,6 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
 void handleCloseAuction(AuctionServerState &state, int fd) {
   std::cout << "Handling close auction request" << std::endl;
 
-  (void)state;
-  (void)fd;
-
   CloseAuctionRequest request;
   CloseAuctionResponse response;
 
@@ -415,4 +412,63 @@ void handleBid(AuctionServerState &state, int fd) {
 
   (void)state;
   (void)fd;
+
+  BidRequest request;
+  BidResponse response;
+
+  try {
+    request.receive(fd);
+    state.cdebug << "[Bid] User " << request.userID
+                 << " requested to bid on an auction" << std::endl;
+
+    state.auctionManager.bidOnAuction(request.userID, request.password,
+                                      request.auctionID, request.bidValue);
+
+    response.status = BidResponse::ACC;
+
+    state.cdebug << "[Bid] Bid "
+                 << "successfully placed" << std::endl;
+
+  } catch (UserNotLoggedInException &e) {
+    response.status = BidResponse::NLG;
+
+    state.cdebug << "[Bid] User " << request.userID << " is not logged in"
+                 << std::endl;
+
+  } catch (NonActiveAuctionException &e) {
+    response.status = BidResponse::NOK;
+
+    state.cdebug << "[Bid] Auction " << request.auctionID
+                 << " is no longer active" << std::endl;
+
+  } catch (BidRefusedException &e) {
+    response.status = BidResponse::REF;
+
+    state.cdebug << "[Bid] Bid " << request.bidValue
+                 << " was refused as it was not "
+                 << "larger enough" << std::endl;
+
+  } catch (IllegalBidException &e) {
+
+    response.status = BidResponse::ILG;
+
+    state.cdebug << "[Bid] User " << request.userID
+                 << " is the auction owner, hence it cannot bid" << std::endl;
+
+  } catch (InvalidCredentialsException &e){
+    response.status = BidResponse::ERR;
+
+    state.cdebug << "[Bid] User " << request.userID
+                 << " tried to bid with invalid credentials" << std::endl; 
+                 
+  } catch (InvalidPacketException &e) {
+    response.status = BidResponse::ERR;
+    state.cdebug << "[Bid] Invalid packet received" << std::endl;
+
+  } catch (std::exception &e) {
+    std::cerr << "[Bid] There was an unhandled exception that prevented "
+                 "the user from bidding on an auction"
+              << e.what() << std::endl;
+    return;
+  }
 }

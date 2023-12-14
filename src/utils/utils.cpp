@@ -221,7 +221,7 @@ int8_t validateAuctionID(std::string auctionID) {
 }
 
 int8_t validateBidValue(std::string bidValue) {
-  if (!is_digits(bidValue)) {
+  if (!is_digits(bidValue) || bidValue.length() > START_VALUE_MAX) {
     return INVALID;
   }
 

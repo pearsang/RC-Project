@@ -37,6 +37,9 @@ public:
   void closeAuction(std::string userID, std::string password,
                     std::string auctionID);
 
+  void bidOnAuction(std::string userID, std::string password,
+                    std::string auctionID, uint32_t bidValue);
+
   // constructor
   AuctionManager() = default;
   // destructor
@@ -83,6 +86,18 @@ class AuctionNotFoundException : public std::runtime_error {
 public:
   AuctionNotFoundException()
       : std::runtime_error("The auction requested does not exist") {}
+};
+
+class IllegalBidException : public std::runtime_error {
+public:
+  IllegalBidException()
+      : std::runtime_error("The owner of an auction cannot bid on it") {}
+};
+
+class BidRefusedException : public std::runtime_error {
+public:
+  BidRefusedException()
+      : std::runtime_error("The bid is not larger then the current bid") {}
 };
 
 #endif

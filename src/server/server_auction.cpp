@@ -301,3 +301,27 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
     throw;
   }
 }
+
+void AuctionManager::bidOnAuction(std::string userID, std::string password,
+                  std::string auctionID, uint32_t bidValue) {
+
+  try {
+    UserManager userManager;
+
+    if (validateUserID(userID) == INVALID ||
+        validatePassword(password) == INVALID ||
+        validateAuctionID(auctionID) == INVALID ||
+        validateBidValue(std::to_string(bidValue)) == INVALID) {
+      throw InvalidPacketException();
+    }
+
+    if (userManager.userExists(userID) == INVALID ||
+        userManager.getUserPassword(userID) != password) {
+      throw InvalidCredentialsException();
+    }
+
+    return;
+  } catch (std::exception &e) {
+    throw;
+  }
+}
