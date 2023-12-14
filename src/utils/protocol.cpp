@@ -665,16 +665,16 @@ std::string generateUniqueIdentifier() {
 }
 
 std::string TcpPacket::readAndSaveToFile(const int fd,
-                                         const std::string &file_name,
+                                         std::string &file_name,
                                          const size_t file_size, bool flag) {
-
-  (void)flag;
-  // set filepath
-  std::string filepath = generateUniqueIdentifier();
-  create_new_directory(filepath);
-  filepath += "/" + file_name;
-  std::cout << "Saving file to " << filepath << std::endl;
-  std::ofstream file(filepath);
+  if (flag) {
+    std::string filepath = generateUniqueIdentifier();
+    create_new_directory(filepath);
+    filepath += "/" + file_name;
+    std::cout << "Saving file to " << filepath << std::endl;
+    file_name = filepath;
+  }
+  std::ofstream file(file_name);
   if (!file.good()) {
     throw IOException();
   }
@@ -733,7 +733,7 @@ std::string TcpPacket::readAndSaveToFile(const int fd,
   file.close();
   // print filepath
   std::cout << "File saved to " << file_name << std::endl;
-  return filepath;
+  return file_name;
 }
 
 void ShowAssetRequest::send(int fd) {

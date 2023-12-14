@@ -573,7 +573,7 @@ protected:
    * @param file_name The name of the file to save the asset to.
    * @param file_size The size of the file to read.
    */
-  std::string readAndSaveToFile(const int fd, const std::string &file_name,
+  std::string readAndSaveToFile(const int fd, std::string &file_name,
                                 const size_t file_size, bool flag);
 
 public:
