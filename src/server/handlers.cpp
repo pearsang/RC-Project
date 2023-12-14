@@ -279,7 +279,10 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
   OpenAuctionResponse response;
   try {
     request.receive(fd);
-
+    validateOpenAuctionArgs(request.userID, request.password,
+                            request.auctionName, request.startValue,
+                            request.timeActive, request.assetFilename,
+                            request.assetSize);
     state.cdebug << "[OpenAuction] User " << request.userID
                  << " requested to open an auction" << std::endl;
 
@@ -289,19 +292,11 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
           request.userID, request.auctionName, request.startValue,
           request.timeActive, request.assetFilename, request.assetFilePath);
 
-      if (auctionID == (uint32_t)INVALID) {
-        response.status = OpenAuctionResponse::NOK;
+      response.status = OpenAuctionResponse::OK;
+      response.auctionID = intToStringWithZeros((int)auctionID);
 
-        state.cdebug << "[OpenAuction] Auction "
-                     << " failed to open" << std::endl;
-
-      } else {
-        response.status = OpenAuctionResponse::OK;
-        response.auctionID = intToStringWithZeros((int)auctionID);
-
-        state.cdebug << "[OpenAuction] Auction "
-                     << " successfully opened" << std::endl;
-      }
+      state.cdebug << "[OpenAuction] Auction "
+                   << " successfully opened" << std::endl;
     } else {
       response.status = OpenAuctionResponse::NLG;
 
@@ -316,9 +311,15 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
                     "credentials"
                  << std::endl;
 
+  } catch (AuctionsLimitExceededException &e) {
+    response.status = OpenAuctionResponse::NOK;
+
+    response.status = OpenAuctionResponse::NOK;
+    state.cdebug << "[OpenAuction] Auction "
+                 << " failed to open" << std::endl;
+
   } catch (InvalidPacketException &e) {
     response.status = OpenAuctionResponse::ERR;
-
     state.cdebug << "[OpenAuction] Invalid packet received" << std::endl;
 
   } catch (std::exception &e) {

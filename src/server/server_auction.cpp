@@ -10,7 +10,7 @@ uint32_t AuctionManager::openAuction(std::string userID,
   // verify this function!!!!!!!
   try {
 
-    std::string auctionID = getnextAuctionID();
+    std::string auctionID = getNextAuctionID();
 
     std::string auctionPath = AUCTIONDIR;
     auctionPath += "/" + auctionID;
@@ -26,7 +26,10 @@ uint32_t AuctionManager::openAuction(std::string userID,
 
     // create ASSET directory
     std::string assetPath = auctionPath + "/" + "ASSET" + "/";
+    std::string bidPath = auctionPath + "/" + "BIDS" + "/";
+
     create_new_directory(assetPath);
+    create_new_directory(bidPath);
     rename_file(assetFilePath, assetPath + assetFilename);
 
     std::string assetFilenamePathSubstr =
@@ -34,18 +37,28 @@ uint32_t AuctionManager::openAuction(std::string userID,
     delete_directory(assetFilenamePathSubstr);
 
     return (uint32_t)std::stoi(auctionID);
+  } catch (AuctionsLimitExceededException &e) {
+    std::string assetFilenamePathSubstr =
+        assetFilePath.substr(0, assetFilePath.find_first_of("/"));
+    delete_directory(assetFilenamePathSubstr);
+    throw;
   } catch (std::exception &e) {
     throw;
   }
   return (uint32_t)INVALID;
 }
 
-std::string AuctionManager::getnextAuctionID() {
+std::string AuctionManager::getNextAuctionID() {
   try {
+
     std::string nextAuctionID;
     std::string nextAuctionPath = AUCTIONDIR;
     nextAuctionPath += "/next_auction.txt";
     read_from_file(nextAuctionPath, nextAuctionID);
+
+    if (nextAuctionID.length() > AUCTION_ID_LENGTH) {
+      throw AuctionsLimitExceededException();
+    }
 
     // update next auction id
     int nextAuctionID_int = std::stoi(nextAuctionID);
@@ -117,24 +130,6 @@ std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
   }
 
   return auctions;
-}
-
-std::string AuctionManager::getNextAuctionID() {
-  try {
-    std::string nextAuctionID;
-    std::string nextAuctionPath = AUCTIONDIR;
-    nextAuctionPath += "/next_auction.txt";
-    read_from_file(nextAuctionPath, nextAuctionID);
-
-    // update next auction id
-    int nextAuctionID_int = std::stoi(nextAuctionID);
-    nextAuctionID_int++;
-    write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
-
-    return nextAuctionID;
-  } catch (std::exception &e) {
-    throw;
-  }
 }
 
 std::vector<std::pair<std::string, uint8_t>>

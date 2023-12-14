@@ -15,8 +15,6 @@ public:
   uint32_t openAuction(std::string userID, std::string auctionName,
                        uint32_t startValue, uint32_t timeActive,
                        std::string assetFilename, std::string assetFilePath);
-  std::string getnextAuctionID();
-
   std::string getNextAuctionID();
 
   std::vector<std::pair<std::string, uint8_t>> listAuctions();
@@ -55,6 +53,13 @@ class NoOngoingBidsException : public std::runtime_error {
 public:
   NoOngoingBidsException()
       : std::runtime_error("The user has not yet bidded") {}
+};
+
+class AuctionsLimitExceededException : public std::runtime_error {
+public:
+  AuctionsLimitExceededException()
+      : std::runtime_error("The server has reached the maximum number of "
+                           "auctions") {}
 };
 
 #endif
