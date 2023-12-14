@@ -302,8 +302,42 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
   }
 }
 
+uint32_t AuctionManager::getLargestBid(std::string auctionID) {
+
+  std::string auctionPath = AUCTIONDIR;
+  auctionPath += "/" + auctionID;
+  std::string auctionBidsPath = auctionPath + "/BIDS";
+  std::string max_filename;
+  uintmax_t max = 0;
+
+  for (const auto &entry : fs::directory_iterator(auctionBidsPath)) {
+    if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+      std::string filename = entry.path().stem().string();
+      try {
+        uintmax_t curr = std::stoull(filename);
+        if (curr > max) {
+          max = curr;
+          max_filename = entry.path().string();
+        }
+      } catch (const std::invalid_argument &) {
+        // ignore, filename that is not composed by digits
+      }
+    }
+  }
+
+  // no bids yet
+  if (max_filename.empty()) {
+    return 0;
+  }
+
+  std::string bidValue = max_filename.substr(0, max_filename.find_last_of("."));
+  bidValue = bidValue.substr(bidValue.find_last_of("/") + 1);
+
+  return (uint32_t)std::stoi(bidValue);
+}
+
 void AuctionManager::bidOnAuction(std::string userID, std::string password,
-                  std::string auctionID, uint32_t bidValue) {
+                                  std::string auctionID, uint32_t bidValue) {
 
   try {
     UserManager userManager;
@@ -319,6 +353,36 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
         userManager.getUserPassword(userID) != password) {
       throw InvalidCredentialsException();
     }
+
+    if (userManager.isUserLoggedIn(userID) == INVALID) {
+      throw UserNotLoggedInException();
+    }
+
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
+    if (file_exists(end) != INVALID) {
+      throw NonActiveAuctionException();
+    }
+
+    std::string auctionBidsPath = auctionPath + "/BIDS";
+    uint32_t currBid = getLargestBid(auctionID);
+    if (bidValue <= currBid) {
+      throw BidRefusedException();
+    }
+
+    std::string owner = getAuctionOwner(auctionID);
+    if (owner == userID) {
+      throw IllegalBidException();
+    }
+
+    // bid can be placed
+    std::string bidPath =
+        auctionBidsPath + "/" + std::to_string(bidValue) + ".txt";
+    create_new_file(bidPath);
+    std::string bid_datetime = getCurrentTimeFormated();
+    write_to_file(bidPath,
+                  userID + " " + std::to_string(bidValue) + " " + bid_datetime);
 
     return;
   } catch (std::exception &e) {

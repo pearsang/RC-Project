@@ -6,9 +6,12 @@
 #include "../utils/utils.hpp"
 #include "server_user.hpp"
 
+#include <filesystem>
+#include <iostream>
 #include <random>
-
 #include <string>
+
+namespace fs = std::filesystem;
 
 class AuctionManager {
 public:
@@ -36,6 +39,8 @@ public:
 
   void closeAuction(std::string userID, std::string password,
                     std::string auctionID);
+
+  uint32_t getLargestBid(std::string auctionID);
 
   void bidOnAuction(std::string userID, std::string password,
                     std::string auctionID, uint32_t bidValue);

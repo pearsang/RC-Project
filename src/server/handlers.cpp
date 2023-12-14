@@ -410,9 +410,6 @@ void handleShowAsset(AuctionServerState &state, int fd) {
 void handleBid(AuctionServerState &state, int fd) {
   std::cout << "Handling bid request" << std::endl;
 
-  (void)state;
-  (void)fd;
-
   BidRequest request;
   BidResponse response;
 
@@ -444,7 +441,7 @@ void handleBid(AuctionServerState &state, int fd) {
   } catch (BidRefusedException &e) {
     response.status = BidResponse::REF;
 
-    state.cdebug << "[Bid] Bid " << request.bidValue
+    state.cdebug << "[Bid] Bid of " << request.bidValue
                  << " was refused as it was not "
                  << "larger enough" << std::endl;
 
@@ -455,20 +452,22 @@ void handleBid(AuctionServerState &state, int fd) {
     state.cdebug << "[Bid] User " << request.userID
                  << " is the auction owner, hence it cannot bid" << std::endl;
 
-  } catch (InvalidCredentialsException &e){
+  } catch (InvalidCredentialsException &e) {
     response.status = BidResponse::ERR;
 
     state.cdebug << "[Bid] User " << request.userID
-                 << " tried to bid with invalid credentials" << std::endl; 
-                 
+                 << " tried to bid with invalid credentials" << std::endl;
+
   } catch (InvalidPacketException &e) {
     response.status = BidResponse::ERR;
     state.cdebug << "[Bid] Invalid packet received" << std::endl;
 
   } catch (std::exception &e) {
     std::cerr << "[Bid] There was an unhandled exception that prevented "
-                 "the user from bidding on an auction"
+                 "the user from bidding on an auction "
               << e.what() << std::endl;
     return;
   }
+
+  response.send(fd);
 }

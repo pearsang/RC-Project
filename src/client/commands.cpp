@@ -551,7 +551,9 @@ void BidCommand::handleCommand(std::string args, UserState &state) {
   }
 
   if (validateBidValue(bid_value) == INVALID) {
-    std::cout << "Invalid bid value: Must be a positive number" << std::endl;
+    std::cout
+        << "Invalid bid value: Must be a positive number between 0 and 999999"
+        << std::endl;
     return;
   }
 
@@ -571,7 +573,7 @@ void BidCommand::handleCommand(std::string args, UserState &state) {
   } else if (bidResponse.status == BidResponse::status::NOK) {
     std::cout << "Bid failed: The auction is not active" << std::endl;
   } else if (bidResponse.status == BidResponse::status::REF) {
-    std::cout << "Bid failed: A larger bid has already been placed"
+    std::cout << "Bid failed: A larger or equal bid has already been placed"
               << std::endl;
   } else if (bidResponse.status == BidResponse::status::ILG) {
     std::cout << "Bid failed: Can not bid on your own auction" << std::endl;
