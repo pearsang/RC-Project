@@ -25,6 +25,14 @@ public:
 
   std::string getAuctionInfo(std::string auctionID);
 
+  std::vector<std::string> getAuctionBidders(std::string auctionID);
+
+  std::vector<std::pair<std::string, uint8_t>>
+  getAuctionsBiddedByUser(std::string userID);
+
+  /* lists auctions in which an user has bidded*/
+  std::vector<std::pair<std::string, uint8_t>> listUserBids(std::string userID);
+
   // constructor
   AuctionManager() = default;
   // destructor
@@ -35,6 +43,12 @@ class NoAuctionsException : public std::runtime_error {
 public:
   NoAuctionsException()
       : std::runtime_error("No auctions have been opened yet") {}
+};
+
+class NoOngoingBidsException : public std::runtime_error {
+public:
+  NoOngoingBidsException()
+      : std::runtime_error("The user has not yet bidded") {}
 };
 
 #endif

@@ -245,4 +245,7 @@ std::string getCurrentTimeFormated();
 std::string getStartFullTime();
 
 std::string intToStringWithZeros(int number);
+
+std::string getFirstWord(std::string path);
+
 #endif

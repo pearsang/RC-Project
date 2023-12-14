@@ -319,3 +319,15 @@ std::string intToStringWithZeros(int number) {
 
   return oss.str();
 }
+
+std::string getFirstWord(std::string path) {
+  std::string firstWord;
+  read_from_file(path, firstWord);
+  firstWord = firstWord.substr(0, firstWord.find(" "));
+
+  // remove the last character if it is a newline
+  if (firstWord[firstWord.length() - 1] == '\n') {
+    firstWord = firstWord.substr(0, firstWord.length() - 1);
+  }
+  return firstWord;
+}

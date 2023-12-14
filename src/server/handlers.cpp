@@ -192,9 +192,44 @@ void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
                         SocketAddress &addressFrom) {
   std::cout << "Handling list user bids request" << std::endl;
 
-  (void)state;
-  (void)buf;
   (void)addressFrom;
+
+  ListUserBidsRequest request;
+  ListUserBidsResponse response;
+
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[ListUserBids] User "
+                 << " requested to list bids" << std::endl;
+
+    if (state.usersManager.isUserLoggedIn(request.userID) != INVALID) {
+      response.auctions =
+          state.auctionManager.getAuctionsBiddedByUser(request.userID);
+
+      response.status = ListUserBidsResponse::OK;
+      state.cdebug << "[ListUserBids] Bids listed successfully" << std::endl;
+    } else {
+      response.status = ListUserBidsResponse::NLG;
+      state.cdebug << "[ListUserBids] User " << request.userID
+                   << " is not logged in" << std::endl;
+    }
+
+  } catch (NoOngoingBidsException &e) {
+    state.cdebug << "[ListUserBids] User " << request.userID
+                 << " has not bidded on any auction" << std::endl;
+    response.status = ListUserBidsResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[ListUserBids] Invalid packet received" << std::endl;
+    response.status = ListUserBidsResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[ListUserBids] There was an unhandled exception that "
+                 "prevented the user from listing bids: "
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleListAuctions(AuctionServerState &state, std::stringstream &buf,

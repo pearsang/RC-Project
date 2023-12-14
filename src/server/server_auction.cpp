@@ -23,7 +23,7 @@ uint32_t AuctionManager::openAuction(std::string userID,
     int randomInteger = distribution(gen);
     // to sr
     std::string auctionID = std::to_string(randomInteger);
-    std::cout << "Creating auction for user " << userID << std::endl;
+    // std::cout << "Creating auction for user " << userID << std::endl;
     std::string auctionPath = AUCTIONDIR;
     auctionPath += "/" + auctionID;
     create_new_directory(auctionPath);
@@ -143,6 +143,73 @@ std::string AuctionManager::getAuctionInfo(std::string auctionID) {
     std::string auctionInfo;
     read_from_file(start, auctionInfo);
     return auctionInfo;
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+std::vector<std::string>
+AuctionManager::getAuctionBidders(std::string auctionID) {
+  try {
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    std::string auctionBidsPath = auctionPath + "/BIDS";
+
+    // iterate over all files in BIDS directory
+    std::vector<std::string> auctionsBidders;
+
+    int i = 0;
+    for (const auto &entry :
+         std::filesystem::directory_iterator(auctionBidsPath)) {
+      if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+
+        std::string auctionBidFile = entry.path();
+
+        std::string bidder;
+        bidder = getFirstWord(auctionBidFile);
+        auctionsBidders.push_back(bidder);
+      }
+      i++;
+    }
+
+    if (auctionsBidders.size() == 0) {
+      throw NoOngoingBidsException();
+    }
+
+    return auctionsBidders;
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+std::vector<std::pair<std::string, uint8_t>>
+AuctionManager::getAuctionsBiddedByUser(std::string userID) {
+
+  std::vector<std::pair<std::string, uint8_t>> auctions;
+  std::vector<std::pair<std::string, uint8_t>> auctionsBiddedByUser;
+  try {
+    AuctionManager auctionManager;
+
+    auctions = auctionManager.listAuctions();
+    for (auto auction : auctions) {
+      std::vector<std::string> auctionBidders =
+          auctionManager.getAuctionBidders(auction.first);
+      for (auto bidder : auctionBidders) {
+        if (bidder == userID) {
+          auctionsBiddedByUser.push_back(auction);
+        }
+      }
+    }
+
+    if (auctionsBiddedByUser.size() == 0) {
+      throw NoOngoingBidsException();
+    }
+
+    return auctionsBiddedByUser;
+  } catch (NoOngoingBidsException &e) {
+    throw;
+  } catch (NoAuctionsException &e) {
+    throw NoOngoingBidsException();
   } catch (std::exception &e) {
     throw;
   }
