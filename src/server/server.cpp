@@ -1,6 +1,8 @@
 #include "server.hpp"
 
 #include <arpa/inet.h>
+#include <filesystem>
+#include <iostream>
 #include <unistd.h>
 
 #include <iostream>
@@ -120,8 +122,21 @@ void setupDB() {
   nextAuctionFile += "/next_auction.txt";
   create_new_file(nextAuctionFile);
 
-  // CHANGE THISSSSS!!!!! HARD CODED
-  write_to_file(nextAuctionFile, "3\n");
+  // count the number of directories inside AUctions
+  int count = 0;
+
+  for (const auto &entry : std::filesystem::directory_iterator(AUCTIONDIR)) {
+    if (std::filesystem::is_directory(entry.path())) {
+      count++;
+    }
+  }
+
+  count++;
+
+  std::string nAuctions = std::to_string(count);
+  nAuctions += "\n";
+  write_to_file(nextAuctionFile, nAuctions);
+
 };
 
 void wait_for_udp_packet(AuctionServerState &state) {

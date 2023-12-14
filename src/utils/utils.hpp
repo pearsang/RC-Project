@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "constants.hpp"
+#include "protocol.hpp"
 
 /**
  * @class FatalError
@@ -171,6 +172,8 @@ void write_to_file(const std::string &path, const std::string &text);
  */
 void read_from_file(const std::string &path, std::string &text);
 
+void rename_file(const std::string &oldPath, const std::string &newPath);
+
 /**
  *
  * @brief Validates the user ID from the given string.
@@ -228,10 +231,10 @@ int8_t validateAuctionName(std::string assetName);
 
 /**
  *
- * @brief Validate the file size of an asset.
+ * @brief Validate the file size of an asset's image.
  *
  */
-int8_t validateAssetFileSize(std::string ass);
+int8_t validateAssetFileSize(uint32_t assetSize);
 
 /**
  * @brief Validate a file based on its size.

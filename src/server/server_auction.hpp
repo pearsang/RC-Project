@@ -14,7 +14,8 @@ class AuctionManager {
 public:
   uint32_t openAuction(std::string userID, std::string auctionName,
                        uint32_t startValue, uint32_t timeActive,
-                       std::string assetFilename);
+                       std::string assetFilename, std::string assetFilePath);
+  std::string getnextAuctionID();
 
   std::string getNextAuctionID();
 
@@ -38,6 +39,12 @@ public:
   // destructor
   ~AuctionManager() = default;
 };
+
+
+void validateOpenAuctionArgs(std::string userID, std::string password,
+                             std::string auctionName, uint32_t startValue,
+                             uint32_t timeActive, std::string assetFilename,
+                             uint32_t assetSize);
 
 class NoAuctionsException : public std::runtime_error {
 public:

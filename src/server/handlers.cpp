@@ -281,11 +281,11 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
     request.receive(fd);
     state.cdebug << "[OpenAuction] User " << request.userID
                  << " requested to open an auction" << std::endl;
-
     if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
+
       uint32_t auctionID = state.auctionManager.openAuction(
           request.userID, request.auctionName, request.startValue,
-          request.timeActive, request.assetFilename);
+          request.timeActive, request.assetFilename, request.assetFilePath);
       if (auctionID == (uint32_t)INVALID) {
         response.status = OpenAuctionResponse::NOK;
         state.cdebug << "[OpenAuction] Auction "

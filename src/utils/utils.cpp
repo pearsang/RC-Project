@@ -111,6 +111,17 @@ void create_new_file(const std::string &path) {
   return;
 }
 
+void rename_file(const std::string &oldPath, const std::string &newPath) {
+  try {
+    if (std::filesystem::exists(oldPath)) {
+      std::filesystem::rename(oldPath, newPath);
+    }
+  } catch (...) {
+    throw std::exception();
+  }
+  return;
+}
+
 void delete_file(const std::string &path) {
   try {
     if (std::filesystem::exists(path)) {
@@ -305,6 +316,17 @@ std::string getStartFullTime() {
   std::time_t currentTimeSeconds = std::time(nullptr);
   std::string timeActiveStr = std::to_string(currentTimeSeconds);
   return timeActiveStr;
+}
+
+int8_t validateAssetFileSize(uint32_t assetSize) {
+  // convert assetSize to str
+  std::stringstream ss;
+  ss << assetSize;
+  std::string assetSizeStr = ss.str();
+  if (assetSizeStr.length() > FILESIZE_MAX) {
+    return INVALID;
+  }
+  return 0;
 }
 
 std::string intToStringWithZeros(int number) {

@@ -104,7 +104,7 @@ void LoginCommand::handleCommand(std::string args, UserState &state) {
   } else if (loginResponse.status == LoginResponse::status::NOK) {
     std::cout << "Login failed: Incorrect password" << std::endl;
   } else if (loginResponse.status == LoginResponse::status::REG) {
-    std::cout << "Login successful: You were registred" << std::endl;
+    std::cout << "Login successful: You were registered" << std::endl;
     state.setUserID(user_id);
     state.setPassword(password);
   } else if (loginResponse.status == LoginResponse::status::ERR) {

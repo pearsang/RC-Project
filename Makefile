@@ -61,8 +61,8 @@ fmt: $(SOURCES) $(HEADERS)
 fmt-check: $(SOURCES) $(HEADERS)
 	clang-format -n --Werror $^
 
-src/server/server: $(SERVER_OBJECTS) $(UTILS_OBJECTS) #$(SERVER_HEADERS) #$(UTILS_HEADERS)
-src/client/user: $(CLIENT_OBJECTS) $(UTILS_OBJECTS) #$(CLIENT_HEADERS) #$(UTILS_HEADERS)
+src/server/server: $(SERVER_OBJECTS) $(UTILS_OBJECTS) $(SERVER_HEADERS) $(UTILS_HEADERS)
+src/client/user: $(CLIENT_OBJECTS) $(UTILS_OBJECTS) $(CLIENT_HEADERS) $(UTILS_HEADERS)
 
 AS: src/server/server
 	cp src/server/server AS
