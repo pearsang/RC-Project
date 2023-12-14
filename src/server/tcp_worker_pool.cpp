@@ -48,7 +48,7 @@ void Worker::execute() {
                 << std::endl;
     }
 
-    pool->state.cdebug << "Worker number" << workerID
+    pool->state.cdebug << "Worker number " << workerID
                        << " Closing connection..." << std::endl;
     close(tcpSocketFD);
     to_execute = false;

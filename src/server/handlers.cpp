@@ -279,36 +279,48 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
   OpenAuctionResponse response;
   try {
     request.receive(fd);
+
     state.cdebug << "[OpenAuction] User " << request.userID
                  << " requested to open an auction" << std::endl;
+
     if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
 
       uint32_t auctionID = state.auctionManager.openAuction(
           request.userID, request.auctionName, request.startValue,
           request.timeActive, request.assetFilename, request.assetFilePath);
+
       if (auctionID == (uint32_t)INVALID) {
         response.status = OpenAuctionResponse::NOK;
+
         state.cdebug << "[OpenAuction] Auction "
                      << " failed to open" << std::endl;
+
       } else {
         response.status = OpenAuctionResponse::OK;
+        response.auctionID = intToStringWithZeros((int)auctionID);
+
         state.cdebug << "[OpenAuction] Auction "
                      << " successfully opened" << std::endl;
       }
     } else {
       response.status = OpenAuctionResponse::NLG;
+
       state.cdebug << "[OpenAuction] User " << request.userID
                    << " is not logged in" << std::endl;
     }
   } catch (InvalidCredentialsException &e) {
+    response.status = OpenAuctionResponse::ERR;
+
     state.cdebug << "User " << request.userID
                  << " tried to open an auction with invalid "
                     "credentials"
                  << std::endl;
-    response.status = OpenAuctionResponse::ERR;
+
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[OpenAuction] Invalid packet received" << std::endl;
     response.status = OpenAuctionResponse::ERR;
+
+    state.cdebug << "[OpenAuction] Invalid packet received" << std::endl;
+
   } catch (std::exception &e) {
     std::cerr
         << "[OpenAuction] There was an unhandled exception that prevented "
@@ -316,7 +328,6 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
         << e.what() << std::endl;
     return;
   }
-
   response.send(fd);
 }
 

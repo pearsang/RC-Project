@@ -7,12 +7,10 @@ uint32_t AuctionManager::openAuction(std::string userID,
                                      std::string assetFilename,
                                      std::string assetFilePath) {
   // validations of arguments already performed
-
+  // verify this function!!!!!!!
   try {
-    std::string auctionID = getnextAuctionID();
-    std::cout << "Auction ID: " << auctionID << std::endl;
 
-    std::cout << "Creating auction for user " << userID << std::endl;
+    std::string auctionID = getnextAuctionID();
 
     std::string auctionPath = AUCTIONDIR;
     auctionPath += "/" + auctionID;
@@ -21,24 +19,20 @@ uint32_t AuctionManager::openAuction(std::string userID,
     create_new_file(start);
     std::string start_datetime = getCurrentTimeFormated();
     std::string end_sec_time = getStartFullTime();
-
     write_to_file(start, userID + " " + auctionName + " " + assetFilename +
                              " " + std::to_string(startValue) + " " +
                              std::to_string(timeActive) + " " + start_datetime +
                              " " + end_sec_time);
-    std::string assetFilenamePath = assetFilePath.substr(
-        assetFilePath.find_last_of("/") + 1, assetFilePath.size());
 
     // create ASSET directory
     std::string assetPath = auctionPath + "/" + "ASSET" + "/";
     create_new_directory(assetPath);
-    rename_file(assetFilePath, assetPath + assetFilenamePath);
+    rename_file(assetFilePath, assetPath + assetFilename);
 
     std::string assetFilenamePathSubstr =
         assetFilePath.substr(0, assetFilePath.find_first_of("/"));
     delete_directory(assetFilenamePathSubstr);
 
-    /// FALTA ATUALZAR O NEXT AUCTION FILE?????
     return (uint32_t)std::stoi(auctionID);
   } catch (std::exception &e) {
     throw;
@@ -55,9 +49,9 @@ std::string AuctionManager::getnextAuctionID() {
 
     // update next auction id
     int nextAuctionID_int = std::stoi(nextAuctionID);
+    nextAuctionID = intToStringWithZeros(nextAuctionID_int);
     nextAuctionID_int++;
     write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
-    nextAuctionID = nextAuctionID.substr(0, nextAuctionID.size() - 1);
     return nextAuctionID;
   } catch (std::exception &e) {
     throw;

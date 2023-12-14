@@ -672,7 +672,6 @@ std::string TcpPacket::readAndSaveToFile(const int fd, std::string &file_name,
     std::string filepath = generateUniqueIdentifier();
     create_new_directory(filepath);
     filepath += "/" + file_name;
-    std::cout << "Saving file to " << filepath << std::endl;
     file_name = filepath;
   }
   std::ofstream file(file_name);
@@ -733,7 +732,6 @@ std::string TcpPacket::readAndSaveToFile(const int fd, std::string &file_name,
 
   file.close();
   // print filepath
-  std::cout << "File saved to " << file_name << std::endl;
   return file_name;
 }
 
@@ -835,15 +833,14 @@ void OpenAuctionRequest::receive(int fd) {
   }
 
   readSpace(fd);
-  assetFilePath = readAndSaveToFile(fd, assetFilename, assetSize, true);
+  std::string originalAssetFilename = assetFilename;
+  assetFilePath = readAndSaveToFile(fd, originalAssetFilename, assetSize, true);
   readPacketDelimiter(fd);
 }
 
 void OpenAuctionResponse::send(int fd) {
   std::stringstream stream;
   stream << OpenAuctionResponse::ID << " ";
-  std::cout << "status: " << status << std::endl;
-
   if (status == OK) {
     stream << "OK";
     stream << " " << auctionID;
