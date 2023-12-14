@@ -666,8 +666,7 @@ std::string generateUniqueIdentifier() {
   return unique_identifier;
 }
 
-std::string TcpPacket::readAndSaveToFile(const int fd,
-                                         std::string &file_name,
+std::string TcpPacket::readAndSaveToFile(const int fd, std::string &file_name,
                                          const size_t file_size, bool flag) {
   if (flag) {
     std::string filepath = generateUniqueIdentifier();

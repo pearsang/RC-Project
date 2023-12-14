@@ -40,7 +40,6 @@ public:
   ~AuctionManager() = default;
 };
 
-
 void validateOpenAuctionArgs(std::string userID, std::string password,
                              std::string auctionName, uint32_t startValue,
                              uint32_t timeActive, std::string assetFilename,
