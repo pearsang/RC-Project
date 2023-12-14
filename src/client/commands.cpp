@@ -550,8 +550,7 @@ void BidCommand::handleCommand(std::string args, UserState &state) {
     return;
   }
 
-  if (validateBidValue(bid_value) == INVALID || std::stoi(bid_value) == 0 ||
-      std::stoi(bid_value) == 999999) {
+  if (validateBidValue(bid_value) == INVALID) {
     std::cout << "Invalid bid value: Must be a positive number" << std::endl;
     return;
   }

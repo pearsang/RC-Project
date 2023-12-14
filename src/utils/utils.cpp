@@ -249,7 +249,8 @@ int8_t validateAssetFilename(std::string assetFilename) {
 }
 
 int8_t validateStartValue(std::string startValue) {
-  if (!is_digits(startValue) || startValue.length() > START_VALUE_MAX) {
+  if (!is_digits(startValue) || startValue.length() > START_VALUE_MAX ||
+      std::stoi(startValue) <= 0  || std::stoi(startValue) > 999999) {
     return INVALID;
   }
   return 0;
