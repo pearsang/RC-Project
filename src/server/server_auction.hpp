@@ -17,15 +17,45 @@ public:
                        std::string assetFilename, std::string assetFilePath);
   std::string getnextAuctionID();
 
+  std::string getNextAuctionID();
+
+  std::vector<std::pair<std::string, uint8_t>> listAuctions();
+
+  std::vector<std::pair<std::string, uint8_t>>
+  listUserAuctions(std::string userID);
+
+  std::string getAuctionInfo(std::string auctionID);
+
+  std::vector<std::string> getAuctionBidders(std::string auctionID);
+
+  std::vector<std::pair<std::string, uint8_t>>
+  getAuctionsBiddedByUser(std::string userID);
+
+  /* lists auctions in which an user has bidded*/
+  std::vector<std::pair<std::string, uint8_t>> listUserBids(std::string userID);
+
   // constructor
   AuctionManager() = default;
   // destructor
   ~AuctionManager() = default;
 };
 
+
 void validateOpenAuctionArgs(std::string userID, std::string password,
                              std::string auctionName, uint32_t startValue,
                              uint32_t timeActive, std::string assetFilename,
                              uint32_t assetSize);
+
+class NoAuctionsException : public std::runtime_error {
+public:
+  NoAuctionsException()
+      : std::runtime_error("No auctions have been opened yet") {}
+};
+
+class NoOngoingBidsException : public std::runtime_error {
+public:
+  NoOngoingBidsException()
+      : std::runtime_error("The user has not yet bidded") {}
+};
 
 #endif

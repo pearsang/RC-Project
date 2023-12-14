@@ -293,7 +293,7 @@ std::stringstream ListUserAuctionsResponse::serialize() {
   if (status == OK) {
     buffer << "OK";
     for (auto auction : auctions) {
-      buffer << " " << auction.first << " " << auction.second;
+      buffer << " " << auction.first << " " << std::to_string(auction.second);
     }
   } else if (status == NOK) {
     buffer << "NOK";
@@ -354,7 +354,7 @@ std::stringstream ListUserBidsResponse::serialize() {
   if (status == OK) {
     buffer << "OK";
     for (auto auction : auctions) {
-      buffer << " " << auction.first << " " << auction.second;
+      buffer << " " << auction.first << " " << std::to_string(auction.second);
     }
   } else if (status == NOK) {
     buffer << "NOK";
@@ -410,18 +410,21 @@ void ListAuctionsRequest::deserialize(std::stringstream &buffer) {
 std::stringstream ListAuctionsResponse::serialize() {
   std::stringstream buffer;
   buffer << ListAuctionsResponse::ID << " ";
+
   if (status == OK) {
     buffer << "OK";
-    for (auto auction : auctions) {
-      buffer << " " << auction.first << " " << auction.second;
+    for (auto auction : this->auctions) {
+      buffer << " " << auction.first << " " << std::to_string(auction.second);
     }
   } else if (status == NOK) {
     buffer << "NOK";
   } else if (status == ERR) {
     buffer << "ERR";
   } else {
+    std::cout << "InvalidPacketException" << std::endl;
     throw InvalidPacketException();
   }
+
   buffer << std::endl;
   return buffer;
 };
@@ -431,7 +434,6 @@ void ListAuctionsResponse::deserialize(std::stringstream &buffer) {
   readPacketId(buffer, ListAuctionsResponse::ID);
   readSpace(buffer);
   auto status_str = readString(buffer, 3);
-  std::cout << status_str << std::endl;
   if (status_str == "OK") {
     status = OK;
 

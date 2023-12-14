@@ -324,8 +324,6 @@ void ListUserAuctionsCommand::handleCommand(std::string args,
 
   ListUserAuctionsRequest listUserAuctionsRequest;
   listUserAuctionsRequest.userID = state.getUserID();
-  // THIS USER ID IS FOR TESTING PURPOSES ONLY
-  listUserAuctionsRequest.userID = "123456";
 
   ListUserAuctionsResponse listUserAuctionsResponse;
   state.sendUdpPacketAndWaitForReply(listUserAuctionsRequest,

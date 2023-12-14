@@ -151,24 +151,118 @@ void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
   (void)state;
   (void)buf;
   (void)addressFrom;
+
+  ListUserAuctionsRequest request;
+  ListUserAuctionsResponse response;
+
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[ListUserAuctions] User "
+                 << " requested to list auctions" << std::endl;
+
+    if (state.usersManager.isUserLoggedIn(request.userID) != INVALID) {
+      response.auctions = state.auctionManager.listUserAuctions(request.userID);
+      response.status = ListUserAuctionsResponse::OK;
+      state.cdebug << "[ListUserAuctions] Auctions listed successfully"
+                   << std::endl;
+    } else {
+      response.status = ListUserAuctionsResponse::NLG;
+      state.cdebug << "[ListUserAuctions] User " << request.userID
+                   << " is not logged in" << std::endl;
+    }
+
+  } catch (NoAuctionsException &e) {
+    state.cdebug << "[ListUserAuctions] No auctions to list" << std::endl;
+    response.status = ListUserAuctionsResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[ListUserAuctions] Invalid packet received" << std::endl;
+    response.status = ListUserAuctionsResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[ListUserAuctions] There was an unhandled exception that "
+                 "prevented the user from listing auctions"
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
                         SocketAddress &addressFrom) {
   std::cout << "Handling list user bids request" << std::endl;
 
-  (void)state;
-  (void)buf;
   (void)addressFrom;
+
+  ListUserBidsRequest request;
+  ListUserBidsResponse response;
+
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[ListUserBids] User "
+                 << " requested to list bids" << std::endl;
+
+    if (state.usersManager.isUserLoggedIn(request.userID) != INVALID) {
+      response.auctions =
+          state.auctionManager.getAuctionsBiddedByUser(request.userID);
+
+      response.status = ListUserBidsResponse::OK;
+      state.cdebug << "[ListUserBids] Bids listed successfully" << std::endl;
+    } else {
+      response.status = ListUserBidsResponse::NLG;
+      state.cdebug << "[ListUserBids] User " << request.userID
+                   << " is not logged in" << std::endl;
+    }
+
+  } catch (NoOngoingBidsException &e) {
+    state.cdebug << "[ListUserBids] User " << request.userID
+                 << " has not bidded on any auction" << std::endl;
+    response.status = ListUserBidsResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[ListUserBids] Invalid packet received" << std::endl;
+    response.status = ListUserBidsResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[ListUserBids] There was an unhandled exception that "
+                 "prevented the user from listing bids: "
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleListAuctions(AuctionServerState &state, std::stringstream &buf,
                         SocketAddress &addressFrom) {
   std::cout << "Handling list auctions request" << std::endl;
 
-  (void)state;
-  (void)buf;
-  (void)addressFrom;
+  ListAuctionsRequest request;
+  ListAuctionsResponse response;
+
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[ListAuctions] User "
+                 << " requested to list auctions" << std::endl;
+
+    response.auctions = state.auctionManager.listAuctions();
+    response.status = ListAuctionsResponse::OK;
+    state.cdebug << "[ListAuctions] Auctions listed successfully" << std::endl;
+
+  } catch (NoAuctionsException &e) {
+    state.cdebug << "[ListAuctions] No auctions to list" << std::endl;
+    response.status = ListAuctionsResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[ListAuctions] Invalid packet received" << std::endl;
+    response.status = ListAuctionsResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[ListAuctions] There was an unhandled exception that "
+                 "prevented the user from listing auctions"
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleShowRecord(AuctionServerState &state, std::stringstream &buf,

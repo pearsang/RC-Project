@@ -328,3 +328,28 @@ int8_t validateAssetFileSize(uint32_t assetSize) {
   }
   return 0;
 }
+
+std::string intToStringWithZeros(int number) {
+  // Ensure the number is within the valid range
+  if (number < 0 || number > 999) {
+    throw std::runtime_error("Invalid number");
+  }
+
+  // Use stringstream to convert int to string with leading zeros
+  std::ostringstream oss;
+  oss << std::setw(3) << std::setfill('0') << number;
+
+  return oss.str();
+}
+
+std::string getFirstWord(std::string path) {
+  std::string firstWord;
+  read_from_file(path, firstWord);
+  firstWord = firstWord.substr(0, firstWord.find(" "));
+
+  // remove the last character if it is a newline
+  if (firstWord[firstWord.length() - 1] == '\n') {
+    firstWord = firstWord.substr(0, firstWord.length() - 1);
+  }
+  return firstWord;
+}

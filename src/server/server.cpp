@@ -136,6 +136,7 @@ void setupDB() {
   std::string nAuctions = std::to_string(count);
   nAuctions += "\n";
   write_to_file(nextAuctionFile, nAuctions);
+
 };
 
 void wait_for_udp_packet(AuctionServerState &state) {
