@@ -13,112 +13,118 @@
 extern bool is_exiting;
 
 void CommandManager::addCommand(std::shared_ptr<CommandHandler> handler) {
-  // Add the handler to the list of handlers
-  handlerList.push_back(handler);
+  handlerList.push_back(handler);    // Add the handler to the list
+  handlers[handler->name] = handler; // Add the handler to the map
 
-  // Add the handler to the map of handlers
-  handlers[handler->name] = handler;
-
-  // If the handler has an alias, add the alias to the map of handlers
-  if (handler->alias.has_value()) {
-    handlers[*handler->alias] = handler;
+  if (handler->alias.has_value()) {      // If the handler has an alias
+    handlers[*handler->alias] = handler; // Add the handler alias to the map
   }
 }
 
 void CommandManager::waitForCommand(UserState &state) {
-  std::cout << "> ";
+  std::cout << "> "; // Print the prompt
 
-  std::string line;
-  std::getline(std::cin, line);
+  std::string line;             // The line read from the user
+  std::getline(std::cin, line); // Read the line from the user
 
-  if (std::cin.eof()) {
+  if (std::cin.eof()) { // If the user has pressed Ctrl+D
     return;
   }
 
-  // Split the line into the command name and the arguments
-  auto splitIndex = line.find(' ');
+  std::string commandName;          // The name of the command
+  std::string args;                 // The arguments to the command
+  auto splitIndex = line.find(' '); // Find the index of the separator space
 
-  std::string commandName;
-  // If there is no space, then the entire line is the command name
-  if (splitIndex == std::string::npos) {
-    commandName = line;
-    line = "";
+  if (splitIndex == std::string::npos) { // If there is no space
+    commandName = line;                  // The entire line is the command name
+    args = "";                           // There are no arguments
   } else {
     commandName = line.substr(0, splitIndex);
-    line.erase(0, splitIndex + 1);
+    args = line.erase(0, splitIndex + 1);
   }
 
-  if (commandName.length() == 0) {
+  if (commandName.length() == 0) { // If the command name is empty
     return;
   }
 
-  // Find the command handler for the given command name
-  auto handler = handlers.find(commandName);
-  if (handler == handlers.end()) {
+  auto handler = handlers.find(commandName); // Find the handler for the command
+
+  if (handler == handlers.end()) { // If the handler does not exist
     std::cout << "Invalid command: " << commandName << std::endl;
     return;
   }
 
   try {
-    // Perform the command
-    handler->second->handleCommand(line, state);
+    handler->second->handleCommand(args, state); // Handle the command
   } catch (std::exception &e) {
     std::cout << "Error: " << e.what() << std::endl;
   }
 }
 
 void LoginCommand::handleCommand(std::string args, UserState &state) {
-  std::string user_id, password;
-  std::vector<std::string> params = parse_args(args);
+  std::vector<std::string> params = parse_args(args); // parse the arguments
+  size_t numArgs = params.size();
 
-  if (params.size() != 2) {
-    std::cout << "Invalid number of arguments: Expected 2, got "
-              << params.size() << std::endl;
+  if (numArgs != LOGIN_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected " << LOGIN_ARGS_NUM
+              << " , got " << numArgs << std::endl;
     return;
   }
 
-  user_id = params[0];
-  if (validateUserID(user_id) == INVALID) {
+  std::string userID = params[0];
+  if (validateUserID(userID) == INVALID) { // check if the user id is valid
     std::cout << "Invalid user ID: Must be a positive 6 digit number"
               << std::endl;
     return;
   }
 
-  password = params[1];
-  if (validatePassword(password) == INVALID) {
+  std::string password = params[1];
+  if (validatePassword(password) == INVALID) { // check if the password is valid
     std::cout << "Invalid password: Must be alphanumeric and 8 characters long"
               << std::endl;
     return;
   }
   LoginRequest loginRequest;
-  loginRequest.userID = user_id;
+  loginRequest.userID = userID;
   loginRequest.password = password;
 
   LoginResponse loginResponse;
   state.sendUdpPacketAndWaitForReply(loginRequest, loginResponse);
 
-  if (loginResponse.status == LoginResponse::status::OK) {
+  switch (loginResponse.status) {
+  case LoginResponse::status::OK:
+    state.setUserID(userID);
+    state.setPassword(password);
     std::cout << "Login successful!" << std::endl;
-    state.setUserID(user_id);
-    state.setPassword(password);
-  } else if (loginResponse.status == LoginResponse::status::NOK) {
+    break;
+  case LoginResponse::status::NOK:
     std::cout << "Login failed: Incorrect password" << std::endl;
-  } else if (loginResponse.status == LoginResponse::status::REG) {
-    std::cout << "Login successful: You were registered" << std::endl;
-    state.setUserID(user_id);
+    break;
+  case LoginResponse::status::REG:
+    state.setUserID(userID);
     state.setPassword(password);
-  } else if (loginResponse.status == LoginResponse::status::ERR) {
+    std::cout << "Login successful: You were registered" << std::endl;
+    break;
+  case LoginResponse::status::ERR:
     std::cout << "Login failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown login status" << std::endl;
+    break;
   }
 }
 
 void LogoutCommand::handleCommand(std::string args, UserState &state) {
-  if (parse_args(args).size() != 0) {
-    std::cout << "Invalid number of arguments: Expected 0, got "
-              << parse_args(args).size() << std::endl;
+  std::vector<std::string> params = parse_args(args); // parse the arguments
+  size_t numArgs = params.size();
+
+  if (numArgs != LOGOUT_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected " << LOGOUT_ARGS_NUM
+              << " , got " << numArgs << std::endl;
     return;
   }
-  if (!state.isLoggedIn()) {
+
+  if (!state.isLoggedIn()) { // check if the user is logged in
     std::cout << "You are not logged in" << std::endl;
     return;
   }
@@ -130,29 +136,38 @@ void LogoutCommand::handleCommand(std::string args, UserState &state) {
   LogoutResponse logoutResponse;
   state.sendUdpPacketAndWaitForReply(logoutRequest, logoutResponse);
 
-  if (logoutResponse.status == LogoutResponse::status::OK) {
+  switch (logoutResponse.status) {
+  case LogoutResponse::status::OK:
+    state.setUserID("");   // clear the user id after logout
+    state.setPassword(""); // clear the password after logout
     std::cout << "Logout successful!" << std::endl;
-    std::string empty = "";
-    state.setUserID(empty);
-    state.setPassword(empty);
-  } else if (logoutResponse.status == LogoutResponse::status::NOK) {
+    break;
+  case LogoutResponse::status::NOK:
     std::cout << "Logout failed: You are not logged in" << std::endl;
-  } else if (logoutResponse.status == LogoutResponse::status::UNR) {
+    break;
+  case LogoutResponse::status::UNR:
     std::cout << "Logout failed: You are not registered" << std::endl;
-  } else if (logoutResponse.status == LogoutResponse::status::ERR) {
+    break;
+  case LogoutResponse::status::ERR:
     std::cout << "Logout failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown logout status" << std::endl;
+    break;
   }
 }
 
 void UnregisterCommand::handleCommand(std::string args, UserState &state) {
-  if (parse_args(args).size() != 0) {
-    std::cout << "Invalid number of arguments: Expected 0, got "
-              << parse_args(args).size() << std::endl;
+  std::vector<std::string> params = parse_args(args); // parse the arguments
+  size_t numArgs = params.size();
+
+  if (numArgs != UNREGISTER_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected " << UNREGISTER_ARGS_NUM
+              << " , got " << numArgs << std::endl;
     return;
   }
 
-  // check if a user is logged in
-  if (!state.isLoggedIn()) {
+  if (!state.isLoggedIn()) { // check if the user is logged in
     std::cout << "You must be logged in to unregister" << std::endl;
     return;
   }
@@ -176,68 +191,85 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
   } else if (unregisterResponse.status == UnregisterResponse::status::ERR) {
     std::cout << "Unregister failed: Server error" << std::endl;
   }
+
+  switch (unregisterResponse.status) {
+  case UnregisterResponse::status::OK:
+    state.setUserID("");   // clear the user id after unregister
+    state.setPassword(""); // clear the password after unregister
+    std::cout << "Unregister successful!" << std::endl;
+    break;
+  case UnregisterResponse::status::NOK:
+    std::cout << "Unregister failed: You are not logged in" << std::endl;
+    break;
+  case UnregisterResponse::status::UNR:
+    std::cout << "Unregister failed: You are not registered" << std::endl;
+    break;
+  case UnregisterResponse::status::ERR:
+    std::cout << "Unregister failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown unregister status" << std::endl;
+    break;
+  }
 }
 
 void ExitCommand::handleCommand(std::string args, UserState &state) {
-  // args are not used
-  (void)args;
-  // user has not logged out
-  if (state.isLoggedIn()) {
+  (void)args; // args are not used in this command
+
+  if (state.isLoggedIn()) { // check if the user is logged in
     std::cout << "You are still logged in. Please logout first." << std::endl;
     return;
   }
 
-  is_exiting = true;
+  is_exiting = true; // set the global variable to true to exit the program
 }
 
 void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
 
-  if (!state.isLoggedIn()) {
-    std::cout << "Im useless for now REMOVE ME" << std::endl;
-  }
-
-  if (params.size() != 4) {
-    std::cout << "Invalid number of arguments: Expected 4, got "
-              << params.size() << std::endl;
+  if (numArgs != OPEN_AUCTION_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected "
+              << OPEN_AUCTION_ARGS_NUM << " , got " << numArgs << std::endl;
     return;
   }
 
-  std::string auction_name = params[0];
-  std::string asset_fname = params[1];
-  std::string start_value = params[2];
-  std::string timeactive = params[3];
+  if (!state.isLoggedIn()) { // check if the user is logged in
+    std::cout << "Im useless for now REMOVE ME" << std::endl;
+  }
 
-  if (validateAuctionName(auction_name) == INVALID) {
+  std::string auctionName = params[0];
+  std::string assetFileName = params[1];
+  std::string startValue = params[2];
+  std::string timeActive = params[3];
+
+  if (validateAuctionName(auctionName) == INVALID) { // check auction name
     std::cout << "Invalid auction_name: Must be alphanumeric and 10 characters "
                  "long"
               << std::endl;
     return;
   }
 
-  if (validateAssetFilename(asset_fname) == INVALID) {
+  if (validateAssetFilename(assetFileName) == INVALID) { // check asset filename
     std::cout << "Invalid asset_filename: Must be alphanumeric, 24 characters "
                  "including a 3 character long extension"
               << std::endl;
     return;
   }
 
-  // check if start_value is numerical
-  if (validateStartValue(start_value) == INVALID) {
+  if (validateStartValue(startValue) == INVALID) { // check start value
     std::cout << "Invalid start value: Must be a positive number up to 6 digits"
               << std::endl;
     return;
   }
 
-  // check if timeactive is numerical
-  if (validateAuctionDuration(timeactive) == INVALID) {
+  if (validateAuctionDuration(timeActive) == INVALID) {
     std::cout << "Invalid time active: Must be a positive number up to 5 digits"
               << std::endl;
     return;
   }
 
-  // check file size
-  if (validateFileSize(asset_fname) == INVALID) {
+  if (validateFileSize(assetFileName) == INVALID) { // check file size
     std::cout << "Invalid file size: File must exist or be less than 10MB"
               << std::endl;
     return;
@@ -246,45 +278,54 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   OpenAuctionRequest openAuctionRequest;
   openAuctionRequest.userID = state.getUserID();
   openAuctionRequest.password = state.getPassword();
-  openAuctionRequest.auctionName = auction_name;
-  openAuctionRequest.assetFilename = asset_fname;
-  openAuctionRequest.startValue = (uint32_t)std::stoi(start_value);
-  openAuctionRequest.timeActive = (uint32_t)std::stoi(timeactive);
-  openAuctionRequest.assetSize = getFileSize(asset_fname);
+  openAuctionRequest.auctionName = auctionName;
+  openAuctionRequest.assetFileName = assetFileName;
+  openAuctionRequest.startValue = (uint32_t)std::stoi(startValue);
+  openAuctionRequest.timeActive = (uint32_t)std::stoi(timeActive);
+  openAuctionRequest.assetSize = getFileSize(assetFileName);
 
   OpenAuctionResponse openAuctionResponse;
   state.sendTcpPacketAndWaitForReply(openAuctionRequest, openAuctionResponse);
 
-  if (openAuctionResponse.status == OpenAuctionResponse::status::OK) {
+  switch (openAuctionResponse.status) {
+  case OpenAuctionResponse::status::OK:
     std::cout << "Open auction successful: " << openAuctionResponse.auctionID
               << std::endl;
-  } else if (openAuctionResponse.status == OpenAuctionResponse::status::NOK) {
+    break;
+  case OpenAuctionResponse::status::NOK:
     std::cout << "Open auction failed: Auction could not be started"
               << std::endl;
-  } else if (openAuctionResponse.status == OpenAuctionResponse::status::NLG) {
+    break;
+  case OpenAuctionResponse::status::NLG:
     std::cout << "Open auction failed: You are not logged in" << std::endl;
-  } else if (openAuctionResponse.status == OpenAuctionResponse::status::ERR) {
+    break;
+  case OpenAuctionResponse::status::ERR:
     std::cout << "Open auction failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown open auction status" << std::endl;
+    break;
   }
 }
 
 void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
-  if (!state.isLoggedIn()) {
+  std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
+
+  if (numArgs != CLOSE_AUCTION_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected "
+              << CLOSE_AUCTION_ARGS_NUM << " , got " << numArgs << std::endl;
+    return;
+  }
+
+  if (!state.isLoggedIn()) { // check if the user is logged in
     std::cout << "Close auction failed: You are not logged in" << std::endl;
     return;
   }
-  std::string auction_id;
-  std::vector<std::string> params = parse_args(args);
 
-  if (params.size() != 1) {
-    std::cout << "Invalid number of arguments: Expected 1, got "
-              << params.size() << std::endl;
-    return;
-  }
+  std::string auctionID = params[0];
 
-  auction_id = params[0];
-
-  if (validateAuctionID(auction_id) == INVALID) {
+  if (validateAuctionID(auctionID) == INVALID) { // check auction id
     std::cout << "Invalid auction ID" << std::endl;
     return;
   }
@@ -292,34 +333,52 @@ void CloseAuctionCommand::handleCommand(std::string args, UserState &state) {
   CloseAuctionRequest closeAuctionRequest;
   closeAuctionRequest.userID = state.getUserID();
   closeAuctionRequest.password = state.getPassword();
-  closeAuctionRequest.auctionID = auction_id;
+  closeAuctionRequest.auctionID = auctionID;
 
   CloseAuctionResponse closeAuctionResponse;
   state.sendTcpPacketAndWaitForReply(closeAuctionRequest, closeAuctionResponse);
 
-  if (closeAuctionResponse.status == CloseAuctionResponse::status::OK) {
+  switch (closeAuctionResponse.status) {
+  case CloseAuctionResponse::status::OK:
     std::cout << "Close auction successful!" << std::endl;
-  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::NLG) {
+    break;
+  case CloseAuctionResponse::status::NOK:
+    std::cout << "Close auction failed: You are not the host of this auction"
+              << std::endl;
+    break;
+  case CloseAuctionResponse::status::NLG:
     std::cout << "Close auction failed: You are not logged in" << std::endl;
-  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::EAU) {
+    break;
+  case CloseAuctionResponse::status::EAU:
     std::cout << "Close auction failed: The auction does not exist"
               << std::endl;
-  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::EOW) {
+    break;
+  case CloseAuctionResponse::status::EOW:
     std::cout << "Close auction failed: You do not own this auction"
               << std::endl;
-  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::END) {
+    break;
+  case CloseAuctionResponse::status::END:
     std::cout << "Close auction failed: The auction has already ended"
               << std::endl;
-  } else if (closeAuctionResponse.status == CloseAuctionResponse::status::ERR) {
+    break;
+  case CloseAuctionResponse::status::ERR:
     std::cout << "Close auction failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown close auction status" << std::endl;
+    break;
   }
 }
 
 void ListUserAuctionsCommand::handleCommand(std::string args,
                                             UserState &state) {
-  if (parse_args(args).size() != 0) {
-    std::cout << "Invalid number of arguments: Expected 0, got "
-              << parse_args(args).size() << std::endl;
+  std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
+
+  if (numArgs != LIST_USER_AUCTIONS_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected "
+              << LIST_USER_AUCTIONS_ARGS_NUM << " , got " << numArgs
+              << std::endl;
     return;
   }
 
@@ -330,56 +389,35 @@ void ListUserAuctionsCommand::handleCommand(std::string args,
   state.sendUdpPacketAndWaitForReply(listUserAuctionsRequest,
                                      listUserAuctionsResponse);
 
-  if (listUserAuctionsResponse.status == ListUserAuctionsResponse::status::OK) {
-    // probably refactor this into a function
+  switch (listUserAuctionsResponse.status) {
+  case ListUserAuctionsResponse::status::OK:
     std::cout << "List user auctions successful!" << std::endl;
-    const int columnWidth = 15;
-
-    // Print the top border
-    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ')
-              << std::endl;
-
-    // Print the header
-    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
-              << "|" << std::setw(columnWidth - 1) << std::left << "Status"
-              << "|" << std::endl;
-
-    // Print the border between header and data
-    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-              << std::endl;
-
-    for (const auto &auction : listUserAuctionsResponse.auctions) {
-      std::cout << "|" << std::setw(columnWidth - 1) << std::left
-                << auction.first << "|" << std::setw(columnWidth - 1)
-                << std::left << (auction.second ? "Active" : "Not Active")
-                << "|" << std::endl;
-
-      // Print the border between rows
-      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-                << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-                << std::endl;
-    }
-  } else if (listUserAuctionsResponse.status ==
-             ListUserAuctionsResponse::status::NOK) {
+    printListUserAuctionsTable(listUserAuctionsResponse.auctions);
+    break;
+  case ListUserAuctionsResponse::status::NOK:
     std::cout << "List user auctions failed: You have no ongoing auctions"
               << std::endl;
-  } else if (listUserAuctionsResponse.status ==
-             ListUserAuctionsResponse::status::NLG) {
+    break;
+  case ListUserAuctionsResponse::status::NLG:
     std::cout << "List user auctions failed: You are not logged in"
               << std::endl;
-  } else if (listUserAuctionsResponse.status ==
-             ListUserAuctionsResponse::status::ERR) {
+    break;
+  case ListUserAuctionsResponse::status::ERR:
     std::cout << "List user auctions failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown list user auctions status" << std::endl;
+    break;
   }
 }
 
 void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
+  std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
 
-  if (parse_args(args).size() != 0) {
-    std::cout << "Invalid number of arguments: Expected 0, got "
-              << parse_args(args).size() << std::endl;
+  if (numArgs != LIST_USER_BIDS_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected "
+              << LIST_USER_BIDS_ARGS_NUM << " , got " << numArgs << std::endl;
     return;
   }
 
@@ -389,51 +427,34 @@ void ListUserBidsCommand::handleCommand(std::string args, UserState &state) {
   ListUserBidsResponse listUserBidsResponse;
   state.sendUdpPacketAndWaitForReply(listUserBidsRequest, listUserBidsResponse);
 
-  if (listUserBidsResponse.status == ListUserBidsResponse::status::OK) {
+  switch (listUserBidsResponse.status) {
+  case ListUserBidsResponse::status::OK:
     std::cout << "List user auctions with bids successful!" << std::endl;
-    const int columnWidth = 15;
-
-    // Print the top border
-    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ')
-              << std::endl;
-
-    // Print the header
-    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
-              << "|" << std::setw(columnWidth - 1) << std::left << "Status"
-              << "|" << std::endl;
-
-    // Print the border between header and data
-    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-              << std::endl;
-
-    for (const auto &auction : listUserBidsResponse.auctions) {
-      std::cout << "|" << std::setw(columnWidth - 1) << std::left
-                << auction.first << "|" << std::setw(columnWidth - 1)
-                << std::left << (auction.second ? "Active" : "Not Active")
-                << "|" << std::endl;
-
-      // Print the border between rows
-      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-                << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-                << std::endl;
-    }
-  } else if (listUserBidsResponse.status == ListUserBidsResponse::status::NOK) {
+    printListUserBidsTable(listUserBidsResponse.auctions);
+    break;
+  case ListUserBidsResponse::status::NOK:
     std::cout << "List user auctions with bids failed: You have no ongoing bids"
               << std::endl;
-  } else if (listUserBidsResponse.status == ListUserBidsResponse::status::NLG) {
+    break;
+  case ListUserBidsResponse::status::NLG:
     std::cout << "List user bids failed: You are not logged in" << std::endl;
-  } else if (listUserBidsResponse.status == ListUserBidsResponse::status::ERR) {
+    break;
+  case ListUserBidsResponse::status::ERR:
     std::cout << "List user bids failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown list user bids status" << std::endl;
+    break;
   }
 }
 
 void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
+  std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
 
-  if (parse_args(args).size() != 0) {
-    std::cout << "Invalid number of arguments: Expected 0, got "
-              << parse_args(args).size() << std::endl;
+  if (numArgs != LIST_AUCTIONS_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected "
+              << LIST_AUCTIONS_ARGS_NUM << " , got " << numArgs << std::endl;
     return;
   }
 
@@ -442,112 +463,94 @@ void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
   ListAuctionsResponse listAuctionsResponse;
   state.sendUdpPacketAndWaitForReply(listAuctionsRequest, listAuctionsResponse);
 
-  if (listAuctionsResponse.status == ListAuctionsResponse::status::OK) {
+  switch (listAuctionsResponse.status) {
+  case ListAuctionsResponse::status::OK:
     std::cout << "List auctions successful!" << std::endl;
-    const int columnWidth = 15;
-
-    // Print the top border
-    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ')
-              << std::endl;
-
-    // Print the header
-    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
-              << "|" << std::setw(columnWidth - 1) << std::left << "Status"
-              << "|" << std::endl;
-
-    // Print the border between header and data
-    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-              << std::endl;
-
-    for (const auto &auction : listAuctionsResponse.auctions) {
-      std::cout << "|" << std::setw(columnWidth - 1) << std::left
-                << auction.first << "|" << std::setw(columnWidth - 1)
-                << std::left << (auction.second ? "Active" : "Not Active")
-                << "|" << std::endl;
-
-      // Print the border between rows
-      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-                << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-                << std::endl;
-    }
-  } else if (listAuctionsResponse.status == ListAuctionsResponse::status::NOK) {
+    printListAuctionsTable(listAuctionsResponse.auctions);
+    break;
+  case ListAuctionsResponse::status::NOK:
     std::cout << "List auctions failed: There are no ongoing auctions"
               << std::endl;
-  } else if (listAuctionsResponse.status == ListAuctionsResponse::status::ERR) {
+    break;
+  case ListAuctionsResponse::status::ERR:
     std::cout << "List auctions failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown list auctions status" << std::endl;
+    break;
   }
 }
 
 void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
-
-  (void)state;
-  std::string auction_id;
+  (void)state; // state is not used in this command
   std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
 
-  if (params.size() != 1) {
-    std::cout << "Invalid number of arguments: Expected 1, got "
-              << params.size() << std::endl;
+  if (numArgs != SHOW_ASSETS_ARGS_NUM) {
+    std::cout << "Invalid number of arguments: Expected "
+              << SHOW_ASSETS_ARGS_NUM << " , got " << numArgs << std::endl;
     return;
   }
 
-  auction_id = params[0];
+  std::string auctionID = params[0];
 
-  if (validateAuctionID(auction_id) == INVALID) {
+  if (validateAuctionID(auctionID) == INVALID) { // check auction id
     std::cout << "Invalid auction ID: Must be a 3 digit postive number"
               << std::endl;
     return;
   }
 
   ShowAssetRequest showAssetRequest;
-  showAssetRequest.auctionID = auction_id;
+  showAssetRequest.auctionID = auctionID;
 
   ShowAssetResponse showAssetResponse;
   state.sendTcpPacketAndWaitForReply(showAssetRequest, showAssetResponse);
 
-  if (showAssetResponse.status == ShowAssetResponse::status::OK) {
+  switch (showAssetResponse.status) {
+  case ShowAssetResponse::status::OK:
     std::cout << "Asset image downloaded successfully!" << std::endl;
-
-    std::cout << "File name: " << showAssetResponse.assetFilename << std::endl;
-
-    // show the file path
+    std::cout << "File name: " << showAssetResponse.assetFileName << std::endl;
     std::cout << "File saved to: " << std::filesystem::current_path() << "/"
-              << showAssetResponse.assetFilename << std::endl;
-  } else if (showAssetResponse.status == ShowAssetResponse::status::NOK) {
+              << showAssetResponse.assetFileName << std::endl;
+    break;
+  case ShowAssetResponse::status::NOK:
     std::cout << "Show asset failed: There is no auction file available"
               << std::endl;
-  } else if (showAssetResponse.status == ShowAssetResponse::status::ERR) {
+    break;
+  case ShowAssetResponse::status::ERR:
     std::cout << "Show asset failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown show asset status" << std::endl;
+    break;
   }
 }
 
 void BidCommand::handleCommand(std::string args, UserState &state) {
-  // if there is no user logged in, bid fails
-  if (!state.isLoggedIn()) {
+  std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
+
+  if (numArgs != BID_ARGS_NUM) { // check the number of arguments
+    std::cout << "Invalid number of arguments: Expected " << BID_ARGS_NUM
+              << " , got " << numArgs << std::endl;
+    return;
+  }
+
+  if (!state.isLoggedIn()) { // check if the user is logged in
     std::cout << "Bid failed: You are not logged in" << std::endl;
     return;
   }
-  std::string auction_id;
-  std::string bid_value;
-  std::vector<std::string> params = parse_args(args);
 
-  if (params.size() != 2) {
-    std::cout << "Invalid number of arguments: Expected 2, got "
-              << params.size() << std::endl;
-    return;
-  }
+  std::string auctionID = params[0];
+  std::string bidValue = params[1];
 
-  auction_id = params[0];
-  bid_value = params[1];
-
-  if (validateAuctionID(auction_id) == INVALID) {
+  if (validateAuctionID(auctionID) == INVALID) { // check auction id
     std::cout << "Invalid auction ID: Must be a 3 digit positive number"
               << std::endl;
     return;
   }
 
-  if (validateBidValue(bid_value) == INVALID) {
+  if (validateBidValue(bidValue) == INVALID) { // check bid value
     std::cout
         << "Invalid bid value: Must be a positive number between 0 and 999999"
         << std::endl;
@@ -557,111 +560,78 @@ void BidCommand::handleCommand(std::string args, UserState &state) {
   BidRequest bidRequest;
   bidRequest.userID = state.getUserID();
   bidRequest.password = state.getPassword();
-  bidRequest.auctionID = auction_id;
-  bidRequest.bidValue = (uint32_t)std::stoi(bid_value);
+  bidRequest.auctionID = auctionID;
+  bidRequest.bidValue = (uint32_t)std::stoi(bidValue);
 
   BidResponse bidResponse;
   state.sendTcpPacketAndWaitForReply(bidRequest, bidResponse);
 
-  if (bidResponse.status == BidResponse::status::ACC) {
+  switch (bidResponse.status) {
+  case BidResponse::status::ACC:
     std::cout << "Bid successful!" << std::endl;
-  } else if (bidResponse.status == BidResponse::status::NLG) {
+    break;
+  case BidResponse::status::NLG:
     std::cout << "Bid failed: You are not logged in" << std::endl;
-  } else if (bidResponse.status == BidResponse::status::NOK) {
+    break;
+  case BidResponse::status::NOK:
     std::cout << "Bid failed: The auction is not active" << std::endl;
-  } else if (bidResponse.status == BidResponse::status::REF) {
+    break;
+  case BidResponse::status::REF:
     std::cout << "Bid failed: A larger or equal bid has already been placed"
               << std::endl;
-  } else if (bidResponse.status == BidResponse::status::ILG) {
+    break;
+  case BidResponse::status::ILG:
     std::cout << "Bid failed: Can not bid on your own auction" << std::endl;
-  } else if (bidResponse.status == BidResponse::status::ERR) {
+    break;
+  case BidResponse::status::ERR:
     std::cout << "Bid failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown bid status" << std::endl;
+    break;
   }
 }
 
 void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
-  std::string auction_id;
   std::vector<std::string> params = parse_args(args);
+  size_t numArgs = params.size();
 
-  if (params.size() != 1) {
-    std::cout << "Invalid number of arguments: Expected 1, got "
-              << params.size() << std::endl;
+  if (numArgs != SHOW_RECORD_ARGS_NUM) {
+    std::cout << "Invalid number of arguments: Expected "
+              << SHOW_RECORD_ARGS_NUM << " , got " << numArgs << std::endl;
     return;
   }
 
-  auction_id = params[0];
+  std::string auctionID = params[0];
 
-  if (validateAuctionID(auction_id) == INVALID) {
+  if (validateAuctionID(auctionID) == INVALID) { // check auction id
     std::cout << "Invalid auction ID: Must be a 3 digit positive number"
               << std::endl;
     return;
   }
-
   ShowRecordRequest showRecordRequest;
-  showRecordRequest.auctionID = auction_id;
+  showRecordRequest.auctionID = auctionID;
 
   ShowRecordResponse showRecordResponse;
   state.sendUdpPacketAndWaitForReply(showRecordRequest, showRecordResponse);
 
-  if (showRecordResponse.status == ShowRecordResponse::status::OK) {
-
-    const int columnWidth = 30;
-
+  switch (showRecordResponse.status) {
+  case ShowRecordResponse::status::OK:
+    printListShowRecordTable(
+        showRecordResponse.hostUID, showRecordResponse.auctionName,
+        showRecordResponse.assetFileName, showRecordResponse.startValue,
+        showRecordResponse.startDate, showRecordResponse.timeActive,
+        showRecordResponse.bids, showRecordResponse.end);
     std::cout << "Show record successful!" << std::endl;
-    std::cout << "Host ID: " << showRecordResponse.hostUID << "\t\t"
-              << "Auction Name: " << showRecordResponse.auctionName << "\t"
-              << "Asset Filename: " << showRecordResponse.assetFilename << "\t"
-              << "Start Value: " << showRecordResponse.startValue << "\t"
-              << "Start Date: " << showRecordResponse.startDate << "\t\t"
-              << "Active Time: " << showRecordResponse.timeActive << std::endl;
-
-    // Print the top border
-    std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ')
-              << std::endl;
-
-    // Print the header
-    std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Bidder"
-              << "|" << std::setw(columnWidth - 1) << std::left << "Bid Value"
-              << "|" << std::setw(columnWidth - 1) << std::left << "Bid Date"
-              << "|" << std::setw(columnWidth - 1) << std::left
-              << "Bid Sec Time"
-              << "|" << std::endl;
-
-    // Print the middle border
-    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-              << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
-              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
-              << std::endl;
-
-    for (const auto &bid : showRecordResponse.bids) {
-      // Accessing elements of the tuple
-      std::string bidder_UID = std::get<0>(bid);
-      uint32_t bid_value = std::get<1>(bid);
-      std::string bid_date_time = std::get<2>(bid);
-      uint32_t bid_sec_time = std::get<3>(bid);
-
-      std::cout << "|" << std::setw(columnWidth - 1) << std::left << bidder_UID
-                << "|" << std::setw(columnWidth - 1) << std::left << bid_value
-                << "|" << std::setw(columnWidth - 1) << std::left
-                << bid_date_time << "|" << std::setw(columnWidth - 1)
-                << std::left << bid_sec_time << "|" << std::endl;
-
-      // Print the border between rows
-      std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
-                << std::setw(columnWidth) << "+" << std::setw(columnWidth)
-                << "+" << std::setw(columnWidth) << "+" << std::setfill(' ')
-                << "+" << std::endl;
-    }
-    if (showRecordResponse.end.first != "") {
-      std::cout << "End Date: " << showRecordResponse.end.first << "\t\t"
-                << "Time passed: " << showRecordResponse.end.second << "\t"
-                << std::endl;
-    }
-  } else if (showRecordResponse.status == ShowRecordResponse::status::NOK) {
+    break;
+  case ShowRecordResponse::status::NOK:
     std::cout << "Show record failed: Auction does not exist" << std::endl;
-  } else if (showRecordResponse.status == ShowRecordResponse::status::ERR) {
+    break;
+  case ShowRecordResponse::status::ERR:
     std::cout << "Show record failed: Server error" << std::endl;
+    break;
+  default:
+    std::cout << "Unknown show record status" << std::endl;
+    break;
   }
 }

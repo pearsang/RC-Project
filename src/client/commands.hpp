@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../utils/constants.hpp"
+#include "../utils/utils.hpp"
 #include "user_state.hpp"
 
 class CommandHandler;
