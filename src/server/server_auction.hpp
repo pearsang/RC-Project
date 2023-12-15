@@ -45,6 +45,9 @@ public:
   void bidOnAuction(std::string userID, std::string password,
                     std::string auctionID, uint32_t bidValue);
 
+  std::tuple<std::string, uint32_t, std::string>
+  getAuctionAsset(std::string auctionID);
+
   // constructor
   AuctionManager() = default;
   // destructor
@@ -91,6 +94,12 @@ class AuctionNotFoundException : public std::runtime_error {
 public:
   AuctionNotFoundException()
       : std::runtime_error("The auction requested does not exist") {}
+};
+
+class AssetNotFoundException : public std::runtime_error {
+public:
+  AssetNotFoundException()
+      : std::runtime_error("The asset requested does not exist") {}
 };
 
 class IllegalBidException : public std::runtime_error {

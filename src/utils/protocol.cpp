@@ -758,7 +758,7 @@ void ShowAssetResponse::send(int fd) {
 
     stream.str(std::string());
     stream.clear();
-    sendFile(fd, assetFilename);
+    sendFile(fd, assetPath);
   } else if (status == NOK) {
     stream << "NOK";
   } else if (status == ERR) {
@@ -781,7 +781,7 @@ void ShowAssetResponse::receive(int fd) {
     readSpace(fd);
     assetSize = readInt(fd);
     readSpace(fd);
-    assetFilePath = readAndSaveToFile(fd, assetFilename, assetSize, false);
+    assetPath = readAndSaveToFile(fd, assetFilename, assetSize, false);
   } else if (status_str == "NOK") {
     this->status = NOK;
   } else {
@@ -834,7 +834,7 @@ void OpenAuctionRequest::receive(int fd) {
 
   readSpace(fd);
   std::string originalAssetFilename = assetFilename;
-  assetFilePath = readAndSaveToFile(fd, originalAssetFilename, assetSize, true);
+  assetPath = readAndSaveToFile(fd, originalAssetFilename, assetSize, true);
   readPacketDelimiter(fd);
 }
 

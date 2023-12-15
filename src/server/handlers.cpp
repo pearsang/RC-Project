@@ -290,7 +290,7 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
 
       uint32_t auctionID = state.auctionManager.openAuction(
           request.userID, request.auctionName, request.startValue,
-          request.timeActive, request.assetFilename, request.assetFilePath);
+          request.timeActive, request.assetFilename, request.assetPath);
 
       response.status = OpenAuctionResponse::OK;
       response.auctionID = intToStringWithZeros((int)auctionID);
@@ -405,6 +405,47 @@ void handleShowAsset(AuctionServerState &state, int fd) {
 
   (void)state;
   (void)fd;
+
+  ShowAssetRequest request;
+  ShowAssetResponse response;
+  try {
+    request.receive(fd);
+    state.cdebug
+        << "[ShowAsset] An user has requested to show an asset of auction "
+        << request.auctionID << std::endl;
+
+    std::tuple<std::string, uint32_t, std::string> asset =
+        state.auctionManager.getAuctionAsset(request.auctionID);
+    response.assetFilename = std::get<0>(asset);
+    response.assetSize = std::get<1>(asset);
+    response.assetPath = std::get<2>(asset);
+    response.status = ShowAssetResponse::OK;
+
+    state.cdebug << "[ShowAsset] Asset of auction " << request.auctionID
+                 << " was successfully shown" << std::endl;
+  } catch (AuctionNotFoundException &e) {
+    response.status = ShowAssetResponse::NOK;
+
+    state.cdebug << "[ShowAsset] Auction " << request.auctionID << " not found"
+                 << std::endl;
+  } catch (AssetNotFoundException &e) {
+    response.status = ShowAssetResponse::NOK;
+
+    state.cdebug << "[ShowAsset] Asset of auction " << request.auctionID
+                 << " not found" << std::endl;
+  } catch (InvalidPacketException &e) {
+    response.status = ShowAssetResponse::ERR;
+    state.cdebug << "[ShowAsset] Invalid packet received" << std::endl;
+
+  } catch (
+      std::exception &e) { // TODO: catch only the exceptions that can be thrown
+    std::cerr << "[ShowAsset] There was an unhandled exception that prevented "
+                 "the user from showing an asset"
+              << e.what() << std::endl;
+    return;
+  }
+
+  response.send(fd);
 }
 
 void handleBid(AuctionServerState &state, int fd) {

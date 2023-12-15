@@ -482,10 +482,7 @@ void ListAuctionsCommand::handleCommand(std::string args, UserState &state) {
 
 void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
 
-  if (!state.isLoggedIn()) {
-    std::cout << "Im useless for now REMOVE ME" << std::endl;
-  }
-
+  (void)state;
   std::string auction_id;
   std::vector<std::string> params = parse_args(args);
 
@@ -518,7 +515,7 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
     std::cout << "File saved to: " << std::filesystem::current_path() << "/"
               << showAssetResponse.assetFilename << std::endl;
   } else if (showAssetResponse.status == ShowAssetResponse::status::NOK) {
-    std::cout << "Show asset failed: There is auction file available"
+    std::cout << "Show asset failed: There is no auction file available"
               << std::endl;
   } else if (showAssetResponse.status == ShowAssetResponse::status::ERR) {
     std::cout << "Show asset failed: Server error" << std::endl;

@@ -389,3 +389,41 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
     throw;
   }
 }
+
+std::tuple<std::string, uint32_t, std::string>
+AuctionManager::getAuctionAsset(std::string auctionID) {
+  try {
+    if (validateAuctionID(auctionID) == INVALID) {
+      throw InvalidPacketException();
+    }
+
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    if (directory_exists(auctionPath) == INVALID) {
+      throw AuctionNotFoundException();
+    }
+
+    std::string auctionInfo = getAuctionInfo(auctionID);
+    // review me please!
+    std::string assetFilename = auctionInfo.substr(
+        auctionInfo.find_first_of(" ", auctionInfo.find_first_of(" ") + 1) + 1);
+    std::string assetPath = auctionPath + "/ASSET/" + assetFilename;
+    // keep only till the first space, not included
+    assetPath = assetPath.substr(0, assetPath.find_first_of(" "));
+    assetFilename = assetFilename.substr(0, assetFilename.find_first_of(" "));
+    printf("assetPath: %s\n", assetPath.c_str());
+
+    if (file_exists(assetPath) == INVALID) {
+      throw AssetNotFoundException();
+    }
+
+    // get asset size
+    uint32_t assetSize = getFileSize(assetPath);
+    printf("assetSize: %d\n", assetSize);
+    printf("assetFilename: %s\n", assetFilename.c_str());
+
+    return std::make_tuple(assetFilename, assetSize, assetPath);
+  } catch (std::exception &e) {
+    throw;
+  }
+}

@@ -628,7 +628,7 @@ public:
   status status;
   std::string assetFilename;
   uint32_t assetSize;
-  std::string assetFilePath;
+  std::string assetPath;
 
   void send(int fd);
   void receive(int fd);
@@ -654,7 +654,7 @@ public:
   uint32_t assetSize;
   uint32_t startValue;
   uint32_t timeActive;
-  std::string assetFilePath;
+  std::string assetPath;
 
   void send(int fd);
   void receive(int fd);
