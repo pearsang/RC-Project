@@ -13,28 +13,27 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// flag to indicate whether the client is terminating
-extern bool is_exiting;
+extern bool is_exiting; // flag to indicate whether the application is exiting
 
 int main(int argc, char *argv[]) {
   try {
-    setup_custom_signal_handlers();
+    setup_custom_signal_handlers();  // change the signal handlers to our own
+    ClientConfig config(argc, argv); // parse command-line arguments
 
-    ClientConfig config(argc, argv);
-    if (config.help) {
+    if (config.help) { // if the help flag is set, print the help menu and exit
       config.printHelp(std::cout);
       return EXIT_SUCCESS;
     }
 
-    UserState userState(config.host, config.port);
+    UserState userState(config.host, config.port); // create a new user state
+    CommandManager commandManager;    // create a new command manager
+    registerCommands(commandManager); // register all commands with the manager
 
-    CommandManager commandManager;
-    registerCommands(commandManager);
-
-    while (!std::cin.eof() && !is_exiting) {
-      commandManager.waitForCommand(userState);
+    while (!std::cin.eof() && !is_exiting) {    // while not exiting, wait for
+      commandManager.waitForCommand(userState); // commands and handle them
     }
 
+    // If it breaks out of the loop, it means that the application is exiting
     std::cout << std::endl
               << "Exiting... Press CTRL + C (again) to forcefully close "
                  "the application."
@@ -42,14 +41,14 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 
-  } catch (std::exception &e) {
+  } catch (std::exception &e) { // catch any exceptions thrown
     std::cerr << "Encountered fatal error while running the "
                  "application. Shutting down..."
               << std::endl
               << e.what() << std::endl;
     return EXIT_FAILURE;
 
-  } catch (...) {
+  } catch (...) { // catch any other exceptions thrown
     std::cerr << "Encountered fatal error while running the "
                  "application. Shutting down..."
               << std::endl;
@@ -75,10 +74,10 @@ void registerCommands(CommandManager &commandManager) {
 }
 
 ClientConfig::ClientConfig(int argc, char *argv[]) {
-  this->program_path = argv[0];
+  this->programPath = argv[0]; // set the program path to the first argument
+
+  // -h -n -p are valid options, and : means that they need an argument
   int opt;
-  // hn:p: means that -h, -n, -p are valid options, and : means that they need
-  // an argument
   while ((opt = getopt(argc, argv, "hn:p:")) != -1) {
     switch (opt) {
     case 'h':
@@ -91,17 +90,16 @@ ClientConfig::ClientConfig(int argc, char *argv[]) {
       this->port = std::string(optarg);
       break;
     default:
-      // If an invalid option is provided, print the help menu and exit
-      std::cerr << std::endl;
+      std::cerr << std::endl; // print a newline before printing help
       printHelp(std::cerr);
       exit(EXIT_FAILURE);
     }
   }
-  validate_port_number(port);
+  validate_port_number(port); // validate the port number
 }
 
 void ClientConfig::printHelp(std::ostream &stream) {
-  stream << "Usage: " << program_path << " [-n ASIP] [-p ASport] [-h]"
+  stream << "Usage: " << programPath << " [-n ASIP] [-p ASport] [-h]"
          << std::endl;
   stream << "Available options:" << std::endl;
   stream << "-n ASIP\t\tSet hostname of Auction Server. Default: "

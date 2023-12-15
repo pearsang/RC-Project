@@ -17,7 +17,7 @@
  */
 class ClientConfig {
 public:
-  char *program_path;
+  char *programPath;
   std::string host = DEFAULT_HOSTNAME;
   std::string port = DEFAULT_PORT;
   bool help = false;
