@@ -607,18 +607,12 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
 
     const int columnWidth = 30;
 
-    std::tm *tm_info = std::localtime(&showRecordResponse.startDate);
-
-    // Format the date and time
-    char start_date[20];
-    std::strftime(start_date, sizeof(start_date), "%Y-%m-%d %H:%M:%S", tm_info);
-
     std::cout << "Show record successful!" << std::endl;
     std::cout << "Host ID: " << showRecordResponse.hostUID << "\t\t"
               << "Auction Name: " << showRecordResponse.auctionName << "\t"
               << "Asset Filename: " << showRecordResponse.assetFilename << "\t"
               << "Start Value: " << showRecordResponse.startValue << "\t"
-              << "Start Date: " << start_date << "\t\t"
+              << "Start Date: " << showRecordResponse.startDate << "\t\t"
               << "Active Time: " << showRecordResponse.timeActive << std::endl;
 
     // Print the top border
@@ -645,22 +639,14 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
       // Accessing elements of the tuple
       std::string bidder_UID = std::get<0>(bid);
       uint32_t bid_value = std::get<1>(bid);
-      time_t bid_date_time = std::get<2>(bid);
+      std::string bid_date_time = std::get<2>(bid);
       uint32_t bid_sec_time = std::get<3>(bid);
-
-      // Convert time_t to a struct tm for extracting date and time components
-      std::tm *bid_date_time_tm_info = std::localtime(&bid_date_time);
-
-      // Format the date and time
-      char date[20];
-      std::strftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S",
-                    bid_date_time_tm_info);
 
       std::cout << "|" << std::setw(columnWidth - 1) << std::left << bidder_UID
                 << "|" << std::setw(columnWidth - 1) << std::left << bid_value
-                << "|" << std::setw(columnWidth - 1) << std::left << date << "|"
-                << std::setw(columnWidth - 1) << std::left << bid_sec_time
-                << "|" << std::endl;
+                << "|" << std::setw(columnWidth - 1) << std::left
+                << bid_date_time << "|" << std::setw(columnWidth - 1)
+                << std::left << bid_sec_time << "|" << std::endl;
 
       // Print the border between rows
       std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
@@ -668,7 +654,7 @@ void ShowRecordCommand::handleCommand(std::string args, UserState &state) {
                 << "+" << std::setw(columnWidth) << "+" << std::setfill(' ')
                 << "+" << std::endl;
     }
-    if (showRecordResponse.end.first != 0) {
+    if (showRecordResponse.end.first != "") {
       std::cout << "End Date: " << showRecordResponse.end.first << "\t\t"
                 << "Time passed: " << showRecordResponse.end.second << "\t"
                 << std::endl;

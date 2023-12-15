@@ -197,7 +197,7 @@ protected:
    * @param buffer The buffer to read from.
    * @return The time that was read.
    */
-  time_t readTime(std::stringstream &buffer);
+  std::string readTime(std::stringstream &buffer);
 
 public:
   /**
@@ -475,10 +475,10 @@ public:
   std::string auctionName;
   std::string assetFilename;
   uint32_t startValue;
-  time_t startDate;
+  std::string startDate;
   uint32_t timeActive;
-  std::vector<std::tuple<std::string, uint32_t, time_t, uint32_t>> bids;
-  std::pair<time_t, uint32_t> end;
+  std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> bids;
+  std::pair<std::string, uint32_t> end;
 
   std::stringstream serialize();
   void deserialize(std::stringstream &buffer);

@@ -380,9 +380,17 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
     std::string bidPath =
         auctionBidsPath + "/" + std::to_string(bidValue) + ".txt";
     create_new_file(bidPath);
-    std::string bid_datetime = getCurrentTimeFormated();
+    std::string bidDateTime = getCurrentTimeFormated();
+    std::string bidTimeSeconds = std::to_string(std::time(nullptr));
+
+    std::string auctionInfo = getAuctionInfo(auctionID);
+    std::string startTimeSeconds = auctionInfo.substr(
+        auctionInfo.find_last_of(" ") + 1, auctionInfo.length());
+
     write_to_file(bidPath,
-                  userID + " " + std::to_string(bidValue) + " " + bid_datetime);
+                  userID + " " + std::to_string(bidValue) + " " + bidDateTime +
+                      " " +
+                      getTimeDifferenceStr(startTimeSeconds, bidTimeSeconds));
 
     return;
   } catch (std::exception &e) {
@@ -423,6 +431,122 @@ AuctionManager::getAuctionAsset(std::string auctionID) {
     printf("assetFilename: %s\n", assetFilename.c_str());
 
     return std::make_tuple(assetFilename, assetSize, assetPath);
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
+std::tuple<
+    std::string, std::string, std::string, uint32_t, std::string, uint32_t,
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>,
+    std::pair<std::string, uint32_t>>
+AuctionManager::getAuctionRecord(std::string auctionID) {
+  try {
+    if (validateAuctionID(auctionID) == INVALID) {
+      throw InvalidPacketException();
+    }
+
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    if (directory_exists(auctionPath) == INVALID) {
+      throw AuctionNotFoundException();
+    }
+
+    std::string auctionOwner;
+    std::string auctionName;
+    std::string assetFilename;
+    uint32_t startValue;
+    std::string start_datetime;
+    uint32_t timeActive;
+
+    std::string bidder;
+    uint32_t bidValue;
+    std::string bid_datetime;
+    uint32_t bid_sec_time;
+    std::tuple<std::string, uint32_t, std::string, uint32_t> bids;
+
+    std::string end_datetime;
+    uint32_t end_sec_time;
+    std::pair<std::string, uint32_t> auctionEndInfoPair;
+
+    std::string auctionInfo = getAuctionInfo(auctionID);
+    std::string word;
+
+    // constructing stream from the string
+    std::stringstream start(auctionInfo);
+
+    // declaring vector to store the string after split
+    std::vector<std::string> words;
+    while (getline(start, word, ' ')) {
+      words.push_back(word);
+    }
+
+    auctionOwner = words[0];
+    auctionName = words[1];
+    assetFilename = words[2];
+    startValue = (uint32_t)std::stoi(words[3]);
+    start_datetime = words[5] + " " + words[6];
+    timeActive = (uint32_t)std::stoi(words[4]);
+
+    std::string auctionBidsPath = auctionPath + "/BIDS";
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+        auctionBids;
+    // UID bid_value bid_datetime bid_sec_time
+    for (const auto &entry :
+         std::filesystem::directory_iterator(auctionBidsPath)) {
+      if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+        std::string bidFile = entry.path();
+        std::string bidInfo;
+        read_from_file(bidFile, bidInfo);
+        // split on spaces
+        std::stringstream bid(bidInfo);
+        std::vector<std::string> bidWords;
+        while (getline(bid, word, ' ')) {
+          bidWords.push_back(word);
+        }
+
+        bidder = bidWords[0];
+        bidValue = (uint32_t)std::stoi(bidWords[1]);
+        bid_datetime = bidWords[2] + " " + bidWords[3];
+        bid_sec_time = (uint32_t)std::stoi(bidWords[4]);
+        bids = std::make_tuple(bidder, bidValue, bid_datetime, bid_sec_time);
+        auctionBids.push_back(bids);
+      }
+    }
+
+    // end_datetime end_sec_time
+    std::pair<std::string, uint32_t> auctionEnd;
+    std::string auctionEndPath = auctionPath + "/END_" + auctionID + ".txt";
+    if (file_exists(auctionEndPath) != INVALID) {
+      std::string auctionEndInfo;
+      read_from_file(auctionEndPath, auctionEndInfo);
+      std::stringstream auctionEnd_(auctionEndInfo);
+      std::vector<std::string> auctionEndWords;
+      while (getline(auctionEnd_, word, ' ')) {
+        auctionEndWords.push_back(word);
+      }
+      end_datetime = auctionEndWords[0] + " " + auctionEndWords[1];
+      end_sec_time = (uint32_t)std::stoi(auctionEndWords[1]);
+
+      auctionEndInfoPair = std::make_pair(end_datetime, end_sec_time);
+    }
+
+    // sort auctionsBids by bidValue
+    std::sort(
+        auctionBids.begin(), auctionBids.end(),
+        [](const std::tuple<std::string, uint32_t, std::string, uint32_t> &a,
+           const std::tuple<std::string, uint32_t, std::string, uint32_t> &b) {
+          return std::get<1>(a) > std::get<1>(b);
+        });
+
+    if (auctionBids.size() > 50) {
+      auctionBids.erase(auctionBids.begin() + 50, auctionBids.end());
+    }
+
+    return std::make_tuple(auctionOwner, auctionName, assetFilename, startValue,
+                           start_datetime, timeActive, auctionBids,
+                           auctionEndInfoPair);
+
   } catch (std::exception &e) {
     throw;
   }

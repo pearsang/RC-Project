@@ -251,4 +251,6 @@ std::string intToStringWithZeros(int number);
 
 std::string getFirstWord(std::string path);
 
+std::string getTimeDifferenceStr(std::string startTime, std::string endTime);
+
 #endif

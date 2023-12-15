@@ -102,14 +102,11 @@ uint32_t UdpPacket::readInt(std::stringstream &buffer) {
   return (uint32_t)i;
 }
 
-time_t UdpPacket::readTime(std::stringstream &buffer) {
+std::string UdpPacket::readTime(std::stringstream &buffer) {
   auto date = readString(buffer, 10);
   readSpace(buffer);
   auto time = readString(buffer, 8);
-  struct tm tm;
-  memset(&tm, 0, sizeof(struct tm));
-  strptime((date + " " + time).c_str(), "%Y-%m-%d %H:%M:%S", &tm);
-  return mktime(&tm);
+  return date + " " + time;
 }
 
 std::stringstream LoginRequest::serialize() {
@@ -478,7 +475,7 @@ std::stringstream ShowRecordResponse::serialize() {
       buffer << " B " << std::get<0>(bid) << " " << std::get<1>(bid) << " "
              << std::get<2>(bid) << " " << std::get<3>(bid);
     }
-    if (end.first != 0) {
+    if (end.first != "") {
       buffer << " E " << end.first << " " << end.second;
     }
   } else if (status == NOK) {
@@ -531,7 +528,7 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
         readSpace(buffer);
         auto bid_sec_time = readInt(buffer);
         bids.push_back(
-            std::make_tuple(user_id, bid_value, bid_date, bid_sec_time));
+            std::make_tuple(bidder_id, bid_value, bid_date, bid_sec_time));
       } else if (b_or_e == 'E') {
         readSpace(buffer);
         auto end_date_time = readTime(buffer);

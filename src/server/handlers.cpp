@@ -272,6 +272,79 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
   (void)state;
   (void)buf;
   (void)addressFrom;
+
+  ShowRecordRequest request;
+  ShowRecordResponse response;
+
+  try {
+    request.deserialize(buf);
+    state.cdebug << "[ShowRecord] User "
+                 << " requested to show record of auction " << request.auctionID
+                 << std::endl;
+
+    std::tuple<
+        std::string, std::string, std::string, uint32_t, std::string, uint32_t,
+        std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>,
+        std::pair<std::string, uint32_t>>
+        auctionRecords =
+            state.auctionManager.getAuctionRecord(request.auctionID);
+    response.hostUID = std::get<0>(auctionRecords);
+    response.auctionName = std::get<1>(auctionRecords);
+    response.assetFilename = std::get<2>(auctionRecords);
+    response.startValue = std::get<3>(auctionRecords);
+    response.startDate = std::get<4>(auctionRecords);
+    response.timeActive = std::get<5>(auctionRecords);
+    response.bids = std::get<6>(auctionRecords);
+    for (auto bid : response.bids) {
+      state.cdebug << "[ShowRecord] Bidsasdasd: " << std::get<0>(bid) << " "
+                   << std::get<1>(bid) << " " << std::get<2>(bid) << " "
+                   << std::get<3>(bid) << std::endl;
+    }
+
+    if (std::get<7>(auctionRecords).first != "") {
+      response.end = std::get<7>(auctionRecords);
+    }
+    response.status = ShowRecordResponse::OK;
+    state.cdebug << "[ShowRecord] Record of auction " << request.auctionID
+                 << " shown successfully" << std::endl;
+    state.cdebug << "[ShowRecord] Host UID: " << response.hostUID << std::endl;
+    state.cdebug << "[ShowRecord] Auction name: " << response.auctionName
+                 << std::endl;
+    state.cdebug << "[ShowRecord] Asset filename: " << response.assetFilename
+                 << std::endl;
+    state.cdebug << "[ShowRecord] Start value: " << response.startValue
+
+                 << std::endl;
+    state.cdebug << "[ShowRecord] Start date: " << response.startDate
+                 << std::endl;
+    state.cdebug << "[ShowRecord] Time active: " << response.timeActive
+                 << std::endl;
+    for (auto bid : response.bids) {
+      state.cdebug << "[ShowRecord] Bid: " << std::get<0>(bid) << " "
+                   << std::get<1>(bid) << " " << std::get<2>(bid) << " "
+                   << std::get<3>(bid) << std::endl;
+    }
+
+    state.cdebug << "[ShowRecord] End: " << response.end.first << " "
+                 << response.end.second << std::endl;
+    state.cdebug << "[ShowRecord] Record shown successfully" << std::endl;
+
+  } catch (AuctionNotFoundException &e) {
+    state.cdebug << "[ShowRecord] Auction " << request.auctionID << " not found"
+                 << std::endl;
+    response.status = ShowRecordResponse::NOK;
+  } catch (InvalidPacketException &e) {
+    state.cdebug << "[ShowRecord] Invalid packet received" << std::endl;
+    response.status = ShowRecordResponse::ERR;
+  } catch (std::exception &e) {
+    std::cerr << "[ShowRecord] There was an unhandled exception that "
+                 "prevented the user from showing the record"
+              << e.what() << std::endl;
+    return;
+  }
+
+  send_packet(response, addressFrom.socket,
+              (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
 void handleOpenAuction(AuctionServerState &state, int fd) {

@@ -303,7 +303,7 @@ std::string getCurrentTimeFormated() {
   // Convert the time point to a time_t object
   std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
 
-  // Convert the time_t object to a tm struct
+  // Convert the time_t object to a time_t struct
   std::tm *timeInfo = std::localtime(&currentTime);
 
   // Format the date and time
@@ -353,4 +353,16 @@ std::string getFirstWord(std::string path) {
     firstWord = firstWord.substr(0, firstWord.length() - 1);
   }
   return firstWord;
+}
+
+std::string getTimeDifferenceStr(std::string startTime, std::string endTime) {
+  try {
+    int start = std::stoi(startTime);
+    int end = std::stoi(endTime);
+    int diff = end - start;
+    std::string diffStr = std::to_string(diff);
+    return diffStr;
+  } catch (...) {
+    throw std::exception();
+  }
 }

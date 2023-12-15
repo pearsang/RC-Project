@@ -6,6 +6,7 @@
 #include "../utils/utils.hpp"
 #include "server_user.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <random>
@@ -47,6 +48,12 @@ public:
 
   std::tuple<std::string, uint32_t, std::string>
   getAuctionAsset(std::string auctionID);
+
+  std::tuple<
+      std::string, std::string, std::string, uint32_t, std::string, uint32_t,
+      std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>,
+      std::pair<std::string, uint32_t>>
+  getAuctionRecord(std::string auctionID);
 
   // constructor
   AuctionManager() = default;
