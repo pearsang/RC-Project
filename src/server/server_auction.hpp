@@ -55,6 +55,10 @@ public:
       std::pair<std::string, uint32_t>>
   getAuctionRecord(std::string auctionID);
 
+  int8_t checkAuctionValidity(std::string auctionID);
+
+  void createCloseAuctionFile(std::string auctionID);
+
   // constructor
   AuctionManager() = default;
   // destructor

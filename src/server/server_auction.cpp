@@ -71,6 +71,7 @@ std::string AuctionManager::getNextAuctionID() {
   }
 }
 
+// REMOVE MNEEEEEE
 void validateOpenAuctionArgs(std::string userID, std::string password,
                              std::string auctionName, uint32_t startValue,
                              uint32_t timeActive, std::string assetFilename,
@@ -120,8 +121,17 @@ std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
 
     // auction still active - no end file
     if (file_exists(auction_end_file) == INVALID) {
-
-      auctions.push_back(std::make_pair(intToStringWithZeros(i), 1));
+      if (checkAuctionValidity(intToStringWithZeros(i)) == INVALID) {
+        try {
+          createCloseAuctionFile(intToStringWithZeros(i));
+        } catch (NonActiveAuctionException &e) {
+          // if auction was closed by another user, ignore it
+          printf("AHAHHAHAHHAHAHHAHA");
+        }
+        auctions.push_back(std::make_pair(intToStringWithZeros(i), 0));
+      } else {
+        auctions.push_back(std::make_pair(intToStringWithZeros(i), 1));
+      }
     }
     // auction ended
     else {
@@ -175,6 +185,29 @@ std::string AuctionManager::getAuctionInfo(std::string auctionID) {
   }
 }
 
+int8_t AuctionManager::checkAuctionValidity(std::string auctionID) {
+  try {
+    int currentTimeSeconds = (int)std::time(nullptr);
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
+    std::string auctionInfo = getAuctionInfo(auctionID);
+
+    std::string startTimeSeconds = auctionInfo.substr(
+        auctionInfo.find_last_of(" ") + 1, auctionInfo.length());
+
+    // get
+
+    if ((std::stoi(startTimeSeconds) - currentTimeSeconds) > 0) {
+      return 0;
+    }
+    return INVALID;
+
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
 std::vector<std::string>
 AuctionManager::getAuctionBidders(std::string auctionID) {
   try {
@@ -209,6 +242,7 @@ AuctionManager::getAuctionBidders(std::string auctionID) {
   }
 }
 
+// my bids
 std::vector<std::pair<std::string, uint8_t>>
 AuctionManager::getAuctionsBiddedByUser(std::string userID) {
 
@@ -256,6 +290,24 @@ std::string AuctionManager::getAuctionOwner(std::string auctionID) {
   }
 }
 
+void AuctionManager::createCloseAuctionFile(std::string auctionID) {
+  try {
+    std::string auctionPath = AUCTIONDIR;
+    auctionPath += "/" + auctionID;
+    std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
+    if (file_exists(end) != INVALID) {
+      throw NonActiveAuctionException();
+    }
+    // close auction
+    create_new_file(end);
+    std::string end_datetime = getCurrentTimeFormated();
+    write_to_file(end, end_datetime);
+
+  } catch (std::exception &e) {
+    throw;
+  }
+}
+
 void AuctionManager::closeAuction(std::string userID, std::string password,
                                   std::string auctionID) {
   try {
@@ -286,17 +338,11 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
       throw IncorrectAuctionOwnerException();
     }
 
-    std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
-    if (file_exists(end) != INVALID) {
-      throw NonActiveAuctionException();
-    }
-
-    // close auction
-    create_new_file(end);
-    std::string end_datetime = getCurrentTimeFormated();
-    write_to_file(end, end_datetime);
+    createCloseAuctionFile(auctionID);
 
     return;
+  } catch (NonActiveAuctionException &e) {
+    throw;
   } catch (std::exception &e) {
     throw;
   }
@@ -362,6 +408,13 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
     auctionPath += "/" + auctionID;
     std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
     if (file_exists(end) != INVALID) {
+      throw NonActiveAuctionException();
+    } else if (checkAuctionValidity(auctionID) == INVALID) {
+      try {
+        createCloseAuctionFile(auctionID);
+      } catch (NonActiveAuctionException &e) {
+        // if auction was closed by another user, ignore it
+      }
       throw NonActiveAuctionException();
     }
 

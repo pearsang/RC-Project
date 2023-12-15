@@ -1,5 +1,5 @@
 login 192837 eusofixe
-open pikadeaço Monet_01.jpg 100 100
+open pikadeaço Monet_01.jpg 100 10
 login 123456 12345678
 bid 001 101
 bid 001 102
