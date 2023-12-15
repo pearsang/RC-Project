@@ -190,15 +190,21 @@ int8_t AuctionManager::checkAuctionValidity(std::string auctionID) {
     int currentTimeSeconds = (int)std::time(nullptr);
     std::string auctionPath = AUCTIONDIR;
     auctionPath += "/" + auctionID;
-    std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
     std::string auctionInfo = getAuctionInfo(auctionID);
 
     std::string startTimeSeconds = auctionInfo.substr(
         auctionInfo.find_last_of(" ") + 1, auctionInfo.length());
 
-    // get
-
-    if ((std::stoi(startTimeSeconds) - currentTimeSeconds) > 0) {
+    // get 5th word of auctionInfo
+    std::stringstream start(auctionInfo);
+    std::string word;
+    std::vector<std::string> words;
+    while (getline(start, word, ' ')) {
+      words.push_back(word);
+    }
+    std::string timeActive = words[4];
+    if ((std::stoi(startTimeSeconds) + std::stoi(timeActive) -
+         currentTimeSeconds) > 0) {
       return 0;
     }
     return INVALID;
@@ -464,6 +470,14 @@ AuctionManager::getAuctionAsset(std::string auctionID) {
       throw AuctionNotFoundException();
     }
 
+    if (checkAuctionValidity(auctionID) == INVALID) {
+      try {
+        createCloseAuctionFile(auctionID);
+      } catch (NonActiveAuctionException &e) {
+        // if auction was closed by another user, ignore it
+      }
+    }
+
     std::string auctionInfo = getAuctionInfo(auctionID);
     // review me please!
     std::string assetFilename = auctionInfo.substr(
@@ -472,7 +486,6 @@ AuctionManager::getAuctionAsset(std::string auctionID) {
     // keep only till the first space, not included
     assetPath = assetPath.substr(0, assetPath.find_first_of(" "));
     assetFilename = assetFilename.substr(0, assetFilename.find_first_of(" "));
-    printf("assetPath: %s\n", assetPath.c_str());
 
     if (file_exists(assetPath) == INVALID) {
       throw AssetNotFoundException();
@@ -480,8 +493,6 @@ AuctionManager::getAuctionAsset(std::string auctionID) {
 
     // get asset size
     uint32_t assetSize = getFileSize(assetPath);
-    printf("assetSize: %d\n", assetSize);
-    printf("assetFilename: %s\n", assetFilename.c_str());
 
     return std::make_tuple(assetFilename, assetSize, assetPath);
   } catch (std::exception &e) {
