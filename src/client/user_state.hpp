@@ -29,7 +29,7 @@ class UserState {
   void setupUdpSocket();
 
   /**
-   * @brief Resolves the server address.
+   * @brief Resolves the server address, for both UDP and TCP.
    *
    * @param hostname The hostname of the server.
    * @param port The port of the server.
@@ -99,6 +99,12 @@ public:
    */
   void sendUdpPacketAndWaitForReply(UdpPacket &request, UdpPacket &response);
 
+  /**
+   * @brief Sends a TCP packet and waits for a reply.
+   *
+   * @param request The packet to send.
+   * @param response The packet to receive.
+   */
   void sendTcpPacketAndWaitForReply(TcpPacket &request, TcpPacket &response);
 
   /**
@@ -162,7 +168,7 @@ public:
   void setPassword(std::string __password) { this->password = __password; }
 
   /**
-   * @brief Checks if there is a logged in user.
+   * @brief Checks if there is a logged in user.s
    */
   bool isLoggedIn() { return !this->userID.empty(); }
 };
