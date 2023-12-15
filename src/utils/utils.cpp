@@ -366,3 +366,151 @@ std::string getTimeDifferenceStr(std::string startTime, std::string endTime) {
     throw std::exception();
   }
 }
+
+void printListUserAuctionsTable(
+    std::vector<std::pair<std::string, uint8_t>> auctions) {
+  const int columnWidth = 15;
+
+  // Print the top border
+  std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << std::endl;
+
+  // Print the header
+  std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
+            << "|" << std::setw(columnWidth - 1) << std::left << "Status"
+            << "|" << std::endl;
+
+  // Print the border between header and data
+  std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+            << std::endl;
+
+  for (const auto &auction : auctions) {
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << auction.first
+              << "|" << std::setw(columnWidth - 1) << std::left
+              << (auction.second ? "Active" : "Not Active") << "|" << std::endl;
+
+    // Print the border between rows
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+  }
+}
+
+void printListUserBidsTable(
+    std::vector<std::pair<std::string, uint8_t>> auctions) {
+  const int columnWidth = 15;
+
+  // Print the top border
+  std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << std::endl;
+
+  // Print the header
+  std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
+            << "|" << std::setw(columnWidth - 1) << std::left << "Status"
+            << "|" << std::endl;
+
+  // Print the border between header and data
+  std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+            << std::endl;
+
+  for (const auto &auction : auctions) {
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << auction.first
+              << "|" << std::setw(columnWidth - 1) << std::left
+              << (auction.second ? "Active" : "Not Active") << "|" << std::endl;
+
+    // Print the border between rows
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+  }
+}
+
+void printListAuctionsTable(
+    std::vector<std::pair<std::string, uint8_t>> auctions) {
+  const int columnWidth = 15;
+
+  // Print the top border
+  std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << std::endl;
+
+  // Print the header
+  std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Auction ID"
+            << "|" << std::setw(columnWidth - 1) << std::left << "Status"
+            << "|" << std::endl;
+
+  // Print the border between header and data
+  std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+            << std::endl;
+
+  for (const auto &auction : auctions) {
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << auction.first
+              << "|" << std::setw(columnWidth - 1) << std::left
+              << (auction.second ? "Active" : "Not Active") << "|" << std::endl;
+
+    // Print the border between rows
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+  }
+}
+
+void printListShowRecordTable(
+    std::string hostUID, std::string auctionName, std::string assetFileName,
+    uint32_t startValue, std::string startDate, uint32_t timeActive,
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> bids,
+    std::pair<std::string, uint32_t> end) {
+  const int columnWidth = 30;
+
+  std::cout << "Show record successful!" << std::endl;
+  std::cout << "Host ID: " << hostUID << "\t\t"
+            << "Auction Name: " << auctionName << "\t"
+            << "Asset Filename: " << assetFileName << "\t"
+            << "Start Value: " << startValue << "\t"
+            << "Start Date: " << startDate << "\t\t"
+            << "Active Time: " << timeActive << std::endl;
+
+  // Print the top border
+  std::cout << "+" << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << std::endl;
+
+  // Print the header
+  std::cout << "|" << std::setw(columnWidth - 1) << std::left << "Bidder"
+            << "|" << std::setw(columnWidth - 1) << std::left << "Bid Value"
+            << "|" << std::setw(columnWidth - 1) << std::left << "Bid Date"
+            << "|" << std::setw(columnWidth - 1) << std::left << "Bid Sec Time"
+            << "|" << std::endl;
+
+  // Print the middle border
+  std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+            << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
+            << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+            << std::endl;
+
+  for (const auto &bid : bids) {
+    // Accessing elements of the tuple
+    std::string bidder_UID = std::get<0>(bid);
+    uint32_t bid_value = std::get<1>(bid);
+    std::string bid_date_time = std::get<2>(bid);
+    uint32_t bid_sec_time = std::get<3>(bid);
+
+    std::cout << "|" << std::setw(columnWidth - 1) << std::left << bidder_UID
+              << "|" << std::setw(columnWidth - 1) << std::left << bid_value
+              << "|" << std::setw(columnWidth - 1) << std::left << bid_date_time
+              << "|" << std::setw(columnWidth - 1) << std::left << bid_sec_time
+              << "|" << std::endl;
+
+    // Print the border between rows
+    std::cout << std::setw(columnWidth) << std::setfill('-') << "+"
+              << std::setw(columnWidth) << "+" << std::setw(columnWidth) << "+"
+              << std::setw(columnWidth) << "+" << std::setfill(' ') << "+"
+              << std::endl;
+  }
+  if (end.first != "") {
+    std::cout << "End Date: " << end.first << "\t\t"
+              << "Time passed: " << end.second << "\t" << std::endl;
+  }
+}

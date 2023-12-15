@@ -253,4 +253,19 @@ std::string getFirstWord(std::string path);
 
 std::string getTimeDifferenceStr(std::string startTime, std::string endTime);
 
+void printListUserAuctionsTable(
+    std::vector<std::pair<std::string, uint8_t>> auctions);
+
+void printListUserBidsTable(
+    std::vector<std::pair<std::string, uint8_t>> auctions);
+
+void printListAuctionsTable(
+    std::vector<std::pair<std::string, uint8_t>> auctions);
+
+void printListShowRecordTable(
+    std::string hostUID, std::string auctionName, std::string assetFileName,
+    uint32_t startValue, std::string startDate, uint32_t timeActive,
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> bids,
+    std::pair<std::string, uint32_t> end);
+
 #endif

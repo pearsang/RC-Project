@@ -473,7 +473,7 @@ public:
   status status;
   std::string hostUID;
   std::string auctionName;
-  std::string assetFilename;
+  std::string assetFileName;
   uint32_t startValue;
   std::string startDate;
   uint32_t timeActive;
@@ -626,7 +626,7 @@ public:
   enum status { OK, NOK, ERR };
   static constexpr const char *ID = "RSA";
   status status;
-  std::string assetFilename;
+  std::string assetFileName;
   uint32_t assetSize;
   std::string assetPath;
 
@@ -650,7 +650,7 @@ public:
   std::string userID;
   std::string password;
   std::string auctionName;
-  std::string assetFilename;
+  std::string assetFileName;
   uint32_t assetSize;
   uint32_t startValue;
   uint32_t timeActive;
