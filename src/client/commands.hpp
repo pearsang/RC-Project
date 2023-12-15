@@ -35,9 +35,9 @@ public:
   /**
    * @brief Waits for and handles incoming commands.
    *
-   * @param state The current user state.
+   * @param userState The current user state.
    */
-  void waitForCommand(UserState &state);
+  void waitForCommand(UserState &userState);
 
   /**
    * @brief Registers a command handler with the manager.
@@ -53,9 +53,8 @@ public:
  * @brief Represents a base class for implementing command-specific behavior.
  *
  * CommandHandler define the properties and behavior of specific commands that
- * the CommandManager can handle. Each CommandHandler has a unique name, an
- * optional alias, optional usage information, and a description of the
- * command's purpose.
+ * the CommandManager can handle. Each CommandHandler has a unique name and
+ * optionally an alias.
  */
 class CommandHandler {
 protected:
@@ -64,176 +63,198 @@ protected:
    *
    * @param name The unique name of the command.
    * @param alias An optional alias for the command.
-   * @param usage An optional string describing the usage of the command.
-   * @param description The description of the command's purpose.
    */
-  CommandHandler(const char *__name, const std::optional<const char *> __alias,
-                 const std::optional<const char *> __usage,
-                 const char *__description)
-      : name{__name}, alias{__alias}, usage{__usage}, description{
-                                                          __description} {}
+  CommandHandler(const char *__name, const std::optional<const char *> __alias)
+      : name{__name}, alias{__alias} {}
 
 public:
   const char *name;
   const std::optional<const char *> alias;
-  const std::optional<const char *> usage;
-  const char *description;
-  virtual void handleCommand(std::string args, UserState &state) = 0;
+  virtual void handleCommand(std::string args, UserState &userState) = 0;
 };
 
 /**
  * @class LoginCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for logging in to the server.
  *
  */
 class LoginCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  LoginCommand() : CommandHandler("login", std::nullopt, "LIN", "Login") {}
+  LoginCommand() : CommandHandler("login", std::nullopt) {}
 };
 
 /**
  * @class LogoutCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for logging out of the server.
  *
  */
 class LogoutCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  LogoutCommand() : CommandHandler("logout", std::nullopt, "LOU", "Logout") {}
+  LogoutCommand() : CommandHandler("logout", std::nullopt) {}
 };
 
 /**
- * @class UnresgisterCommand
+ * @class UnregisterCommand
+ *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
  *
  * @brief Represents a command for unregistering from the server.
  */
 class UnregisterCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  UnregisterCommand()
-      : CommandHandler("unregister", std::nullopt, "UNR", "Unregister") {}
+  UnregisterCommand() : CommandHandler("unregister", std::nullopt) {}
 };
 
 /**
  * @class ExitCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for exiting the application.
  */
 class ExitCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
   // The Exit command has no usage
 public:
-  ExitCommand() : CommandHandler("exit", std::nullopt, std::nullopt, "Exit") {}
+  ExitCommand() : CommandHandler("exit", std::nullopt) {}
 };
 
 /**
- * @class OpenCommand
+ * @class OpenAuctionCommand
+ *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
  *
  * @brief Represents a command for opening a new auction.
  */
 class OpenAuctionCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  OpenAuctionCommand()
-      : CommandHandler("open", std::nullopt, "OPA", "Open Auction") {}
+  OpenAuctionCommand() : CommandHandler("open", std::nullopt) {}
 };
 
 /**
- * @class CloseCommand
+ * @class CloseAuctionCommand
+ *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
  *
  * @brief Represents a command for closing an auction.
  */
 class CloseAuctionCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  CloseAuctionCommand()
-      : CommandHandler("close", std::nullopt, "CLS", "Close Auction") {}
+  CloseAuctionCommand() : CommandHandler("close", std::nullopt) {}
 };
 
 /**
  * @class ListUserAuctionsCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for listing all auctions for a user.
  */
 class ListUserAuctionsCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  ListUserAuctionsCommand()
-      : CommandHandler("myauctions", "ma", "LMA", "List User Auctions") {}
+  ListUserAuctionsCommand() : CommandHandler("myauctions", "ma") {}
 };
 
 /**
  * @class ListUserBidsCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for listing all auctions that the user bidded.
  */
 class ListUserBidsCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  ListUserBidsCommand()
-      : CommandHandler("mybids", "mb", "LMB", "List User Bids") {}
+  ListUserBidsCommand() : CommandHandler("mybids", "mb") {}
 };
 
 /**
  * @class ListAuctionsCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for listing all active auctions.
  */
 class ListAuctionsCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  ListAuctionsCommand()
-      : CommandHandler("list", "l", "LST", "List Currently Active Auctions") {}
+  ListAuctionsCommand() : CommandHandler("list", "l") {}
 };
 
 /**
  * @class ShowAssetCommand
  *
- * @brief Represents a command for showing the image of the asset of an auction.
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
+ * @brief Represents a command for showing the image of the asset of an
+ * auction.
  */
 class ShowAssetCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  ShowAssetCommand()
-      : CommandHandler("show_asset", "sa", "SAS", "Show Asset") {}
+  ShowAssetCommand() : CommandHandler("show_asset", "sa") {}
 };
 
 /**
  * @class BidCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for bidding on an auction.
  */
 class BidCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  BidCommand() : CommandHandler("bid", "b", "BID", "Place a Bid") {}
+  BidCommand() : CommandHandler("bid", "b") {}
 };
 
 /**
  * @class ShowRecordCommand
  *
+ * @param args The arguments passed to the command.
+ * @param userState The current user state.
+ *
  * @brief Represents a command for showing the record of an auction.
  */
 class ShowRecordCommand : public CommandHandler {
-  void handleCommand(std::string args, UserState &state);
+  void handleCommand(std::string args, UserState &userState);
 
 public:
-  ShowRecordCommand()
-      : CommandHandler("show_record", "sr", "SRC", "Show Auction Record") {}
+  ShowRecordCommand() : CommandHandler("show_record", "sr") {}
 };
 
 #endif

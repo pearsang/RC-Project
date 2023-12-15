@@ -76,7 +76,6 @@ void registerCommands(CommandManager &commandManager) {
 
 ClientConfig::ClientConfig(int argc, char *argv[]) {
   this->program_path = argv[0];
-  // REMOVE UNECESSARY FLAGS
   int opt;
   // hn:p: means that -h, -n, -p are valid options, and : means that they need
   // an argument
