@@ -37,10 +37,11 @@
 #define POOL_SIZE 50
 #define TCP_MAX_CONNECTIONS 5
 
-// Directories
-#define ASDIR "AS-DB"
-#define USERDIR "AS-DB/USERS"
-#define AUCTIONDIR "AS-DB/AUCTIONS"
+// Directories and files
+#define AS_DIR "AS-DB"
+#define USER_DIR (AS_DIR "/USERS")
+#define AUCTION_DIR (AS_DIR "/AUCTIONS")
+#define NEXT_AUCTION_FILE "next_auction.txt"
 
 // Commands arguments number
 #define LOGIN_ARGS_NUM 2

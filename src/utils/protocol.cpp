@@ -469,7 +469,7 @@ std::stringstream ShowRecordResponse::serialize() {
   buffer << ShowRecordResponse::ID << " ";
   if (status == OK) {
     buffer << "OK"
-           << " " << hostUID << " " << auctionName << " " << assetFilename
+           << " " << hostUID << " " << auctionName << " " << assetFileName
            << " " << startValue << " " << startDate << " " << timeActive;
     for (auto bid : bids) {
       buffer << " B " << std::get<0>(bid) << " " << std::get<1>(bid) << " "
@@ -504,7 +504,7 @@ void ShowRecordResponse::deserialize(std::stringstream &buffer) {
     auctionName = auction_name;
     readSpace(buffer);
     auto asset_filename = readString(buffer, 24);
-    assetFilename = asset_filename;
+    assetFileName = asset_filename;
     readSpace(buffer);
     auto start_price = readInt(buffer);
     startValue = start_price;
@@ -750,7 +750,7 @@ void ShowAssetResponse::send(int fd) {
 
   if (status == OK) {
     stream << "OK";
-    stream << " " << assetFilename << " " << assetSize << " ";
+    stream << " " << assetFileName << " " << assetSize << " ";
     writeString(fd, stream.str());
 
     stream.str(std::string());
@@ -774,11 +774,11 @@ void ShowAssetResponse::receive(int fd) {
   if (status_str == "OK") {
     this->status = OK;
     readSpace(fd);
-    assetFilename = readString(fd);
+    assetFileName = readString(fd);
     readSpace(fd);
     assetSize = readInt(fd);
     readSpace(fd);
-    assetPath = readAndSaveToFile(fd, assetFilename, assetSize, false);
+    assetPath = readAndSaveToFile(fd, assetFileName, assetSize, false);
   } else if (status_str == "NOK") {
     this->status = NOK;
   } else {
@@ -792,12 +792,12 @@ void OpenAuctionRequest::send(int fd) {
   stream << OpenAuctionRequest::ID << " " << this->userID << " "
          << this->password << " " << this->auctionName << " "
          << this->startValue << " " << this->timeActive << " "
-         << this->assetFilename << " " << assetSize << " ";
+         << this->assetFileName << " " << assetSize << " ";
   writeString(fd, stream.str());
 
   stream.str(std::string());
   stream.clear();
-  sendFile(fd, this->assetFilename);
+  sendFile(fd, this->assetFileName);
 
   stream << std::endl;
   writeString(fd, stream.str());
@@ -821,7 +821,7 @@ void OpenAuctionRequest::receive(int fd) {
   readSpace(fd);
   timeActive = readInt(fd);
   readSpace(fd);
-  assetFilename = readString(fd);
+  assetFileName = readString(fd);
   readSpace(fd);
   assetSize = readInt(fd);
 
@@ -830,8 +830,8 @@ void OpenAuctionRequest::receive(int fd) {
   }
 
   readSpace(fd);
-  std::string originalAssetFilename = assetFilename;
-  assetPath = readAndSaveToFile(fd, originalAssetFilename, assetSize, true);
+  std::string originalAssetFileName = assetFileName;
+  assetPath = readAndSaveToFile(fd, originalAssetFileName, assetSize, true);
   readPacketDelimiter(fd);
 }
 

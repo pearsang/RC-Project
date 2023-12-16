@@ -290,7 +290,7 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
             state.auctionManager.getAuctionRecord(request.auctionID);
     response.hostUID = std::get<0>(auctionRecords);
     response.auctionName = std::get<1>(auctionRecords);
-    response.assetFilename = std::get<2>(auctionRecords);
+    response.assetFileName = std::get<2>(auctionRecords);
     response.startValue = std::get<3>(auctionRecords);
     response.startDate = std::get<4>(auctionRecords);
     response.timeActive = std::get<5>(auctionRecords);
@@ -310,7 +310,7 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
     state.cdebug << "[ShowRecord] Host UID: " << response.hostUID << std::endl;
     state.cdebug << "[ShowRecord] Auction name: " << response.auctionName
                  << std::endl;
-    state.cdebug << "[ShowRecord] Asset filename: " << response.assetFilename
+    state.cdebug << "[ShowRecord] Asset filename: " << response.assetFileName
                  << std::endl;
     state.cdebug << "[ShowRecord] Start value: " << response.startValue
 
@@ -354,7 +354,7 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
     request.receive(fd);
     validateOpenAuctionArgs(request.userID, request.password,
                             request.auctionName, request.startValue,
-                            request.timeActive, request.assetFilename,
+                            request.timeActive, request.assetFileName,
                             request.assetSize);
     state.cdebug << "[OpenAuction] User " << request.userID
                  << " requested to open an auction" << std::endl;
@@ -363,7 +363,7 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
 
       uint32_t auctionID = state.auctionManager.openAuction(
           request.userID, request.auctionName, request.startValue,
-          request.timeActive, request.assetFilename, request.assetPath);
+          request.timeActive, request.assetFileName, request.assetPath);
 
       response.status = OpenAuctionResponse::OK;
       response.auctionID = intToStringWithZeros((int)auctionID);
@@ -489,7 +489,7 @@ void handleShowAsset(AuctionServerState &state, int fd) {
 
     std::tuple<std::string, uint32_t, std::string> asset =
         state.auctionManager.getAuctionAsset(request.auctionID);
-    response.assetFilename = std::get<0>(asset);
+    response.assetFileName = std::get<0>(asset);
     response.assetSize = std::get<1>(asset);
     response.assetPath = std::get<2>(asset);
     response.status = ShowAssetResponse::OK;

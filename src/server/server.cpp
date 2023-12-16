@@ -12,36 +12,36 @@
 #include "../utils/protocol.hpp"
 #include "../utils/utils.hpp"
 
-// flag to indicate whether the server is terminating
-extern bool is_exiting;
+extern bool is_exiting; // flag to indicate whether the application is exiting
 
 int main(int argc, char *argv[]) {
 
   try {
 
-    ServerConfig config(argc, argv);
+    ServerConfig config(argc, argv); // parse command-line arguments
 
-    if (config.help) {
+    if (config.help) { // if the help flag is set, print the help menu and exit
       config.printHelp(std::cout);
       return EXIT_SUCCESS;
     }
 
-    setup_custom_signal_handlers();
-    setupDB();
+    setup_custom_signal_handlers(); // change the signal handlers to our own
+    setupDB();                      // setup the database
 
-    AuctionServerState state(config.port, config.verbose);
-    state.registerHandlers();
+    AuctionServerState serverState(config.port, config.verbose);
+    serverState.registerHandlers(); // register all handlers with the manager
 
-    state.cdebug << "Server is running on verbose mode" << std::endl;
+    serverState.cdebug << "Server is running on verbose mode" << std::endl;
 
-    std::thread tcp_thread(tcpMainThread, std::ref(state));
-    uint32_t ex_trial = 0;
-    while (!is_exiting) {
+    // start the TCP thread
+    std::thread tcp_thread(tcpMainThread, std::ref(serverState));
+    uint32_t ex_trial = 0; // exception trial counter
+    while (!is_exiting) { // while not exiting, wait for packets and handle them
       try {
-        wait_for_udp_packet(state);
-        ex_trial = 0;
+        wait_for_udp_packet(serverState);
+        ex_trial = 0; // reset the exception trial counter
       } catch (std::exception &e) {
-        std::cerr << "Encountered a fatak error while running the "
+        std::cerr << "Encountered a fatal error while running the "
                      "application. Retrying..."
                   << std::endl
                   << e.what() << std::endl;
@@ -52,15 +52,15 @@ int main(int argc, char *argv[]) {
                   << std::endl;
         ex_trial++;
       }
-      if (ex_trial >= EXCEPTION_RETRY_MAX_TRIALS) {
+      if (ex_trial >= EXCEPTION_RETRY_MAX_TRIALS) { // if max trials reached
         std::cerr << "Max trials reached, shutting down..." << std::endl;
-        is_exiting = true;
+        is_exiting = true; // set the exiting flag
       }
     }
 
     std::cout << "Shutting down UDP server..." << std::endl;
 
-    tcp_thread.join();
+    tcp_thread.join(); // wait for the TCP thread to finish
 
   } catch (std::exception &e) {
     std::cerr << "Encountered a fatal error while running the "
@@ -74,14 +74,13 @@ int main(int argc, char *argv[]) {
               << std::endl;
     return EXIT_FAILURE;
   }
-
   return EXIT_SUCCESS;
 }
 
 ServerConfig::ServerConfig(int argc, char *argv[]) {
   programPath = argv[0];
+  // -p -v -h are valid options, and : means that they need an argument
   int opt;
-
   while ((opt = getopt(argc, argv, "-p:vh")) != -1) {
     switch (opt) {
     case 'p':
@@ -97,13 +96,13 @@ ServerConfig::ServerConfig(int argc, char *argv[]) {
       break;
 
     default:
-      std::cerr << std::endl;
-      printHelp(std::cerr);
+      std::cerr << std::endl; // print a newline before printing help
+      printHelp(std::cerr);   // print the help menu
       exit(EXIT_FAILURE);
     }
   }
 
-  validate_port_number(port);
+  validate_port_number(port); // validate the port number
 }
 
 void ServerConfig::printHelp(std::ostream &stream) {
@@ -114,18 +113,18 @@ void ServerConfig::printHelp(std::ostream &stream) {
 }
 
 void setupDB() {
-  create_new_directory(ASDIR);
-  create_new_directory(USERDIR);
-  create_new_directory(AUCTIONDIR);
+  create_new_directory(AS_DIR);      // create the AS directory
+  create_new_directory(USER_DIR);    // create the user directory
+  create_new_directory(AUCTION_DIR); // create the auction directory
 
-  std::string nextAuctionFile = AUCTIONDIR;
-  nextAuctionFile += "/next_auction.txt";
+  std::string nextAuctionFile =
+      AUCTION_DIR + std::string("/") + NEXT_AUCTION_FILE;
   create_new_file(nextAuctionFile);
 
   // count the number of directories inside AUctions
   int count = 0;
 
-  for (const auto &entry : std::filesystem::directory_iterator(AUCTIONDIR)) {
+  for (const auto &entry : std::filesystem::directory_iterator(AUCTION_DIR)) {
     if (std::filesystem::is_directory(entry.path())) {
       count++;
     }

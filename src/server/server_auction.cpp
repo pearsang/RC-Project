@@ -12,7 +12,7 @@ uint32_t AuctionManager::openAuction(std::string userID,
 
     std::string auctionID = getNextAuctionID();
 
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     create_new_directory(auctionPath);
     std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
@@ -52,7 +52,7 @@ std::string AuctionManager::getNextAuctionID() {
   try {
 
     std::string nextAuctionID;
-    std::string nextAuctionPath = AUCTIONDIR;
+    std::string nextAuctionPath = AUCTION_DIR;
     nextAuctionPath += "/next_auction.txt";
     read_from_file(nextAuctionPath, nextAuctionID);
 
@@ -91,11 +91,11 @@ void validateOpenAuctionArgs(std::string userID, std::string password,
 std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
 
   std::vector<std::pair<std::string, uint8_t>> auctions;
-  if (directory_exists(AUCTIONDIR) == INVALID) {
+  if (directory_exists(AUCTION_DIR) == INVALID) {
     throw std::exception();
   }
   // get number of auctions in DB
-  std::string next_auction_path = AUCTIONDIR;
+  std::string next_auction_path = AUCTION_DIR;
   next_auction_path += "/next_auction.txt";
   std::string nextAuctionID;
 
@@ -109,7 +109,7 @@ std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
 
   // get all auctions
   for (int i = 1; i <= nAuctions; i++) {
-    std::string auction_dir = AUCTIONDIR;
+    std::string auction_dir = AUCTION_DIR;
     auction_dir += "/" + intToStringWithZeros(i);
     std::string auction_end_file =
         auction_dir + "/" + "END_" + intToStringWithZeros(i) + ".txt";
@@ -174,7 +174,7 @@ AuctionManager::listUserAuctions(std::string userID) {
 
 std::string AuctionManager::getAuctionInfo(std::string auctionID) {
   try {
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
     std::string auctionInfo;
@@ -188,7 +188,7 @@ std::string AuctionManager::getAuctionInfo(std::string auctionID) {
 int8_t AuctionManager::checkAuctionValidity(std::string auctionID) {
   try {
     int currentTimeSeconds = (int)std::time(nullptr);
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     std::string auctionInfo = getAuctionInfo(auctionID);
 
@@ -217,7 +217,7 @@ int8_t AuctionManager::checkAuctionValidity(std::string auctionID) {
 std::vector<std::string>
 AuctionManager::getAuctionBidders(std::string auctionID) {
   try {
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     std::string auctionBidsPath = auctionPath + "/BIDS";
 
@@ -284,7 +284,7 @@ AuctionManager::getAuctionsBiddedByUser(std::string userID) {
 
 std::string AuctionManager::getAuctionOwner(std::string auctionID) {
   try {
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     std::string start = auctionPath + "/" + "START_" + auctionID + ".txt";
     std::string auctionInfo;
@@ -298,7 +298,7 @@ std::string AuctionManager::getAuctionOwner(std::string auctionID) {
 
 void AuctionManager::createCloseAuctionFile(std::string auctionID) {
   try {
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
     if (file_exists(end) != INVALID) {
@@ -334,7 +334,7 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
       throw UserNotLoggedInException();
     }
 
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     if (directory_exists(auctionPath) == INVALID) {
       throw AuctionNotFoundException();
@@ -356,7 +356,7 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
 
 uint32_t AuctionManager::getLargestBid(std::string auctionID) {
 
-  std::string auctionPath = AUCTIONDIR;
+  std::string auctionPath = AUCTION_DIR;
   auctionPath += "/" + auctionID;
   std::string auctionBidsPath = auctionPath + "/BIDS";
   std::string max_filename;
@@ -410,7 +410,7 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
       throw UserNotLoggedInException();
     }
 
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     std::string end = auctionPath + "/" + "END_" + auctionID + ".txt";
     if (file_exists(end) != INVALID) {
@@ -464,7 +464,7 @@ AuctionManager::getAuctionAsset(std::string auctionID) {
       throw InvalidPacketException();
     }
 
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     if (directory_exists(auctionPath) == INVALID) {
       throw AuctionNotFoundException();
@@ -510,7 +510,7 @@ AuctionManager::getAuctionRecord(std::string auctionID) {
       throw InvalidPacketException();
     }
 
-    std::string auctionPath = AUCTIONDIR;
+    std::string auctionPath = AUCTION_DIR;
     auctionPath += "/" + auctionID;
     if (directory_exists(auctionPath) == INVALID) {
       throw AuctionNotFoundException();

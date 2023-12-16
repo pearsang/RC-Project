@@ -158,9 +158,9 @@ void AuctionServerState::callTcpPacketHandler(std::string packet_id, int fd) {
 }
 
 int8_t existsDB() {
-  if (directory_exists(ASDIR) == INVALID ||
-      directory_exists(USERDIR) == INVALID ||
-      directory_exists(AUCTIONDIR) == INVALID) {
+  if (directory_exists(AS_DIR) == INVALID ||
+      directory_exists(USER_DIR) == INVALID ||
+      directory_exists(AUCTION_DIR) == INVALID) {
     return INVALID;
   }
   return 0;

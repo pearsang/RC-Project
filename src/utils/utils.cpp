@@ -285,7 +285,7 @@ int8_t validateFileSize(std::string file_path) {
 }
 
 std::string getUserPassword(std::string userID) {
-  std::string passwordPath = USERDIR;
+  std::string passwordPath = USER_DIR;
   std::string validPassword;
   try {
     passwordPath += "/" + userID + "/" + userID + "_pass.txt";
