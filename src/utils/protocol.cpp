@@ -825,7 +825,7 @@ void OpenAuctionRequest::receive(int fd) {
   readSpace(fd);
   assetSize = readInt(fd);
 
-  if (assetSize > 99999999) {
+  if (validateAssetFileSize(assetSize) == INVALID) {
     throw InvalidPacketException();
   }
 

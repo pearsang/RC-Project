@@ -260,6 +260,12 @@ AuctionManager::getAuctionsBiddedByUser(std::string userID) {
       throw NoOngoingBidsException();
     }
 
+    // remove duplicate auctions
+    std::sort(auctionsBiddedByUser.begin(), auctionsBiddedByUser.end());
+    auctionsBiddedByUser.erase(
+        std::unique(auctionsBiddedByUser.begin(), auctionsBiddedByUser.end()),
+        auctionsBiddedByUser.end());
+
     return auctionsBiddedByUser;
   } catch (NoOngoingBidsException &e) {
     throw;
@@ -436,12 +442,12 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
       throw NonActiveAuctionException();
     }
 
-    if (bidValue <= getLargestBid(auctionID)) { // bid value is too low
-      throw BidRefusedException();
-    }
-
     if (getAuctionOwner(auctionID) == userID) { // user is auction owner
       throw IllegalBidException();
+    }
+
+    if (bidValue <= getLargestBid(auctionID)) { // bid value is too low
+      throw BidRefusedException();
     }
 
     std::string auctionBidsPath = auctionPath + BID_DIR;

@@ -176,18 +176,6 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
   UnregisterResponse unregisterResponse;
   state.sendUdpPacketAndWaitForReply(unregisterRequest, unregisterResponse);
 
-  if (unregisterResponse.status == UnregisterResponse::status::OK) {
-    std::cout << "Unregister successful!" << std::endl;
-    std::string empty = "";
-    state.setUserID(empty);
-    state.setPassword(empty);
-  } else if (unregisterResponse.status == UnregisterResponse::status::NOK) {
-    std::cout << "Unregister failed: You are not logged in" << std::endl;
-  } else if (unregisterResponse.status == UnregisterResponse::status::UNR) {
-    std::cout << "Unregister failed: You are not registered" << std::endl;
-  } else if (unregisterResponse.status == UnregisterResponse::status::ERR) {
-    std::cout << "Unregister failed: Server error" << std::endl;
-  }
   std::string empty = "";
   switch (unregisterResponse.status) {
   case UnregisterResponse::status::OK:
@@ -232,7 +220,8 @@ void OpenAuctionCommand::handleCommand(std::string args, UserState &state) {
   }
 
   if (!state.isLoggedIn()) { // check if the user is logged in
-    std::cout << "Im useless for now REMOVE ME" << std::endl;
+    std::cout << "You must be logged in to open an auction " << std::endl;
+    return;
   }
 
   std::string auctionName = params[0];
@@ -502,12 +491,12 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
 
   ShowAssetResponse showAssetResponse;
   state.sendTcpPacketAndWaitForReply(showAssetRequest, showAssetResponse);
-
+  std::string currentPath = std::filesystem::current_path();
   switch (showAssetResponse.status) {
   case ShowAssetResponse::status::OK:
     std::cout << "Asset image downloaded successfully!" << std::endl;
     std::cout << "File name: " << showAssetResponse.assetFileName << std::endl;
-    std::cout << "File saved to: " << std::filesystem::current_path() << SLASH
+    std::cout << "File saved to: " << currentPath << SLASH
               << showAssetResponse.assetFileName << std::endl;
     break;
   case ShowAssetResponse::status::NOK:

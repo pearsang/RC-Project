@@ -324,6 +324,9 @@ int8_t validateAssetFileSize(uint32_t assetSize) {
   std::stringstream ss;
   ss << assetSize;
   std::string assetSizeStr = ss.str();
+  if (assetSizeStr.length() == 10000000) { // 10MB
+    return 0;
+  }
   if (assetSizeStr.length() > FILESIZE_MAX) {
     return INVALID;
   }
