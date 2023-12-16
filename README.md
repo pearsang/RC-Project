@@ -17,28 +17,32 @@ root directory to facilitate the compilation of both applications.
 
 ## How to run:
 
-In order to compile the user application, run the command: make user
-To run the application, run the command: ./user
+In order to compile the user application, run the command: `make user`
+To run the application, run the command: `./user`
 The following flags can be used:
+```  
     -n : to set the AS hostname
     -p : to set the AS port
     -h : to show the help menu
+```
 
-In order to compile the AS, run the command: make AS
-To run the server, run the command: ./AS
+In order to compile the AS, run the command: `make AS`
+To run the server, run the command: `./AS`
 The following flags can be used:
+```
     -p : to set the port number the server will be listening on
     -v : to activate the verbose mode, where the AS prints log messages 
 during its execution.
+```
 
-If the flags to set the hostname (-n) or the port (-p) are not used,
+If the flags to set the hostname (`-n`) or the port (`-p`) are not used,
 the default values will ben taken into consideration. You can change these
-values and a lot more on utils/constants.hpp.
+values and a lot more on _utils/constants.hpp_.
 
 ## The Code:
 
 The program is divided into 3 main directories:
-
+```
     ./client - all the main functions needed to run the user app.
 
     ./server - all the main functions needed to run the AS.
@@ -47,6 +51,7 @@ The program is divided into 3 main directories:
 including the "protocol.cpp" (with the respective header file), that includes
 all the functions to write/read from the UDP and TCP sockets, which depending
 on the commands, is how both endpoints will communicate.
+```
 
 ## Usage:
 
