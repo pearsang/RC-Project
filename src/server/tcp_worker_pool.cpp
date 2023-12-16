@@ -3,8 +3,6 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "../utils/protocol.hpp"
-
 Worker::Worker() { thread = std::thread(&Worker::execute, this); }
 
 Worker::~Worker() {
@@ -48,8 +46,8 @@ void Worker::execute() {
                 << std::endl;
     }
 
-    pool->state.cdebug << "Worker number " << workerID
-                       << " Closing connection..." << std::endl;
+    pool->state.verbose << "Worker number " << workerID
+                        << " Closing connection..." << std::endl;
     close(tcpSocketFD);
     to_execute = false;
     pool->freeWorker(workerID);
@@ -79,7 +77,7 @@ void TcpWorkerPool::giveConnection(int fd) {
 
       workers[i].cond.notify_one();
 
-      state.cdebug << "Sent to worker number " << i << std::endl;
+      state.verbose << "Sent to worker number " << i << std::endl;
       return;
     }
   }

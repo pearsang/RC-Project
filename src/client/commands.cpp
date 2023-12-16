@@ -1,7 +1,4 @@
 #include "commands.hpp"
-#include "./utils/protocol.hpp"
-
-#include "../utils/utils.hpp"
 #include <cctype>
 #include <cstring>
 #include <fstream>
@@ -510,7 +507,7 @@ void ShowAssetCommand::handleCommand(std::string args, UserState &state) {
   case ShowAssetResponse::status::OK:
     std::cout << "Asset image downloaded successfully!" << std::endl;
     std::cout << "File name: " << showAssetResponse.assetFileName << std::endl;
-    std::cout << "File saved to: " << std::filesystem::current_path() << "/"
+    std::cout << "File saved to: " << std::filesystem::current_path() << SLASH
               << showAssetResponse.assetFileName << std::endl;
     break;
   case ShowAssetResponse::status::NOK:

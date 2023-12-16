@@ -668,7 +668,7 @@ std::string TcpPacket::readAndSaveToFile(const int fd, std::string &file_name,
   if (flag) {
     std::string filepath = generateUniqueIdentifier();
     create_new_directory(filepath);
-    filepath += "/" + file_name;
+    filepath += SLASH + file_name;
     file_name = filepath;
   }
   std::ofstream file(file_name);

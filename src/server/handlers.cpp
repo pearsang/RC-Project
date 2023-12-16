@@ -6,36 +6,35 @@
 
 #include "../utils/protocol.hpp"
 
-void handleLogin(AuctionServerState &state, std::stringstream &buf,
+void handleLogin(AuctionServerState &serverState, std::stringstream &buf,
                  SocketAddress &addressFrom) {
   LoginRequest request;
   LoginResponse response;
-
   try {
     request.deserialize(buf);
-    state.cdebug << "[Login] User " << request.userID << " requested to login"
-                 << std::endl;
+    serverState.verbose << "[Login] User " << request.userID
+                        << " requested to login" << std::endl;
 
-    if (state.usersManager.userExists(request.userID) == 0) {
-      state.usersManager.login(request.userID, request.password);
+    if (serverState.usersManager.userExists(request.userID) == 0) {
+      serverState.usersManager.login(request.userID, request.password);
       response.status = LoginResponse::OK;
-      state.cdebug << "[Login] User " << request.userID
-                   << " successfully logged in" << std::endl;
+      serverState.verbose << "[Login] User " << request.userID
+                          << " successfully logged in" << std::endl;
 
     } else {
-      state.usersManager.registerUser(request.userID, request.password);
+      serverState.usersManager.registerUser(request.userID, request.password);
       response.status = LoginResponse::REG;
-      state.cdebug << "[Login] User " << request.userID
-                   << " successfully registered" << std::endl;
+      serverState.verbose << "[Login] User " << request.userID
+                          << " successfully registered" << std::endl;
     }
   } catch (InvalidCredentialsException &e) {
-    state.cdebug << "User " << request.userID
-                 << " tried to login with invalid "
-                    "credentials"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to login with invalid "
+                           "credentials"
+                        << std::endl;
     response.status = LoginResponse::NOK;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[Login] Invalid packet received" << std::endl;
+    serverState.verbose << "[Login] Invalid packet received" << std::endl;
     response.status = LoginResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[Login] There was an unhandled exception that prevented "
@@ -49,40 +48,40 @@ void handleLogin(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleLogout(AuctionServerState &state, std::stringstream &buf,
+void handleLogout(AuctionServerState &serverState, std::stringstream &buf,
                   SocketAddress &addressFrom) {
   LogoutRequest request;
   LogoutResponse response;
 
   try {
     request.deserialize(buf);
-    state.cdebug << "[Logout] User " << request.userID
-                 << " requested to logout with password " << request.password
-                 << std::endl;
-    if (state.usersManager.userExists(request.userID) == 0) {
-      if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
-        state.usersManager.logout(request.userID, request.password);
+    serverState.verbose << "[Logout] User " << request.userID
+                        << " requested to logout with password "
+                        << request.password << std::endl;
+    if (serverState.usersManager.userExists(request.userID) == 0) {
+      if (serverState.usersManager.isUserLoggedIn(request.userID) == 0) {
+        serverState.usersManager.logout(request.userID, request.password);
         response.status = LogoutResponse::OK;
-        state.cdebug << "[Logout] User " << request.userID
-                     << " successfully logged out" << std::endl;
+        serverState.verbose << "[Logout] User " << request.userID
+                            << " successfully logged out" << std::endl;
       } else {
         response.status = LogoutResponse::NOK;
-        state.cdebug << "[Logout] User " << request.userID
-                     << " is not logged in" << std::endl;
+        serverState.verbose << "[Logout] User " << request.userID
+                            << " is not logged in" << std::endl;
       }
     } else {
       response.status = LogoutResponse::UNR;
-      state.cdebug << "[Logout] User " << request.userID << " is not registered"
-                   << std::endl;
+      serverState.verbose << "[Logout] User " << request.userID
+                          << " is not registered" << std::endl;
     }
   } catch (InvalidCredentialsException &e) {
-    state.cdebug << "User " << request.userID
-                 << " tried to logout with invalid "
-                    "credentials"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to logout with invalid "
+                           "credentials"
+                        << std::endl;
     response.status = LogoutResponse::ERR;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[Logout] Invalid packet received" << std::endl;
+    serverState.verbose << "[Logout] Invalid packet received" << std::endl;
     response.status = LogoutResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[Logout] There was an unhandled exception that prevented "
@@ -95,43 +94,44 @@ void handleLogout(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleUnregister(AuctionServerState &state, std::stringstream &buf,
+void handleUnregister(AuctionServerState &serverState, std::stringstream &buf,
                       SocketAddress &addressFrom) {
   UnregisterRequest request;
   UnregisterResponse response;
 
   try {
     request.deserialize(buf);
-    state.cdebug << "[Unregister] User " << request.userID
-                 << " requested to unregister with password "
-                 << request.password << std::endl;
-    if (state.usersManager.userExists(request.userID) == 0) {
-      if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
-        state.usersManager.logout(request.userID, request.password);
-        state.cdebug << "[Unregister] User " << request.userID
-                     << " successfully logged out" << std::endl;
-        state.usersManager.unregisterUser(request.userID, request.password);
+    serverState.verbose << "[Unregister] User " << request.userID
+                        << " requested to unregister with password "
+                        << request.password << std::endl;
+    if (serverState.usersManager.userExists(request.userID) == 0) {
+      if (serverState.usersManager.isUserLoggedIn(request.userID) == 0) {
+        serverState.usersManager.logout(request.userID, request.password);
+        serverState.verbose << "[Unregister] User " << request.userID
+                            << " successfully logged out" << std::endl;
+        serverState.usersManager.unregisterUser(request.userID,
+                                                request.password);
         response.status = UnregisterResponse::OK;
-        state.cdebug << "[Unregister] User " << request.userID
-                     << " successfully unregistered" << std::endl;
+        serverState.verbose << "[Unregister] User " << request.userID
+                            << " successfully unregistered" << std::endl;
       } else {
         response.status = UnregisterResponse::NOK;
-        state.cdebug << "[Unregister] User " << request.userID
-                     << " is not logged in" << std::endl;
+        serverState.verbose << "[Unregister] User " << request.userID
+                            << " is not logged in" << std::endl;
       }
     } else {
       response.status = UnregisterResponse::UNR;
-      state.cdebug << "[Unregister] User " << request.userID
-                   << " is not registered" << std::endl;
+      serverState.verbose << "[Unregister] User " << request.userID
+                          << " is not registered" << std::endl;
     }
   } catch (InvalidCredentialsException &e) {
-    state.cdebug << "User " << request.userID
-                 << " tried to unregister with invalid "
-                    "credentials"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to unregister with invalid "
+                           "credentials"
+                        << std::endl;
     response.status = UnregisterResponse::ERR;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[Unregister] Invalid packet received" << std::endl;
+    serverState.verbose << "[Unregister] Invalid packet received" << std::endl;
     response.status = UnregisterResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[Unregister] There was an unhandled exception that prevented "
@@ -144,38 +144,37 @@ void handleUnregister(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
+void handleListUserAuctions(AuctionServerState &serverState,
+                            std::stringstream &buf,
                             SocketAddress &addressFrom) {
   std::cout << "Handling list user auctions request" << std::endl;
-
-  (void)state;
-  (void)buf;
-  (void)addressFrom;
-
   ListUserAuctionsRequest request;
   ListUserAuctionsResponse response;
 
   try {
     request.deserialize(buf);
-    state.cdebug << "[ListUserAuctions] User "
-                 << " requested to list auctions" << std::endl;
+    serverState.verbose << "[ListUserAuctions] User "
+                        << " requested to list auctions" << std::endl;
 
-    if (state.usersManager.isUserLoggedIn(request.userID) != INVALID) {
-      response.auctions = state.auctionManager.listUserAuctions(request.userID);
+    if (serverState.usersManager.isUserLoggedIn(request.userID) != INVALID) {
+      response.auctions =
+          serverState.auctionManager.listUserAuctions(request.userID);
       response.status = ListUserAuctionsResponse::OK;
-      state.cdebug << "[ListUserAuctions] Auctions listed successfully"
-                   << std::endl;
+      serverState.verbose << "[ListUserAuctions] Auctions listed successfully"
+                          << std::endl;
     } else {
       response.status = ListUserAuctionsResponse::NLG;
-      state.cdebug << "[ListUserAuctions] User " << request.userID
-                   << " is not logged in" << std::endl;
+      serverState.verbose << "[ListUserAuctions] User " << request.userID
+                          << " is not logged in" << std::endl;
     }
 
   } catch (NoAuctionsException &e) {
-    state.cdebug << "[ListUserAuctions] No auctions to list" << std::endl;
+    serverState.verbose << "[ListUserAuctions] No auctions to list"
+                        << std::endl;
     response.status = ListUserAuctionsResponse::NOK;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[ListUserAuctions] Invalid packet received" << std::endl;
+    serverState.verbose << "[ListUserAuctions] Invalid packet received"
+                        << std::endl;
     response.status = ListUserAuctionsResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[ListUserAuctions] There was an unhandled exception that "
@@ -188,38 +187,37 @@ void handleListUserAuctions(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
+void handleListUserBids(AuctionServerState &serverState, std::stringstream &buf,
                         SocketAddress &addressFrom) {
   std::cout << "Handling list user bids request" << std::endl;
-
-  (void)addressFrom;
-
   ListUserBidsRequest request;
   ListUserBidsResponse response;
 
   try {
     request.deserialize(buf);
-    state.cdebug << "[ListUserBids] User "
-                 << " requested to list bids" << std::endl;
+    serverState.verbose << "[ListUserBids] User "
+                        << " requested to list bids" << std::endl;
 
-    if (state.usersManager.isUserLoggedIn(request.userID) != INVALID) {
+    if (serverState.usersManager.isUserLoggedIn(request.userID) != INVALID) {
       response.auctions =
-          state.auctionManager.getAuctionsBiddedByUser(request.userID);
+          serverState.auctionManager.getAuctionsBiddedByUser(request.userID);
 
       response.status = ListUserBidsResponse::OK;
-      state.cdebug << "[ListUserBids] Bids listed successfully" << std::endl;
+      serverState.verbose << "[ListUserBids] Bids listed successfully"
+                          << std::endl;
     } else {
       response.status = ListUserBidsResponse::NLG;
-      state.cdebug << "[ListUserBids] User " << request.userID
-                   << " is not logged in" << std::endl;
+      serverState.verbose << "[ListUserBids] User " << request.userID
+                          << " is not logged in" << std::endl;
     }
 
   } catch (NoOngoingBidsException &e) {
-    state.cdebug << "[ListUserBids] User " << request.userID
-                 << " has not bidded on any auction" << std::endl;
+    serverState.verbose << "[ListUserBids] User " << request.userID
+                        << " has not bidded on any auction" << std::endl;
     response.status = ListUserBidsResponse::NOK;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[ListUserBids] Invalid packet received" << std::endl;
+    serverState.verbose << "[ListUserBids] Invalid packet received"
+                        << std::endl;
     response.status = ListUserBidsResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[ListUserBids] There was an unhandled exception that "
@@ -232,7 +230,7 @@ void handleListUserBids(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleListAuctions(AuctionServerState &state, std::stringstream &buf,
+void handleListAuctions(AuctionServerState &serverState, std::stringstream &buf,
                         SocketAddress &addressFrom) {
   std::cout << "Handling list auctions request" << std::endl;
 
@@ -241,18 +239,20 @@ void handleListAuctions(AuctionServerState &state, std::stringstream &buf,
 
   try {
     request.deserialize(buf);
-    state.cdebug << "[ListAuctions] User "
-                 << " requested to list auctions" << std::endl;
+    serverState.verbose << "[ListAuctions] User "
+                        << " requested to list auctions" << std::endl;
 
-    response.auctions = state.auctionManager.listAuctions();
+    response.auctions = serverState.auctionManager.listAuctions();
     response.status = ListAuctionsResponse::OK;
-    state.cdebug << "[ListAuctions] Auctions listed successfully" << std::endl;
+    serverState.verbose << "[ListAuctions] Auctions listed successfully"
+                        << std::endl;
 
   } catch (NoAuctionsException &e) {
-    state.cdebug << "[ListAuctions] No auctions to list" << std::endl;
+    serverState.verbose << "[ListAuctions] No auctions to list" << std::endl;
     response.status = ListAuctionsResponse::NOK;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[ListAuctions] Invalid packet received" << std::endl;
+    serverState.verbose << "[ListAuctions] Invalid packet received"
+                        << std::endl;
     response.status = ListAuctionsResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[ListAuctions] There was an unhandled exception that "
@@ -265,29 +265,25 @@ void handleListAuctions(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
+void handleShowRecord(AuctionServerState &serverState, std::stringstream &buf,
                       SocketAddress &addressFrom) {
   std::cout << "Handling show record request" << std::endl;
-
-  (void)state;
-  (void)buf;
-  (void)addressFrom;
 
   ShowRecordRequest request;
   ShowRecordResponse response;
 
   try {
     request.deserialize(buf);
-    state.cdebug << "[ShowRecord] User "
-                 << " requested to show record of auction " << request.auctionID
-                 << std::endl;
+    serverState.verbose << "[ShowRecord] User "
+                        << " requested to show record of auction "
+                        << request.auctionID << std::endl;
 
     std::tuple<
         std::string, std::string, std::string, uint32_t, std::string, uint32_t,
         std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>,
         std::pair<std::string, uint32_t>>
         auctionRecords =
-            state.auctionManager.getAuctionRecord(request.auctionID);
+            serverState.auctionManager.getAuctionRecord(request.auctionID);
     response.hostUID = std::get<0>(auctionRecords);
     response.auctionName = std::get<1>(auctionRecords);
     response.assetFileName = std::get<2>(auctionRecords);
@@ -296,45 +292,48 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
     response.timeActive = std::get<5>(auctionRecords);
     response.bids = std::get<6>(auctionRecords);
     for (auto bid : response.bids) {
-      state.cdebug << "[ShowRecord] Bidsasdasd: " << std::get<0>(bid) << " "
-                   << std::get<1>(bid) << " " << std::get<2>(bid) << " "
-                   << std::get<3>(bid) << std::endl;
+      serverState.verbose << "[ShowRecord] Bidsasdasd: " << std::get<0>(bid)
+                          << " " << std::get<1>(bid) << " " << std::get<2>(bid)
+                          << " " << std::get<3>(bid) << std::endl;
     }
 
     if (std::get<7>(auctionRecords).first != "") {
       response.end = std::get<7>(auctionRecords);
     }
     response.status = ShowRecordResponse::OK;
-    state.cdebug << "[ShowRecord] Record of auction " << request.auctionID
-                 << " shown successfully" << std::endl;
-    state.cdebug << "[ShowRecord] Host UID: " << response.hostUID << std::endl;
-    state.cdebug << "[ShowRecord] Auction name: " << response.auctionName
-                 << std::endl;
-    state.cdebug << "[ShowRecord] Asset filename: " << response.assetFileName
-                 << std::endl;
-    state.cdebug << "[ShowRecord] Start value: " << response.startValue
+    serverState.verbose << "[ShowRecord] Record of auction "
+                        << request.auctionID << " shown successfully"
+                        << std::endl;
+    serverState.verbose << "[ShowRecord] Host UID: " << response.hostUID
+                        << std::endl;
+    serverState.verbose << "[ShowRecord] Auction name: " << response.auctionName
+                        << std::endl;
+    serverState.verbose << "[ShowRecord] Asset filename: "
+                        << response.assetFileName << std::endl;
+    serverState.verbose << "[ShowRecord] Start value: " << response.startValue
 
-                 << std::endl;
-    state.cdebug << "[ShowRecord] Start date: " << response.startDate
-                 << std::endl;
-    state.cdebug << "[ShowRecord] Time active: " << response.timeActive
-                 << std::endl;
+                        << std::endl;
+    serverState.verbose << "[ShowRecord] Start date: " << response.startDate
+                        << std::endl;
+    serverState.verbose << "[ShowRecord] Time active: " << response.timeActive
+                        << std::endl;
     for (auto bid : response.bids) {
-      state.cdebug << "[ShowRecord] Bid: " << std::get<0>(bid) << " "
-                   << std::get<1>(bid) << " " << std::get<2>(bid) << " "
-                   << std::get<3>(bid) << std::endl;
+      serverState.verbose << "[ShowRecord] Bid: " << std::get<0>(bid) << " "
+                          << std::get<1>(bid) << " " << std::get<2>(bid) << " "
+                          << std::get<3>(bid) << std::endl;
     }
 
-    state.cdebug << "[ShowRecord] End: " << response.end.first << " "
-                 << response.end.second << std::endl;
-    state.cdebug << "[ShowRecord] Record shown successfully" << std::endl;
+    serverState.verbose << "[ShowRecord] End: " << response.end.first << " "
+                        << response.end.second << std::endl;
+    serverState.verbose << "[ShowRecord] Record shown successfully"
+                        << std::endl;
 
   } catch (AuctionNotFoundException &e) {
-    state.cdebug << "[ShowRecord] Auction " << request.auctionID << " not found"
-                 << std::endl;
+    serverState.verbose << "[ShowRecord] Auction " << request.auctionID
+                        << " not found" << std::endl;
     response.status = ShowRecordResponse::NOK;
   } catch (InvalidPacketException &e) {
-    state.cdebug << "[ShowRecord] Invalid packet received" << std::endl;
+    serverState.verbose << "[ShowRecord] Invalid packet received" << std::endl;
     response.status = ShowRecordResponse::ERR;
   } catch (std::exception &e) {
     std::cerr << "[ShowRecord] There was an unhandled exception that "
@@ -347,7 +346,7 @@ void handleShowRecord(AuctionServerState &state, std::stringstream &buf,
               (struct sockaddr *)&addressFrom.addr, addressFrom.size);
 }
 
-void handleOpenAuction(AuctionServerState &state, int fd) {
+void handleOpenAuction(AuctionServerState &serverState, int fd) {
   OpenAuctionRequest request;
   OpenAuctionResponse response;
   try {
@@ -356,44 +355,44 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
                             request.auctionName, request.startValue,
                             request.timeActive, request.assetFileName,
                             request.assetSize);
-    state.cdebug << "[OpenAuction] User " << request.userID
-                 << " requested to open an auction" << std::endl;
+    serverState.verbose << "[OpenAuction] User " << request.userID
+                        << " requested to open an auction" << std::endl;
 
-    if (state.usersManager.isUserLoggedIn(request.userID) == 0) {
+    if (serverState.usersManager.isUserLoggedIn(request.userID) == 0) {
 
-      uint32_t auctionID = state.auctionManager.openAuction(
+      uint32_t auctionID = serverState.auctionManager.openAuction(
           request.userID, request.auctionName, request.startValue,
           request.timeActive, request.assetFileName, request.assetPath);
 
       response.status = OpenAuctionResponse::OK;
       response.auctionID = intToStringWithZeros((int)auctionID);
 
-      state.cdebug << "[OpenAuction] Auction "
-                   << " successfully opened" << std::endl;
+      serverState.verbose << "[OpenAuction] Auction "
+                          << " successfully opened" << std::endl;
     } else {
       response.status = OpenAuctionResponse::NLG;
 
-      state.cdebug << "[OpenAuction] User " << request.userID
-                   << " is not logged in" << std::endl;
+      serverState.verbose << "[OpenAuction] User " << request.userID
+                          << " is not logged in" << std::endl;
     }
   } catch (InvalidCredentialsException &e) {
     response.status = OpenAuctionResponse::ERR;
 
-    state.cdebug << "User " << request.userID
-                 << " tried to open an auction with invalid "
-                    "credentials"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to open an auction with invalid "
+                           "credentials"
+                        << std::endl;
 
   } catch (AuctionsLimitExceededException &e) {
     response.status = OpenAuctionResponse::NOK;
 
     response.status = OpenAuctionResponse::NOK;
-    state.cdebug << "[OpenAuction] Auction "
-                 << " failed to open" << std::endl;
+    serverState.verbose << "[OpenAuction] Auction "
+                        << " failed to open" << std::endl;
 
   } catch (InvalidPacketException &e) {
     response.status = OpenAuctionResponse::ERR;
-    state.cdebug << "[OpenAuction] Invalid packet received" << std::endl;
+    serverState.verbose << "[OpenAuction] Invalid packet received" << std::endl;
 
   } catch (std::exception &e) {
     std::cerr
@@ -405,7 +404,7 @@ void handleOpenAuction(AuctionServerState &state, int fd) {
   response.send(fd);
 }
 
-void handleCloseAuction(AuctionServerState &state, int fd) {
+void handleCloseAuction(AuctionServerState &serverState, int fd) {
   std::cout << "Handling close auction request" << std::endl;
 
   CloseAuctionRequest request;
@@ -413,54 +412,55 @@ void handleCloseAuction(AuctionServerState &state, int fd) {
 
   try {
     request.receive(fd);
-    state.cdebug << "[CloseAuction] User " << request.userID
-                 << " requested to close an auction" << std::endl;
+    serverState.verbose << "[CloseAuction] User " << request.userID
+                        << " requested to close an auction" << std::endl;
 
-    state.auctionManager.closeAuction(request.userID, request.password,
-                                      request.auctionID);
+    serverState.auctionManager.closeAuction(request.userID, request.password,
+                                            request.auctionID);
 
     response.status = CloseAuctionResponse::OK;
 
-    state.cdebug << "[CloseAuction] Auction "
-                 << " successfully closed" << std::endl;
+    serverState.verbose << "[CloseAuction] Auction "
+                        << " successfully closed" << std::endl;
   } catch (UserNotLoggedInException &e) {
     response.status = CloseAuctionResponse::NLG;
 
-    state.cdebug << "[CloseAuction] User " << request.userID
-                 << " is not logged in" << std::endl;
+    serverState.verbose << "[CloseAuction] User " << request.userID
+                        << " is not logged in" << std::endl;
 
   } catch (InvalidCredentialsException &e) {
     response.status = CloseAuctionResponse::NOK;
 
-    state.cdebug << "User " << request.userID
-                 << " tried to close an auction with invalid "
-                    "credentials or it does not exist"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to close an auction with invalid "
+                           "credentials or it does not exist"
+                        << std::endl;
   } catch (AuctionNotFoundException &e) {
     response.status = CloseAuctionResponse::EAU;
 
-    state.cdebug << "User " << request.userID
-                 << " tried to close an auction "
-                    "that does not exist"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to close an auction "
+                           "that does not exist"
+                        << std::endl;
 
   } catch (IncorrectAuctionOwnerException &e) {
     response.status = CloseAuctionResponse::EOW;
 
-    state.cdebug << "User " << request.userID
-                 << " tried to close an auction"
-                    " that is owned by another user"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to close an auction"
+                           " that is owned by another user"
+                        << std::endl;
   } catch (NonActiveAuctionException &e) {
     response.status = CloseAuctionResponse::END;
 
-    state.cdebug << "User " << request.userID
-                 << " tried to close an auction"
-                    " that is not active"
-                 << std::endl;
+    serverState.verbose << "User " << request.userID
+                        << " tried to close an auction"
+                           " that is not active"
+                        << std::endl;
   } catch (InvalidPacketException &e) {
     response.status = CloseAuctionResponse::ERR;
-    state.cdebug << "[CloseAuction] Invalid packet received" << std::endl;
+    serverState.verbose << "[CloseAuction] Invalid packet received"
+                        << std::endl;
 
   } catch (std::exception &e) {
     std::cerr
@@ -473,42 +473,39 @@ void handleCloseAuction(AuctionServerState &state, int fd) {
   response.send(fd);
 }
 
-void handleShowAsset(AuctionServerState &state, int fd) {
+void handleShowAsset(AuctionServerState &serverState, int fd) {
   std::cout << "Handling show assets request" << std::endl;
-
-  (void)state;
-  (void)fd;
 
   ShowAssetRequest request;
   ShowAssetResponse response;
   try {
     request.receive(fd);
-    state.cdebug
+    serverState.verbose
         << "[ShowAsset] An user has requested to show an asset of auction "
         << request.auctionID << std::endl;
 
     std::tuple<std::string, uint32_t, std::string> asset =
-        state.auctionManager.getAuctionAsset(request.auctionID);
+        serverState.auctionManager.getAuctionAsset(request.auctionID);
     response.assetFileName = std::get<0>(asset);
     response.assetSize = std::get<1>(asset);
     response.assetPath = std::get<2>(asset);
     response.status = ShowAssetResponse::OK;
 
-    state.cdebug << "[ShowAsset] Asset of auction " << request.auctionID
-                 << " was successfully shown" << std::endl;
+    serverState.verbose << "[ShowAsset] Asset of auction " << request.auctionID
+                        << " was successfully shown" << std::endl;
   } catch (AuctionNotFoundException &e) {
     response.status = ShowAssetResponse::NOK;
 
-    state.cdebug << "[ShowAsset] Auction " << request.auctionID << " not found"
-                 << std::endl;
+    serverState.verbose << "[ShowAsset] Auction " << request.auctionID
+                        << " not found" << std::endl;
   } catch (AssetNotFoundException &e) {
     response.status = ShowAssetResponse::NOK;
 
-    state.cdebug << "[ShowAsset] Asset of auction " << request.auctionID
-                 << " not found" << std::endl;
+    serverState.verbose << "[ShowAsset] Asset of auction " << request.auctionID
+                        << " not found" << std::endl;
   } catch (InvalidPacketException &e) {
     response.status = ShowAssetResponse::ERR;
-    state.cdebug << "[ShowAsset] Invalid packet received" << std::endl;
+    serverState.verbose << "[ShowAsset] Invalid packet received" << std::endl;
 
   } catch (
       std::exception &e) { // TODO: catch only the exceptions that can be thrown
@@ -521,7 +518,7 @@ void handleShowAsset(AuctionServerState &state, int fd) {
   response.send(fd);
 }
 
-void handleBid(AuctionServerState &state, int fd) {
+void handleBid(AuctionServerState &serverState, int fd) {
   std::cout << "Handling bid request" << std::endl;
 
   BidRequest request;
@@ -529,52 +526,54 @@ void handleBid(AuctionServerState &state, int fd) {
 
   try {
     request.receive(fd);
-    state.cdebug << "[Bid] User " << request.userID
-                 << " requested to bid on an auction" << std::endl;
+    serverState.verbose << "[Bid] User " << request.userID
+                        << " requested to bid on an auction" << std::endl;
 
-    state.auctionManager.bidOnAuction(request.userID, request.password,
-                                      request.auctionID, request.bidValue);
+    serverState.auctionManager.bidOnAuction(
+        request.userID, request.password, request.auctionID, request.bidValue);
 
     response.status = BidResponse::ACC;
 
-    state.cdebug << "[Bid] Bid "
-                 << "successfully placed" << std::endl;
+    serverState.verbose << "[Bid] Bid "
+                        << "successfully placed" << std::endl;
 
   } catch (UserNotLoggedInException &e) {
     response.status = BidResponse::NLG;
 
-    state.cdebug << "[Bid] User " << request.userID << " is not logged in"
-                 << std::endl;
+    serverState.verbose << "[Bid] User " << request.userID
+                        << " is not logged in" << std::endl;
 
   } catch (NonActiveAuctionException &e) {
     response.status = BidResponse::NOK;
 
-    state.cdebug << "[Bid] Auction " << request.auctionID
-                 << " is no longer active" << std::endl;
+    serverState.verbose << "[Bid] Auction " << request.auctionID
+                        << " is no longer active" << std::endl;
 
   } catch (BidRefusedException &e) {
     response.status = BidResponse::REF;
 
-    state.cdebug << "[Bid] Bid of " << request.bidValue
-                 << " was refused as it was not "
-                 << "larger enough" << std::endl;
+    serverState.verbose << "[Bid] Bid of " << request.bidValue
+                        << " was refused as it was not "
+                        << "larger enough" << std::endl;
 
   } catch (IllegalBidException &e) {
 
     response.status = BidResponse::ILG;
 
-    state.cdebug << "[Bid] User " << request.userID
-                 << " is the auction owner, hence it cannot bid" << std::endl;
+    serverState.verbose << "[Bid] User " << request.userID
+                        << " is the auction owner, hence it cannot bid"
+                        << std::endl;
 
   } catch (InvalidCredentialsException &e) {
     response.status = BidResponse::ERR;
 
-    state.cdebug << "[Bid] User " << request.userID
-                 << " tried to bid with invalid credentials" << std::endl;
+    serverState.verbose << "[Bid] User " << request.userID
+                        << " tried to bid with invalid credentials"
+                        << std::endl;
 
   } catch (InvalidPacketException &e) {
     response.status = BidResponse::ERR;
-    state.cdebug << "[Bid] Invalid packet received" << std::endl;
+    serverState.verbose << "[Bid] Invalid packet received" << std::endl;
 
   } catch (std::exception &e) {
     std::cerr << "[Bid] There was an unhandled exception that prevented "

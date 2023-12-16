@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "../utils/constants.hpp"
+#include "../utils/protocol.hpp"
 #include "server_state.hpp"
 
 class TcpWorkerPool;

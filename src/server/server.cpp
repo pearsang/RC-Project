@@ -9,9 +9,6 @@
 #include <string>
 #include <thread>
 
-#include "../utils/protocol.hpp"
-#include "../utils/utils.hpp"
-
 extern bool is_exiting; // flag to indicate whether the application is exiting
 
 int main(int argc, char *argv[]) {
@@ -31,7 +28,7 @@ int main(int argc, char *argv[]) {
     AuctionServerState serverState(config.port, config.verbose);
     serverState.registerHandlers(); // register all handlers with the manager
 
-    serverState.cdebug << "Server is running on verbose mode" << std::endl;
+    serverState.verbose << "Server is running on verbose mode" << std::endl;
 
     // start the TCP thread
     std::thread tcp_thread(tcpMainThread, std::ref(serverState));
@@ -117,74 +114,82 @@ void setupDB() {
   create_new_directory(USER_DIR);    // create the user directory
   create_new_directory(AUCTION_DIR); // create the auction directory
 
-  std::string nextAuctionFile =
-      AUCTION_DIR + std::string("/") + NEXT_AUCTION_FILE;
-  create_new_file(nextAuctionFile);
+  std::string nextAuctionFile = AUCTION_DIR + SLASH + NEXT_AUCTION_FILE;
+  create_new_file(AUCTION_DIR + SLASH + NEXT_AUCTION_FILE);
 
-  // count the number of directories inside AUctions
-  int count = 0;
-
+  int count = 0; // count the number of auctions that exist
   for (const auto &entry : std::filesystem::directory_iterator(AUCTION_DIR)) {
-    if (std::filesystem::is_directory(entry.path())) {
-      count++;
+    if (std::filesystem::is_directory(entry.path())) { // if it's a directory
+      count++;                                         // increment the count
     }
   }
+  count++; // increment the count for the next auction
 
-  count++;
-
-  std::string nAuctions = std::to_string(count);
-  nAuctions += "\n";
-  write_to_file(nextAuctionFile, nAuctions);
+  std::string numAuctions = std::to_string(count) + "\n";
+  write_to_file(nextAuctionFile, numAuctions); // for the next auction id
 };
 
-void wait_for_udp_packet(AuctionServerState &state) {
-  SocketAddress source_addr;
-  std::stringstream stream;
-  char buffer[SOCKET_BUFFER_LEN];
+void wait_for_udp_packet(AuctionServerState &serverState) {
+  SocketAddress sourceAddr;       // the source address of the packet
+  std::stringstream stream;       // the stream to read the packet into
+  char buffer[SOCKET_BUFFER_LEN]; // the buffer to read the packet into
 
-  source_addr.size = sizeof(source_addr.addr);
-  ssize_t n = recvfrom(state.udpSocketFD, buffer, SOCKET_BUFFER_LEN, 0,
-                       (struct sockaddr *)&source_addr.addr, &source_addr.size);
-  if (is_exiting) {
+  sourceAddr.size = sizeof(sourceAddr.addr); // set the size of the address
+
+  // receive the packet into the buffer, and store the number of bytes read
+  ssize_t n = recvfrom(serverState.udpSocketFD, buffer, SOCKET_BUFFER_LEN, 0,
+                       (struct sockaddr *)&sourceAddr.addr, &sourceAddr.size);
+
+  if (is_exiting) { // if the application is exiting, return
     return;
   }
-  if (n == -1) {
-    if (errno == EAGAIN) {
+
+  if (n == -1) {           // if the number of bytes read is -1, caught an error
+    if (errno == EAGAIN) { // if the error is EAGAIN, just go around
       return;
     }
     throw FatalError("Failed to receive UDP message (recvfrom)", errno);
   }
-  source_addr.socket = state.udpSocketFD;
 
+  sourceAddr.socket =
+      serverState.udpSocketFD; // set the socket of the source address
+
+  // convert the source address to a string
   char addr_str[INET_ADDRSTRLEN + 1] = {0};
-  inet_ntop(AF_INET, &source_addr.addr.sin_addr, addr_str, INET_ADDRSTRLEN);
-  std::cout << "Receiving incoming UDP message from " << addr_str << ":"
-            << ntohs(source_addr.addr.sin_port) << std::endl;
 
+  // inet_ntop converts the address from binary to text form (IPV4)
+  inet_ntop(AF_INET, &sourceAddr.addr.sin_addr, addr_str, INET_ADDRSTRLEN);
+
+  std::cout << "Receiving incoming UDP message from " << addr_str << ":"
+            << ntohs(sourceAddr.addr.sin_port) << std::endl;
+
+  // write the buffer into the stream
   stream.write(buffer, n);
 
-  return handle_packet(state, stream, source_addr);
+  return handle_packet(serverState, stream, sourceAddr);
 }
 
-void handle_packet(AuctionServerState &state, std::stringstream &buffer,
-                   SocketAddress &source_addr) {
+void handle_packet(AuctionServerState &serverState, std::stringstream &buffer,
+                   SocketAddress &sourceAddr) {
   try {
-    char packet_id[PACKET_ID_LEN + 1];
-    buffer >> packet_id;
+    char _packetID[PACKET_ID_LEN + 1]; // the packet id
+    buffer >> _packetID;               // read the packet id from the stream
 
-    if (!buffer.good()) {
+    if (!buffer.good()) { // if the stream is not good, throw an exception
       std::cerr << "Received unknown packet ID" << std::endl;
       throw InvalidPacketException();
     }
 
-    std::string packet_id_str = std::string(packet_id);
+    std::string packetID = std::string(_packetID); // convert to string
 
-    state.callUdpPacketHandler(packet_id_str, buffer, source_addr);
+    serverState.callUdpPacketHandler(packetID, buffer, sourceAddr);
+
   } catch (InvalidPacketException &e) {
     try {
-      ErrorUdpPacket error;
-      send_packet(error, source_addr.socket,
-                  (struct sockaddr *)&source_addr.addr, source_addr.size);
+      ErrorUdpPacket error; // create an error packet
+      // set the error message, and the source address, and send the packet
+      send_packet(error, sourceAddr.socket, (struct sockaddr *)&sourceAddr.addr,
+                  sourceAddr.size);
     } catch (std::exception &ex) {
       std::cerr << "Failed to reply with ERR packet: " << ex.what()
                 << std::endl;
@@ -196,20 +201,22 @@ void handle_packet(AuctionServerState &state, std::stringstream &buffer,
   }
 }
 
-void tcpMainThread(AuctionServerState &state) {
-  TcpWorkerPool pool(state);
+void tcpMainThread(AuctionServerState &serverState) {
+  // We create a pool of threads to handle the TCP connections
+  TcpWorkerPool pool(serverState);
 
-  if (listen(state.tcpSocketFD, TCP_MAX_CONNECTIONS) < 0) {
+  // We create a socket for the TCP server, and set the socket options
+  if (listen(serverState.tcpSocketFD, TCP_MAX_CONNECTIONS) < 0) {
     perror("Error while executing listen");
     std::cerr << "TCP server is being shutdown..." << std::endl;
     is_exiting = true;
     return;
   }
 
-  uint32_t ex_trial = 0;
-  while (!is_exiting) {
+  uint32_t ex_trial = 0; // exception trial counter
+  while (!is_exiting) {  // while not exiting, wait for packets and handle them
     try {
-      wait_for_tcp_packet(state, pool);
+      wait_for_tcp_packet(serverState, pool);
       ex_trial = 0;
     } catch (std::exception &e) {
       std::cerr << "Encountered fatal error while running the "
@@ -223,22 +230,23 @@ void tcpMainThread(AuctionServerState &state) {
                 << std::endl;
       ex_trial++;
     }
-    if (ex_trial >= EXCEPTION_RETRY_MAX_TRIALS) {
+    if (ex_trial >= EXCEPTION_RETRY_MAX_TRIALS) { // if max trials reached
       std::cerr << "Max attempts, shutting down..." << std::endl;
-      is_exiting = true;
+      is_exiting = true; // set the exiting flag
     }
   }
 
   std::cout << "Shutting down TCP server..." << std::endl;
 }
 
-void wait_for_tcp_packet(AuctionServerState &state, TcpWorkerPool &pool) {
-  SocketAddress source_addr;
+void wait_for_tcp_packet(AuctionServerState &serverState, TcpWorkerPool &pool) {
+  SocketAddress sourceAddr; // the source address of the packet
 
-  source_addr.size = sizeof(source_addr.addr);
+  sourceAddr.size = sizeof(sourceAddr.addr); // set the size of the address
+  // accept a connection, and store the file descriptor of the connection
   int connection_fd =
-      accept(state.tcpSocketFD, (struct sockaddr *)&source_addr.addr,
-             &source_addr.size);
+      accept(serverState.tcpSocketFD, (struct sockaddr *)&sourceAddr.addr,
+             &sourceAddr.size);
   if (is_exiting) {
     return;
   }
@@ -249,21 +257,25 @@ void wait_for_tcp_packet(AuctionServerState &state, TcpWorkerPool &pool) {
     throw FatalError("[ERROR] Failed to accept a connection", errno);
   }
 
-  struct timeval read_timeout;
-  read_timeout.tv_sec = TCP_READ_TIMEOUT_SECONDS;
+  struct timeval read_timeout;                    // set the read timeout
+  read_timeout.tv_sec = TCP_READ_TIMEOUT_SECONDS; // set the timeout
   read_timeout.tv_usec = 0;
+
+  // set the read timeout socket option for the connection
   if (setsockopt(connection_fd, SOL_SOCKET, SO_RCVTIMEO, &read_timeout,
                  sizeof(read_timeout)) < 0) {
     throw FatalError("Failed to set TCP read timeout socket option", errno);
   }
 
-  char addr_str[INET_ADDRSTRLEN + 1] = {0};
-  inet_ntop(AF_INET, &source_addr.addr.sin_addr, addr_str, INET_ADDRSTRLEN);
+  char addr_str[INET_ADDRSTRLEN + 1] = {0}; // convert the address to string
+
+  // inet_ntop converts the address from binary to text form (IPV4)
+  inet_ntop(AF_INET, &sourceAddr.addr.sin_addr, addr_str, INET_ADDRSTRLEN);
   std::cout << "Receiving incoming TCP connection from " << addr_str << ":"
-            << ntohs(source_addr.addr.sin_port) << std::endl;
+            << ntohs(sourceAddr.addr.sin_port) << std::endl;
 
   try {
-    pool.giveConnection(connection_fd);
+    pool.giveConnection(connection_fd); // give the connection to a worker
   } catch (std::exception &e) {
     close(connection_fd);
     throw FatalError(std::string("Failed to give connection to worker: ") +

@@ -5,9 +5,6 @@
 #include <cstring>
 #include <iostream>
 
-#include "utils/constants.hpp"
-#include "utils/utils.hpp"
-
 UserState::UserState(std::string &hostname, std::string &port) {
   this->setupUdpSocket();
   this->resolveServerAddress(hostname, port);

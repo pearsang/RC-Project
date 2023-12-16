@@ -12,41 +12,7 @@
 
 #include "server_auction.hpp"
 #include "server_user.hpp"
-
-class DebugStream {
-  bool active;
-
-public:
-  DebugStream(bool __active) : active{__active} {};
-
-  template <class T> DebugStream &operator<<(T val) {
-    if (active) {
-      std::cout << val;
-    }
-    return *this;
-  }
-
-  DebugStream &operator<<(std::ostream &(*f)(std::ostream &)) {
-    if (active) {
-      f(std::cout);
-    }
-    return *this;
-  }
-
-  DebugStream &operator<<(std::ostream &(*f)(std::ios &)) {
-    if (active) {
-      f(std::cout);
-    }
-    return *this;
-  }
-
-  DebugStream &operator<<(std::ostream &(*f)(std::ios_base &)) {
-    if (active) {
-      f(std::cout);
-    }
-    return *this;
-  }
-};
+#include "verbose_stream.hpp"
 
 class AuctionServerState;
 
@@ -85,11 +51,11 @@ public:
   int tcpSocketFD = -1;
   struct addrinfo *serverUdpAddr = NULL;
   struct addrinfo *serverTcpAddr = NULL;
-  DebugStream cdebug;
+  VerboseStream verbose;
   UserManager usersManager;
   AuctionManager auctionManager;
 
-  AuctionServerState(std::string &port, bool verbose);
+  AuctionServerState(std::string &port, bool _verbose);
 
   ~AuctionServerState();
   /**
@@ -126,11 +92,29 @@ public:
    */
   void registerTcpPacketHandlers();
 
+  /**
+   * @brief Calls the handler for the given UDP packet.
+   *
+   * @param packet_id  The packet ID.
+   * @param stream  The packet stream.
+   * @param addr_from  The address the packet came from.
+   */
   void callUdpPacketHandler(std::string packet_id, std::stringstream &stream,
                             SocketAddress &addr_from);
 
+  /**
+   * @brief Calls the handler for the given TCP packet.
+   *
+   * @param packet_id  The packet ID.
+   * @param fd  The file descriptor the packet came from
+   */
   void callTcpPacketHandler(std::string packet_id, int fd);
 
+  /**
+   * @brief Checks if the database exists
+   *
+   * @return uint8_t
+   */
   uint8_t existsDB();
 };
 

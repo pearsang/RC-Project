@@ -10,8 +10,8 @@
 #include "../utils/utils.hpp"
 #include "handlers.hpp"
 
-AuctionServerState::AuctionServerState(std::string &port, bool verbose)
-    : cdebug{DebugStream(verbose)} {
+AuctionServerState::AuctionServerState(std::string &port, bool _verbose)
+    : verbose{VerboseStream(_verbose)} {
   this->setupUdpSocket();
   this->setupTcpSocket();
   this->resolveServerAddress(port);
@@ -140,7 +140,7 @@ void AuctionServerState::callUdpPacketHandler(std::string packet_id,
                                               SocketAddress &source_addr) {
   auto handler = this->UdpPacketHandlers.find(packet_id);
   if (handler == this->UdpPacketHandlers.end()) {
-    cdebug << "Received unknown Packet ID" << std::endl;
+    verbose << "Received unknown Packet ID" << std::endl;
     throw InvalidPacketException();
   }
 
@@ -150,7 +150,7 @@ void AuctionServerState::callUdpPacketHandler(std::string packet_id,
 void AuctionServerState::callTcpPacketHandler(std::string packet_id, int fd) {
   auto handler = this->TcpPacketHandlers.find(packet_id);
   if (handler == this->TcpPacketHandlers.end()) {
-    cdebug << "Received unknown Packet ID" << std::endl;
+    verbose << "Received unknown Packet ID" << std::endl;
     throw InvalidPacketException();
   }
 

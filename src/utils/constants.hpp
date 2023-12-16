@@ -7,6 +7,7 @@
 #define DEFAULT_HOSTNAME "tejo.tecnico.ulisboa.pt"
 #define DEFAULT_PORT "58011"
 #define INVALID (int8_t) - 1
+#define VALID (int8_t)1
 
 // Protocol constants
 #define USER_ID_LENGTH 6
@@ -42,6 +43,14 @@
 #define USER_DIR (AS_DIR "/USERS")
 #define AUCTION_DIR (AS_DIR "/AUCTIONS")
 #define NEXT_AUCTION_FILE "next_auction.txt"
+#define LOGIN_FILE "_login.txt"
+#define PASS_FILE "_pass.txt"
+#define START_FILE "START_"
+#define END_FILE "END_"
+#define TXT_EXT ".txt"
+#define SLASH std::string("/")
+#define ASSET_DIR (SLASH + "ASSET" + SLASH)
+#define BID_DIR (SLASH + "BIDS" + SLASH)
 
 // Commands arguments number
 #define LOGIN_ARGS_NUM 2

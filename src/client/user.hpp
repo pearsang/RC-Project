@@ -4,6 +4,7 @@
 #include "../utils/constants.hpp"
 #include "../utils/utils.hpp"
 #include "commands.hpp"
+#include "user_state.hpp"
 #include <csignal>
 #include <iostream>
 

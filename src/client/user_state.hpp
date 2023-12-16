@@ -5,6 +5,8 @@
 #include <string>
 
 #include "../utils/protocol.hpp"
+#include "utils/constants.hpp"
+#include "utils/utils.hpp"
 
 /**
  * @class UserState

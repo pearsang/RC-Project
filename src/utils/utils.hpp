@@ -268,4 +268,20 @@ void printListShowRecordTable(
     std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> bids,
     std::pair<std::string, uint32_t> end);
 
+std::vector<std::string> splitOnSeparator(std::string __str, char __separator);
+
+void sortAuctionBids(
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+        &auctionBids);
+
+void getTopNumBids(
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+        &auctionBids,
+    uint32_t numBids);
+
+std::pair<std::string, uint32_t> getAuctionEndInfo(std::string auctionID);
+
+std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+getAuctionBids(std::string auctionID);
+
 #endif

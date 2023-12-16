@@ -288,7 +288,7 @@ std::string getUserPassword(std::string userID) {
   std::string passwordPath = USER_DIR;
   std::string validPassword;
   try {
-    passwordPath += "/" + userID + "/" + userID + "_pass.txt";
+    passwordPath += SLASH + userID + SLASH + userID + PASS_FILE;
     read_from_file(passwordPath, validPassword);
   } catch (...) {
     throw std::exception();
@@ -513,4 +513,79 @@ void printListShowRecordTable(
     std::cout << "End Date: " << end.first << "\t\t"
               << "Time passed: " << end.second << "\t" << std::endl;
   }
+}
+
+std::vector<std::string> splitOnSeparator(std::string __str, char __separator) {
+  std::stringstream start(__str);
+  std::string word;
+  std::vector<std::string> words;
+  while (getline(start, word, __separator)) {
+    words.push_back(word);
+  }
+  return words;
+}
+
+void sortAuctionBids(
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+        &auctionBids) {
+  std::sort(
+      auctionBids.begin(), auctionBids.end(),
+      [](const std::tuple<std::string, uint32_t, std::string, uint32_t> &a,
+         const std::tuple<std::string, uint32_t, std::string, uint32_t> &b) {
+        return std::get<1>(a) > std::get<1>(b);
+      });
+}
+
+void getTopNumBids(
+    std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+        &auctionBids,
+    uint32_t numBids) {
+  if (auctionBids.size() > numBids) {
+    auctionBids.erase(auctionBids.begin() + numBids, auctionBids.end());
+  }
+}
+
+std::pair<std::string, uint32_t> getAuctionEndInfo(std::string auctionID) {
+  // end format: end_datetime end_sec_time
+  std::string auctionPath = AUCTION_DIR + SLASH + auctionID;
+  std::string auctionEndPath =
+      auctionPath + SLASH + END_FILE + auctionID + TXT_EXT;
+  if (file_exists(auctionEndPath) != INVALID) {
+    std::string auctionEndInfo;
+    read_from_file(auctionEndPath, auctionEndInfo);
+    std::vector<std::string> auctionEndWords =
+        splitOnSeparator(auctionEndInfo, ' ');
+
+    std::string end_datetime = auctionEndWords[0] + " " + auctionEndWords[1];
+    uint32_t end_sec_time = (uint32_t)std::stoi(auctionEndWords[1]);
+
+    return std::make_pair(end_datetime, end_sec_time);
+  }
+  return std::make_pair("", 0);
+}
+
+std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+getAuctionBids(std::string auctionID) {
+  // bids format: UID bid_value bid_datetime bid_sec_time
+  std::string auctionPath = AUCTION_DIR + SLASH + auctionID;
+  std::string auctionBidsPath = auctionPath + BID_DIR;
+  std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
+      auctionBids;
+  for (const auto &entry :
+       std::filesystem::directory_iterator(auctionBidsPath)) {
+    if (entry.is_regular_file() && entry.path().extension() == TXT_EXT) {
+      std::string bidInfo;
+      read_from_file(entry.path(), bidInfo);
+      std::vector<std::string> bidWords = splitOnSeparator(bidInfo, ' ');
+
+      std::string bidder = bidWords[0];
+      uint32_t bidValue = (uint32_t)std::stoi(bidWords[1]);
+      std::string bid_datetime = bidWords[2] + " " + bidWords[3];
+      uint32_t bid_sec_time = (uint32_t)std::stoi(bidWords[4]);
+      std::tuple<std::string, uint32_t, std::string, uint32_t> bids =
+          std::make_tuple(bidder, bidValue, bid_datetime, bid_sec_time);
+      auctionBids.push_back(bids);
+    }
+  }
+  return auctionBids;
 }

@@ -5,6 +5,8 @@
 #include <filesystem>
 
 #include "../utils/constants.hpp"
+#include "../utils/protocol.hpp"
+#include "../utils/utils.hpp"
 #include "server_state.hpp"
 #include "tcp_worker_pool.hpp"
 
@@ -21,18 +23,38 @@ public:
 
 /**
  * @brief Waits for an UDP packet to arrive.
+ *
+ * @param serverState The server state.
+ *
  */
-void wait_for_udp_packet(AuctionServerState &state);
+void wait_for_udp_packet(AuctionServerState &serverState);
 
-void tcpMainThread(AuctionServerState &state);
+/**
+ * @brief Handles an UDP packet.
+ *
+ * @param serverState The server state.
+ *
+ */
+void tcpMainThread(AuctionServerState &serverState);
 
-void handle_packet(AuctionServerState &state, std::stringstream &buffer,
+/**
+ * @brief Handles an UDP packet.
+ *
+ * @param serverState The server state.
+ * @param buffer The buffer containing the packet.
+ * @param source_addr The source address of the packet.
+ *
+ */
+void handle_packet(AuctionServerState &serverState, std::stringstream &buffer,
                    SocketAddress &source_addr);
 
-void handle_packet(std::stringstream &buffer, SocketAddress &source_addr,
-                   AuctionServerState &state);
-
-void wait_for_tcp_packet(AuctionServerState &state, TcpWorkerPool &pool);
+/**
+ * @brief Waits for a TCP packet to arrive.
+ *
+ * @param serverState The server state.
+ * @param pool The TCP worker pool to use.
+ */
+void wait_for_tcp_packet(AuctionServerState &serverState, TcpWorkerPool &pool);
 
 void setupDB();
 
