@@ -399,7 +399,9 @@ uint32_t AuctionManager::getLargestBid(std::string auctionID) {
   }
   // no bids yet
   if (max_filename.empty()) {
-    return 0;
+    std::string auctionInfo = getAuctionInfo(auctionID);
+    std::vector<std::string> words = splitOnSeparator(auctionInfo, ' ');
+    return (uint32_t)std::stoi(words[3]);
   }
 
   std::string bidValue = max_filename.substr(0, max_filename.find_last_of("."));
