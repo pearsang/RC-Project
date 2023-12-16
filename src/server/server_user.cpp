@@ -51,7 +51,6 @@ void UserManager::registerUser(std::string userID, std::string password) {
 
     std::string passwordPath = userPath + SLASH + userID + PASS_FILE;
     create_new_file(passwordPath);
-
     write_to_file(passwordPath, password);
     login(userID, password);
   } catch (std::exception &e) {
@@ -61,7 +60,7 @@ void UserManager::registerUser(std::string userID, std::string password) {
 
 int8_t UserManager::userExists(std::string userID) {
   std::string userPath = USER_DIR + SLASH + userID + SLASH + userID + PASS_FILE;
-  return file_exists(userPath);
+  return file_exists(userPath) == INVALID ? INVALID : VALID;
 }
 
 void UserManager::logout(std::string userID, std::string password) {

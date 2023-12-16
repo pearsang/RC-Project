@@ -59,7 +59,7 @@ std::string AuctionManager::getNextAuctionID() {
 
     // Update next auction ID
     int nextAuctionID_int = std::stoi(nextAuctionID);
-    nextAuctionID = intToStringWithZeros(nextAuctionID_int);
+    nextAuctionID = intToStringWithZeros(nextAuctionID_int, AUCTION_ID_LENGTH);
     nextAuctionID_int++;
     write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
 
@@ -69,7 +69,6 @@ std::string AuctionManager::getNextAuctionID() {
   }
 }
 
-// REMOVE MNEEEEEE
 void validateOpenAuctionArgs(std::string userID, std::string password,
                              std::string auctionName, uint32_t startValue,
                              uint32_t timeActive, std::string assetFilename,
@@ -106,9 +105,11 @@ std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
 
   // get all auctions
   for (int i = 1; i <= numAuctions; i++) {
-    std::string auction_dir = AUCTION_DIR + SLASH + intToStringWithZeros(i);
-    std::string auction_end_file =
-        auction_dir + SLASH + END_FILE + intToStringWithZeros(i) + TXT_EXT;
+    std::string auction_dir =
+        AUCTION_DIR + SLASH + intToStringWithZeros(i, AUCTION_ID_LENGTH);
+    std::string auction_end_file = auction_dir + SLASH + END_FILE +
+                                   intToStringWithZeros(i, AUCTION_ID_LENGTH) +
+                                   TXT_EXT;
 
     // if auction directory does not exist - auction count was compromissed
     if (directory_exists(auction_dir) == INVALID) {
@@ -117,20 +118,25 @@ std::vector<std::pair<std::string, uint8_t>> AuctionManager::listAuctions() {
 
     // auction still active - no end file
     if (file_exists(auction_end_file) == INVALID) {
-      if (checkAuctionValidity(intToStringWithZeros(i)) == INVALID) {
+      if (checkAuctionValidity(intToStringWithZeros(i, AUCTION_ID_LENGTH)) ==
+          INVALID) {
         try {
-          createCloseAuctionFile(intToStringWithZeros(i));
+          createCloseAuctionFile(intToStringWithZeros(i, AUCTION_ID_LENGTH),
+                                 false);
         } catch (NonActiveAuctionException &e) {
           // if auction was closed by another user, ignore it
         }
-        auctions.push_back(std::make_pair(intToStringWithZeros(i), 0));
+        auctions.push_back(
+            std::make_pair(intToStringWithZeros(i, AUCTION_ID_LENGTH), 0));
       } else {
-        auctions.push_back(std::make_pair(intToStringWithZeros(i), 1));
+        auctions.push_back(
+            std::make_pair(intToStringWithZeros(i, AUCTION_ID_LENGTH), 1));
       }
     }
     // auction ended
     else {
-      auctions.push_back(std::make_pair(intToStringWithZeros(i), 0));
+      auctions.push_back(
+          std::make_pair(intToStringWithZeros(i, AUCTION_ID_LENGTH), 0));
     }
   }
   return auctions;
@@ -277,7 +283,8 @@ std::string AuctionManager::getAuctionOwner(std::string auctionID) {
   }
 }
 
-void AuctionManager::createCloseAuctionFile(std::string auctionID) {
+void AuctionManager::createCloseAuctionFile(std::string auctionID,
+                                            bool earlyClosure) {
   try {
     std::string auctionPath = AUCTION_DIR + SLASH + auctionID;
     std::string end = auctionPath + SLASH + END_FILE + auctionID + TXT_EXT;
@@ -286,8 +293,33 @@ void AuctionManager::createCloseAuctionFile(std::string auctionID) {
     }
     // close auction
     create_new_file(end);
-    std::string end_datetime = getCurrentTimeFormated();
-    write_to_file(end, end_datetime);
+
+    std::string auctionInfo = getAuctionInfo(auctionID);
+    std::vector<std::string> words = splitOnSeparator(auctionInfo, ' ');
+
+    // get the word after the last space
+    int startTimeSeconds = std::stoi(words[words.size() - 1]);
+
+    // calculate the time has passed
+    if (earlyClosure) {
+      int end_time = (int)(std::time(nullptr));
+      std::string end_datetime = getCurrentTimeFormated();
+      int diff = end_time - startTimeSeconds;
+      std::string duration = std::to_string(diff);
+      write_to_file(end, end_datetime + " " + duration);
+    }
+
+    else {
+      // calculate the end_datetime
+      time_t end_time = startTimeSeconds + std::stoi(words[4]);
+      // Format the date and time
+      char buffer[20];
+      std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S",
+                    std::localtime(&end_time));
+      std::string end_datetime = buffer;
+      std::string timeActive = words[4];
+      write_to_file(end, end_datetime + " " + timeActive);
+    }
 
   } catch (std::exception &e) {
     throw;
@@ -323,7 +355,12 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
       throw IncorrectAuctionOwnerException();
     }
 
-    createCloseAuctionFile(auctionID);
+    // check if auction has already expired
+    if (checkAuctionValidity(auctionID) == INVALID) {
+      createCloseAuctionFile(auctionID, false);
+    } else {
+      createCloseAuctionFile(auctionID, true);
+    }
 
     return;
   } catch (NonActiveAuctionException &e) {
@@ -392,7 +429,7 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
       throw NonActiveAuctionException();
     } else if (checkAuctionValidity(auctionID) == INVALID) {
       try {
-        createCloseAuctionFile(auctionID);
+        createCloseAuctionFile(auctionID, false);
       } catch (NonActiveAuctionException &e) {
         // if auction was closed by another user, ignore it
       }
@@ -408,7 +445,9 @@ void AuctionManager::bidOnAuction(std::string userID, std::string password,
     }
 
     std::string auctionBidsPath = auctionPath + BID_DIR;
-    std::string bidPath = auctionBidsPath + std::to_string(bidValue) + TXT_EXT;
+    std::string bidPath =
+        auctionBidsPath +
+        intToStringWithZeros((int)bidValue, BID_VALLUE_LENGTH) + TXT_EXT;
     create_new_file(bidPath);
 
     std::string bidDateTime = getCurrentTimeFormated();
@@ -444,7 +483,7 @@ AuctionManager::getAuctionAsset(std::string auctionID) {
 
     if (checkAuctionValidity(auctionID) == INVALID) { // check auction validity
       try {
-        createCloseAuctionFile(auctionID);
+        createCloseAuctionFile(auctionID, false);
       } catch (NonActiveAuctionException &e) {
         // if auction was closed by another user, ignore it
       }
@@ -483,6 +522,10 @@ AuctionManager::getAuctionRecord(std::string auctionID) {
     std::string auctionPath = AUCTION_DIR + SLASH + auctionID;
     if (directory_exists(auctionPath) == INVALID) { // check auction exists
       throw AuctionNotFoundException();
+    }
+
+    if (checkAuctionValidity(auctionID) == INVALID) { // check auction validity
+      createCloseAuctionFile(auctionID, false);
     }
 
     std::string auctionInfo = getAuctionInfo(auctionID);

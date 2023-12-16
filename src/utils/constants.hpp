@@ -7,12 +7,13 @@
 #define DEFAULT_HOSTNAME "tejo.tecnico.ulisboa.pt"
 #define DEFAULT_PORT "58011"
 #define INVALID (int8_t) - 1
-#define VALID (int8_t)1
+#define VALID (int8_t)0
 
 // Protocol constants
 #define USER_ID_LENGTH 6
 #define USER_ID_MAX ((uint32_t)pow(10, USER_ID_LENGTH) - 1)
 #define AUCTION_ID_LENGTH 3
+#define BID_VALLUE_LENGTH 6
 #define FILENAME_MAX_LENGTH 24
 #define ASSET_NAME_MAX 10
 #define START_VALUE_MAX 6

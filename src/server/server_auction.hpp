@@ -150,7 +150,7 @@ public:
    *
    * @param auctionID  the auction ID to close
    */
-  void createCloseAuctionFile(std::string auctionID);
+  void createCloseAuctionFile(std::string auctionID, bool automaticClosure);
 
   /**
    * @brief Construct a new Auction Manager object

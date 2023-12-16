@@ -330,15 +330,17 @@ int8_t validateAssetFileSize(uint32_t assetSize) {
   return 0;
 }
 
-std::string intToStringWithZeros(int number) {
+std::string intToStringWithZeros(int number, size_t size) {
+
+  std::string nine = "9";
+
   // Ensure the number is within the valid range
-  if (number < 0 || number > 999) {
+  if (number < 0 || number > std::stoi(nine.append(size - 1, '9'))) {
     throw std::runtime_error("Invalid number");
   }
-
   // Use stringstream to convert int to string with leading zeros
   std::ostringstream oss;
-  oss << std::setw(3) << std::setfill('0') << number;
+  oss << std::setw((int)size) << std::setfill('0') << number;
 
   return oss.str();
 }
@@ -464,7 +466,6 @@ void printListShowRecordTable(
     std::pair<std::string, uint32_t> end) {
   const int columnWidth = 30;
 
-  std::cout << "Show record successful!" << std::endl;
   std::cout << "Host ID: " << hostUID << "\t\t"
             << "Auction Name: " << auctionName << "\t"
             << "Asset Filename: " << assetFileName << "\t"
@@ -557,7 +558,7 @@ std::pair<std::string, uint32_t> getAuctionEndInfo(std::string auctionID) {
         splitOnSeparator(auctionEndInfo, ' ');
 
     std::string end_datetime = auctionEndWords[0] + " " + auctionEndWords[1];
-    uint32_t end_sec_time = (uint32_t)std::stoi(auctionEndWords[1]);
+    uint32_t end_sec_time = (uint32_t)std::stoi(auctionEndWords[2]);
 
     return std::make_pair(end_datetime, end_sec_time);
   }

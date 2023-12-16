@@ -8,6 +8,9 @@
 
 void handleLogin(AuctionServerState &serverState, std::stringstream &buf,
                  SocketAddress &addressFrom) {
+
+  std::cout << "Handling login request" << std::endl;
+
   LoginRequest request;
   LoginResponse response;
   try {
@@ -50,6 +53,8 @@ void handleLogin(AuctionServerState &serverState, std::stringstream &buf,
 
 void handleLogout(AuctionServerState &serverState, std::stringstream &buf,
                   SocketAddress &addressFrom) {
+  std::cout << "Handling logout request" << std::endl;
+
   LogoutRequest request;
   LogoutResponse response;
 
@@ -96,6 +101,8 @@ void handleLogout(AuctionServerState &serverState, std::stringstream &buf,
 
 void handleUnregister(AuctionServerState &serverState, std::stringstream &buf,
                       SocketAddress &addressFrom) {
+  std::cout << "Handling unregister request" << std::endl;
+
   UnregisterRequest request;
   UnregisterResponse response;
 
@@ -291,40 +298,11 @@ void handleShowRecord(AuctionServerState &serverState, std::stringstream &buf,
     response.startDate = std::get<4>(auctionRecords);
     response.timeActive = std::get<5>(auctionRecords);
     response.bids = std::get<6>(auctionRecords);
-    for (auto bid : response.bids) {
-      serverState.verbose << "[ShowRecord] Bidsasdasd: " << std::get<0>(bid)
-                          << " " << std::get<1>(bid) << " " << std::get<2>(bid)
-                          << " " << std::get<3>(bid) << std::endl;
-    }
 
     if (std::get<7>(auctionRecords).first != "") {
       response.end = std::get<7>(auctionRecords);
     }
     response.status = ShowRecordResponse::OK;
-    serverState.verbose << "[ShowRecord] Record of auction "
-                        << request.auctionID << " shown successfully"
-                        << std::endl;
-    serverState.verbose << "[ShowRecord] Host UID: " << response.hostUID
-                        << std::endl;
-    serverState.verbose << "[ShowRecord] Auction name: " << response.auctionName
-                        << std::endl;
-    serverState.verbose << "[ShowRecord] Asset filename: "
-                        << response.assetFileName << std::endl;
-    serverState.verbose << "[ShowRecord] Start value: " << response.startValue
-
-                        << std::endl;
-    serverState.verbose << "[ShowRecord] Start date: " << response.startDate
-                        << std::endl;
-    serverState.verbose << "[ShowRecord] Time active: " << response.timeActive
-                        << std::endl;
-    for (auto bid : response.bids) {
-      serverState.verbose << "[ShowRecord] Bid: " << std::get<0>(bid) << " "
-                          << std::get<1>(bid) << " " << std::get<2>(bid) << " "
-                          << std::get<3>(bid) << std::endl;
-    }
-
-    serverState.verbose << "[ShowRecord] End: " << response.end.first << " "
-                        << response.end.second << std::endl;
     serverState.verbose << "[ShowRecord] Record shown successfully"
                         << std::endl;
 
@@ -347,6 +325,9 @@ void handleShowRecord(AuctionServerState &serverState, std::stringstream &buf,
 }
 
 void handleOpenAuction(AuctionServerState &serverState, int fd) {
+
+  std::cout << "Handling open auction request" << std::endl;
+
   OpenAuctionRequest request;
   OpenAuctionResponse response;
   try {
@@ -365,7 +346,8 @@ void handleOpenAuction(AuctionServerState &serverState, int fd) {
           request.timeActive, request.assetFileName, request.assetPath);
 
       response.status = OpenAuctionResponse::OK;
-      response.auctionID = intToStringWithZeros((int)auctionID);
+      response.auctionID =
+          intToStringWithZeros((int)auctionID, AUCTION_ID_LENGTH);
 
       serverState.verbose << "[OpenAuction] Auction "
                           << " successfully opened" << std::endl;

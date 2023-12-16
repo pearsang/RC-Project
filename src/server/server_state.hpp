@@ -109,13 +109,5 @@ public:
    * @param fd  The file descriptor the packet came from
    */
   void callTcpPacketHandler(std::string packet_id, int fd);
-
-  /**
-   * @brief Checks if the database exists
-   *
-   * @return uint8_t
-   */
-  uint8_t existsDB();
 };
-
 #endif

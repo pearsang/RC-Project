@@ -160,14 +160,14 @@ public:
    *
    * @param userID The user ID.
    */
-  void setUserID(std::string __userID) { this->userID = __userID; }
+  void setUserID(std::string &__userID) { this->userID = __userID; }
 
   /**
    * @brief Sets the password.
    *
    * @param password The password.
    */
-  void setPassword(std::string __password) { this->password = __password; }
+  void setPassword(std::string &__password) { this->password = __password; }
 
   /**
    * @brief Checks if there is a logged in user.s

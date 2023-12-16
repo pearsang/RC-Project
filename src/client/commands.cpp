@@ -132,11 +132,11 @@ void LogoutCommand::handleCommand(std::string args, UserState &state) {
 
   LogoutResponse logoutResponse;
   state.sendUdpPacketAndWaitForReply(logoutRequest, logoutResponse);
-
+  std::string empty = "";
   switch (logoutResponse.status) {
   case LogoutResponse::status::OK:
-    state.setUserID("");   // clear the user id after logout
-    state.setPassword(""); // clear the password after logout
+    state.setUserID(empty);   // clear the user id after logout
+    state.setPassword(empty); // clear the password after logout
     std::cout << "Logout successful!" << std::endl;
     break;
   case LogoutResponse::status::NOK:
@@ -188,11 +188,11 @@ void UnregisterCommand::handleCommand(std::string args, UserState &state) {
   } else if (unregisterResponse.status == UnregisterResponse::status::ERR) {
     std::cout << "Unregister failed: Server error" << std::endl;
   }
-
+  std::string empty = "";
   switch (unregisterResponse.status) {
   case UnregisterResponse::status::OK:
-    state.setUserID("");   // clear the user id after unregister
-    state.setPassword(""); // clear the password after unregister
+    state.setUserID(empty);   // clear the user id after unregister
+    state.setPassword(empty); // clear the password after unregister
     std::cout << "Unregister successful!" << std::endl;
     break;
   case UnregisterResponse::status::NOK:
