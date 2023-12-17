@@ -31,8 +31,8 @@ public:
 
 class TcpWorkerPool {
   Worker workers[POOL_SIZE];
-  bool busy_workers[POOL_SIZE]; 
-  std::mutex busy_workers_lock; 
+  bool busy_workers[POOL_SIZE];
+  std::mutex busy_workers_lock;
 
 public:
   AuctionServerState &state;
@@ -41,14 +41,14 @@ public:
 
   /**
    * @brief Attributes a socket to a worker that  is available.
-   * 
+   *
    * @param fd socket file descriptor.
    */
   void giveConnection(int fd);
 
   /**
    * @brief Frees a busy worker.
-   * 
+   *
    * @param workerID worker ID to be set free.
    */
   void freeWorker(uint32_t workerID);
@@ -56,7 +56,7 @@ public:
 
 /**
  * @brief Get the packet ID of a TCP message from a socket.
- * 
+ *
  * @param fd TCP socket file descriptor.
  * @return packet ID.
  */

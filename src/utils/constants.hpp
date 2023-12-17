@@ -5,7 +5,7 @@
 
 // Default values
 #define DEFAULT_HOSTNAME "localhost" //"tejo.tecnico.ulisboa.pt"
-#define DEFAULT_PORT "58079"        //"58011" 
+#define DEFAULT_PORT "58079"         //"58011"
 #define INVALID (int8_t) - 1
 #define VALID (int8_t)0
 

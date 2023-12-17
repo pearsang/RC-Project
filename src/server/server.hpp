@@ -58,7 +58,7 @@ void wait_for_tcp_packet(AuctionServerState &serverState, TcpWorkerPool &pool);
 
 /**
  * @brief Creates all the main directories and files of the AS Database.
- * 
+ *
  */
 void setupDB();
 
