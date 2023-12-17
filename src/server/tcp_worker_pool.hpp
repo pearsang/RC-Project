@@ -31,8 +31,8 @@ public:
 
 class TcpWorkerPool {
   Worker workers[POOL_SIZE];
-  bool busy_threads[POOL_SIZE]; // change name to busy_workers
-  std::mutex busy_threads_lock; // change name to busy_workers_lock
+  bool busy_workers[POOL_SIZE]; 
+  std::mutex busy_workers_lock; 
 
 public:
   AuctionServerState &state;

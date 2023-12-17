@@ -37,11 +37,11 @@ void Worker::execute() {
         std::cerr << "Failed to reply with ERR packet" << std::endl;
       }
     } catch (std::exception &e) {
-      std::cerr << "Worker number" << workerID
+      std::cerr << "Worker number " << workerID
                 << " encountered an exception while running: " << e.what()
                 << std::endl;
     } catch (...) {
-      std::cerr << "Worker number" << workerID
+      std::cerr << "Worker number " << workerID
                 << " encountered an unknown exception while running."
                 << std::endl;
     }
@@ -57,37 +57,9 @@ void Worker::execute() {
 TcpWorkerPool::TcpWorkerPool(AuctionServerState &auctionState)
     : state{auctionState} {
   for (uint32_t i = 0; i < POOL_SIZE; ++i) {
-    busy_threads[i] = false;
+    busy_workers[i] = false;
     workers[i].pool = this;
     workers[i].workerID = i;
-  }
-}
-
-void TcpWorkerPool::giveConnection(int fd) {
-  std::scoped_lock<std::mutex> slock(busy_threads_lock);
-
-  for (size_t i = 0; i < POOL_SIZE; ++i) {
-    if (!busy_threads[i]) {
-      // Found an available worker!
-      std::scoped_lock<std::mutex> worker_lock(workers[i].lock);
-
-      busy_threads[i] = true;
-      workers[i].tcpSocketFD = fd;
-      workers[i].to_execute = true;
-      workers[i].cond.notify_one();
-
-      state.verbose << "Sent to worker number " << i << std::endl;
-      return;
-    }
-  }
-
-  throw AllWorkersBusyException();
-}
-
-void TcpWorkerPool::freeWorker(uint32_t workerID) {
-  std::scoped_lock<std::mutex> slock(busy_threads_lock);
-  if (workerID < POOL_SIZE) {
-    busy_threads[workerID] = false;
   }
 }
 
@@ -106,4 +78,31 @@ std::string read_packet_id(int fd) {
 
   id[PACKET_ID_LEN] = '\0';
   return std::string(id);
+}
+void TcpWorkerPool::freeWorker(uint32_t workerID) {
+  std::scoped_lock<std::mutex> slock(busy_workers_lock);
+  if (workerID < POOL_SIZE) {
+    busy_workers[workerID] = false;
+  }
+}
+
+void TcpWorkerPool::giveConnection(int fd) {
+  std::scoped_lock<std::mutex> slock(busy_workers_lock);
+
+  for (size_t i = 0; i < POOL_SIZE; ++i) {
+    if (!busy_workers[i]) {
+      // Found an available worker!
+      std::scoped_lock<std::mutex> worker_lock(workers[i].lock);
+
+      busy_workers[i] = true;
+      workers[i].tcpSocketFD = fd;
+      workers[i].to_execute = true;
+      workers[i].cond.notify_one();
+
+      state.verbose << "Sent to worker number " << i << std::endl;
+      return;
+    }
+  }
+
+  throw AllWorkersBusyException();
 }

@@ -28,7 +28,7 @@ UserState::~UserState() {
 void UserState::setupUdpSocket() {
   // Create a UDP socket, AF_INET for IPv4, SOCK_DGRAM for UDP, 0 for IP
   if ((this->udpSocketFD = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
-    throw FatalError("Failed to create a UDP socket", errno);
+    throw FatalError("Failed to create an UDP socket", errno);
   }
 }
 

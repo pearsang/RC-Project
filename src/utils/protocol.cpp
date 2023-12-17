@@ -728,7 +728,6 @@ std::string TcpPacket::readAndSaveToFile(const int fd, std::string &file_name,
   }
 
   file.close();
-  // print filepath
   return file_name;
 }
 
