@@ -26,7 +26,7 @@
 #define SOCKET_BUFFER_LEN 8192
 
 // TCP constants
-#define TCP_WRITE_TIMEOUT_SECONDS (20 * 60)
+#define TCP_WRITE_TIMEOUT_SECONDS 30
 #define TCP_READ_TIMEOUT_SECONDS 15
 
 // Server constants
