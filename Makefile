@@ -30,7 +30,7 @@ CXXFLAGS += $(INCLUDES)
 LDFLAGS += $(INCLUDES)
 
 
-LDFLAGS = -fsanitize=address -lasan
+#LDFLAGS = -fsanitize=address -lasan
 
 CXXFLAGS += -fdiagnostics-color=always
 CXXFLAGS += -Wall

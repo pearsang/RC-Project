@@ -364,6 +364,7 @@ void AuctionManager::closeAuction(std::string userID, std::string password,
     // check if auction has already expired
     if (checkAuctionValidity(auctionID) == INVALID) {
       createCloseAuctionFile(auctionID, false);
+      throw NonActiveAuctionException();
     } else {
       createCloseAuctionFile(auctionID, true);
     }
@@ -533,7 +534,11 @@ AuctionManager::getAuctionRecord(std::string auctionID) {
     }
 
     if (checkAuctionValidity(auctionID) == INVALID) { // check auction validity
-      createCloseAuctionFile(auctionID, false);
+      try {
+        createCloseAuctionFile(auctionID, false);
+      } catch (NonActiveAuctionException &e) {
+        // if auction was closed, ignore it
+      }
     }
 
     std::string auctionInfo = getAuctionInfo(auctionID);
