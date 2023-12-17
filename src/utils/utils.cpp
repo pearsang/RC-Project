@@ -508,11 +508,11 @@ void printListShowRecordTable(
     std::pair<std::string, uint32_t> end) {
   const int columnWidth = 30;
 
-  std::cout << "Host ID: " << hostUID << "\t\t"
-            << "Auction Name: " << auctionName << "\t"
-            << "Asset Filename: " << assetFileName << "\t"
-            << "Start Value: " << startValue << "\t"
-            << "Start Date: " << startDate << "\t\t"
+  std::cout << "Host ID: " << hostUID << "\t\t" << std::endl
+            << "Auction Name: " << auctionName << "\t" << std::endl
+            << "Asset Filename: " << assetFileName << "\t" << std::endl
+            << "Start Value: " << startValue << "\t" << std::endl
+            << "Start Date: " << startDate << "\t\t" << std::endl
             << "Active Time: " << timeActive << std::endl;
 
   // Print the top border
