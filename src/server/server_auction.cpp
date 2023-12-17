@@ -1,6 +1,9 @@
 #include "server_auction.hpp"
 #include "../utils/protocol.hpp"
 
+// to lock the next auction ID counter file
+std::mutex fileMutex;
+
 uint32_t AuctionManager::openAuction(std::string userID,
                                      std::string auctionName,
                                      uint32_t startValue, uint32_t timeActive,
@@ -51,9 +54,14 @@ std::string AuctionManager::getNextAuctionID() {
   try {
     std::string nextAuctionID;
     std::string nextAuctionPath = AUCTION_DIR + SLASH + NEXT_AUCTION_FILE;
+    // lock
+    std::lock_guard<std::mutex> lock(fileMutex);
+
     read_from_file(nextAuctionPath, nextAuctionID);
 
     if (nextAuctionID.length() > AUCTION_ID_LENGTH) {
+      // unlock
+      fileMutex.unlock();
       throw AuctionsLimitExceededException();
     }
 
@@ -62,9 +70,14 @@ std::string AuctionManager::getNextAuctionID() {
     nextAuctionID = intToStringWithZeros(nextAuctionID_int, AUCTION_ID_LENGTH);
     nextAuctionID_int++;
     write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
+    
+    // unlock
+    fileMutex.unlock();
 
     return nextAuctionID;
   } catch (std::exception &e) {
+    // Unlock the mutex in case of an exception
+    fileMutex.unlock();
     throw;
   }
 }

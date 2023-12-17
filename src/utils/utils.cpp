@@ -5,6 +5,9 @@
 // Flag to indicate whether the application is terminating
 bool is_exiting = false;
 
+// Define a map to store file-specific mutexes
+std::unordered_map<std::string, std::mutex> fileMutexMap;
+
 void validate_port_number(const std::string &port_number) {
   // Ensure that the port number is a valid number
   for (char c : port_number) {
@@ -91,20 +94,32 @@ std::vector<std::string> parse_args(std::string args) {
 }
 
 void create_new_directory(const std::string &path) {
-  if (!std::filesystem::exists(path)) {
-    std::filesystem::create_directory(path);
-    return;
+  try{
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
+    if (!std::filesystem::exists(path)) {
+      std::filesystem::create_directory(path);
+      return;
+    }
+  } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
+    throw std::exception();
   }
   return;
 }
 
 void create_new_file(const std::string &path) {
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     if (!std::filesystem::exists(path)) {
       std::ofstream ofs(path);
       ofs.close();
     }
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
 
@@ -124,10 +139,14 @@ void rename_file(const std::string &oldPath, const std::string &newPath) {
 
 void delete_file(const std::string &path) {
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     if (std::filesystem::exists(path)) {
       std::filesystem::remove(path);
     }
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
   return;
@@ -135,10 +154,14 @@ void delete_file(const std::string &path) {
 
 void delete_directory(const std::string &path) {
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     if (std::filesystem::exists(path)) {
       std::filesystem::remove_all(path);
     }
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
 
@@ -147,10 +170,14 @@ void delete_directory(const std::string &path) {
 
 int8_t directory_exists(const std::string &path) {
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     if (!std::filesystem::exists(path)) {
       return INVALID;
     }
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
   return 0;
@@ -158,10 +185,14 @@ int8_t directory_exists(const std::string &path) {
 
 int8_t file_exists(const std::string &path) {
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     if (!std::filesystem::exists(path)) {
       return INVALID;
     }
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
   return 0;
@@ -169,10 +200,14 @@ int8_t file_exists(const std::string &path) {
 
 void write_to_file(const std::string &path, const std::string &text) {
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     std::ofstream file(path);
     file << text;
     file.close();
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
 }
@@ -180,12 +215,16 @@ void write_to_file(const std::string &path, const std::string &text) {
 void read_from_file(const std::string &path, std::string &text) {
 
   try {
+    // Lock the mutex associated with the file
+    std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     std::ifstream file(path);
     if (file.is_open()) {
       std::getline(file, text, '\0');
       file.close();
     }
   } catch (...) {
+    // Unlock the mutex in case of an exception
+    fileMutexMap[path].unlock();
     throw std::exception();
   }
 }

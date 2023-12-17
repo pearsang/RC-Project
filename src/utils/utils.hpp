@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <mutex>
 
 #include "constants.hpp"
 #include "protocol.hpp"
