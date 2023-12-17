@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
+#include <mutex>
 #include <random>
 #include <string>
-#include <mutex>
 
 namespace fs = std::filesystem;
 

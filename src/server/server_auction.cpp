@@ -70,7 +70,7 @@ std::string AuctionManager::getNextAuctionID() {
     nextAuctionID = intToStringWithZeros(nextAuctionID_int, AUCTION_ID_LENGTH);
     nextAuctionID_int++;
     write_to_file(nextAuctionPath, std::to_string(nextAuctionID_int));
-    
+
     // unlock
     fileMutex.unlock();
 

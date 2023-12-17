@@ -94,7 +94,7 @@ std::vector<std::string> parse_args(std::string args) {
 }
 
 void create_new_directory(const std::string &path) {
-  try{
+  try {
     // Lock the mutex associated with the file
     std::lock_guard<std::mutex> lock(fileMutexMap[path]);
     if (!std::filesystem::exists(path)) {
