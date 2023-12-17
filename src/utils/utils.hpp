@@ -242,46 +242,142 @@ int8_t validateAssetFileSize(uint32_t assetSize);
  */
 int8_t validateFileSize(std::string file_path);
 
+/**
+ * @brief Get the User Password object
+ * 
+ * @param userID ID of the user
+ * @return std::string 
+ */
 std::string getUserPassword(std::string userID);
 
+/**
+ * @brief Get the current date and time in a string format of 19B. 
+ * 
+ * @return string of the current date and time
+ */
 std::string getCurrentTimeFormated();
 
+/**
+ * @brief Get the current date and time.
+ * 
+ * @return string of the current date and time
+ */
 std::string getStartFullTime();
 
+/**
+ * @brief Convert an integer to a string of given size.
+ * 
+ * @param number integer to be converted
+ * @param size size of desired string
+ * @return string of the integer with zeros on the left 
+ */
 std::string intToStringWithZeros(int number, size_t size);
 
+/**
+ * @brief Get the first word of a file.
+ * 
+ * @param path path of the file.
+ * @return string of first word of the file.
+ */
 std::string getFirstWord(std::string path);
 
+/**
+ * @brief Calculate the time difference between two time instances.
+ * 
+ * @param startTime
+ * @param endTime 
+ * @return time difference in seconds in a string
+ */
 std::string getTimeDifferenceStr(std::string startTime, std::string endTime);
 
+/**
+ * @brief Formatter for user auctions table.
+ * 
+ * @param auctions vector of pairs containing the auction name and the auction
+ * status
+ */
 void printListUserAuctionsTable(
     std::vector<std::pair<std::string, uint8_t>> auctions);
 
+/**
+ * @brief Formatter for user bids table.
+ *  
+ * @param auctions vector of pairs containing the auction name and the auction
+ * status
+ */
 void printListUserBidsTable(
     std::vector<std::pair<std::string, uint8_t>> auctions);
 
+/**
+ * @brief Formatter for list auctions table.
+ * 
+ * @param auctions vector of pairs containing the auction name and the auction
+ * status
+ */
 void printListAuctionsTable(
     std::vector<std::pair<std::string, uint8_t>> auctions);
 
+/**
+ * @brief 
+ * 
+ * @param hostUID the host/owner user ID.
+ * @param auctionName auction name.
+ * @param assetFileName asset filename.
+ * @param startValue starting value of the auction.
+ * @param startDate date on which the auction was opened.
+ * @param timeActive duration set for the auction.
+ * @param bids list of bids made to the auction.
+ * @param end pair containing the user ID of the winner and the winning bid.
+ */
 void printListShowRecordTable(
     std::string hostUID, std::string auctionName, std::string assetFileName,
     uint32_t startValue, std::string startDate, uint32_t timeActive,
     std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>> bids,
     std::pair<std::string, uint32_t> end);
 
+/**
+ * @brief split a string on a given separator.
+ * 
+ * @param __str 
+ * @param __separator 
+ * @return vector of diferent words of the string.
+ */
 std::vector<std::string> splitOnSeparator(std::string __str, char __separator);
 
+/**
+ * @brief Sort the bids of an auction by the bid value.
+ * 
+ * @param auctionBids vector of tuples containing the user bidder ID, bid value, date.
+ */
 void sortAuctionBids(
     std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
         &auctionBids);
 
+/**
+ * @brief Get the largest N bids of an auction.
+ * 
+ * @param auctionBids tuple containing the user bidder ID, bid value, date of each bid.
+ * @param numBids maximum number of bids to be returned.
+ */
 void getTopNumBids(
     std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
         &auctionBids,
     uint32_t numBids);
 
+/**
+ * @brief Get the auction info about its closure.
+ * 
+ * @param auctionID ID of the auction.
+ * @return date and time of the auction closure and the time that it remained opened.
+ */
 std::pair<std::string, uint32_t> getAuctionEndInfo(std::string auctionID);
 
+/**
+ * @brief Get the auction bids.
+ * 
+ * @param auctionID ID of the auction.
+ * @return vector of tuples containing the user bidder ID, bid value, date of each bid.
+ */
 std::vector<std::tuple<std::string, uint32_t, std::string, uint32_t>>
 getAuctionBids(std::string auctionID);
 

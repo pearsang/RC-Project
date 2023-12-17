@@ -74,7 +74,6 @@ void TcpWorkerPool::giveConnection(int fd) {
       busy_threads[i] = true;
       workers[i].tcpSocketFD = fd;
       workers[i].to_execute = true;
-
       workers[i].cond.notify_one();
 
       state.verbose << "Sent to worker number " << i << std::endl;

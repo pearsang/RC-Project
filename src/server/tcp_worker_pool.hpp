@@ -38,10 +38,28 @@ public:
   AuctionServerState &state;
 
   TcpWorkerPool(AuctionServerState &auctionState);
+
+  /**
+   * @brief Attributes a socket to a worker that  is available.
+   * 
+   * @param fd socket file descriptor.
+   */
   void giveConnection(int fd);
+
+  /**
+   * @brief Frees a busy worker.
+   * 
+   * @param workerID worker ID to be set free.
+   */
   void freeWorker(uint32_t workerID);
 };
 
+/**
+ * @brief Get the packet ID of a TCP message from a socket.
+ * 
+ * @param fd TCP socket file descriptor.
+ * @return packet ID.
+ */
 std::string read_packet_id(int fd);
 
 class AllWorkersBusyException : public std::runtime_error {

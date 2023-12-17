@@ -1,5 +1,7 @@
 #include <iostream>
 
+/* Verbose Mode Implementation */
+
 class VerboseStream {
   bool active;
 
