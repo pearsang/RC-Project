@@ -1,9 +1,0 @@
-login 192837 eusofixe
-open pikadeaço Monet_01.jpg 100 5
-sr 001
-logout 
-login 111111 11111111
-bid 001 101
-bid 001 102
-close 001
-sr 001
